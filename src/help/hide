@@ -1,0 +1,57 @@
+It is frequently desirable to hide some of the type components used in
+the implementation of a type from the user of the final type.
+This can be accomplished by first implementing a type with extraneous
+components and then modifying it to omit some of these.  Either
+of the following constructs may be used for this purpose:
+
+	type_expression export local_type_id
+			 { export_element; ... ; export_element }
+
+	type_expression hide local_type_id
+			 { export_element; ... ; export_element }
+
+An export element is either the keyword "constants", or the name of a type
+component, optionally followed by:
+
+            << signature >>
+
+The optional signature specification can be used to identify one of several
+identically named components.  The local type identifier may be used to refer
+to the type itself inside such signatures.
+(If no local type identifier is present, the signature must match that of
+ 
+            type_expression$c
+
+where c is the component to be deleted.  That is, the signature should be
+specified with the type_expression in place of all occurrences of the local
+type identifier.  The preferred usage is to give the local type identifier
+if any signatures are present.)
+
+The keyword "constants" may be used as an export element to abbreviate
+all constants in the original type.  For this purpose, constants are type
+components with name consisting of exactly one character enclosed in quotes,
+and with signature
+
+                func[] val t
+
+where t is the local type name.
+
+In the case of the "export" construction, the resulting type contains only
+those components specified in the export list.  In the case of the "hide"
+construct, it contains all components of the original type, with the exception
+of those specified by the export elements.
+
+The signature of the resulting type is obtained from that of the original type
+by deleting the appropriate components.  Any expressions occurring in the
+resulting signature must still be signature correct.  In particular, the
+following is illegal:
+
+                Void with t { T == Short;
+                              '0' == t$T$'0' }
+                     hide { T }
+
+The resulting type would have signature:
+
+                type t { '0': func[] val t$T }
+
+However t$T is no longer signature correct since T has been deleted.

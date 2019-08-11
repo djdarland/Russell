@@ -1,0 +1,1071 @@
+Note: Verion 0.1 was the first one to be made generally available.
+Version 0.2 and later have the version number specified in the WHAT
+file in the main directory of the distribution.
+
+Since Version 0.0:
+
+1) In-line code for Short unary "-" should use mnegw rather than mnegl
+   (initenv.r, line 58).  Fix initenv.r and do a make in the src
+   directory.
+
+2) help/precedence was unclear about type modification.  Modifications
+   effectively have higher precedence than applications.
+
+3) references to separately compiled files occassionally generated
+   internal compiler errors.  This happened when a product field appears
+   directly in a type signature which is part of the signature of the
+   separately compiled expression.  It can be avoided by either
+    a) always hiding or renaming product components in separately
+       compiled type definitions, or, preferably by,
+    b) installing a new version of the compiler when you encounter
+       the bug.
+
+4) "cor" didn't work correctly.  Either use an explicit conditional
+    or get a revised version of the compiler.
+
+5) The square root routine in the infinite precision example left a lot to be
+   desired.  Ignore it.
+
+6) If one of the guards in a conditional required coercion, all
+   of the guarded expressions would be coerced to val signatures, whether
+   or not this was appropriate.  Fortunately, it's rarely inappropriate.
+
+7) Rhelp did not work for users who didn't own the help file.  Fix:
+   Change definition of O_RDONLY in rhelp.r so that it is 0.  Fix
+   Makefile so that a change to rhelp.r will cause rhelp to be remade.
+   Type "make" and reinstall.
+
+8) The built-in long operations could conceivably cause the garbage
+   collector to fail.  This conclusion is based on examination of the
+   code and was never detected in practice.
+
+Since Version 0.1
+
+1) Long division could cause the garbage collector to crash.  Fix:
+   Change the declaration of "divisor" to be static and include an
+   explicit initialization.
+
+2) The system sometimes spent excessive amounts of time in the garbage
+   collector.  Fix: Get a new version of alloc.c.
+
+3) The compiler crashed if a name of a product or union field was erroneously
+   omitted.
+
+4) The error message "Missing type component" was somewhat misleading,
+   since it usually indicated a signature mismatch.
+
+Since Version 0.2:
+
+1) Certain error messages were unintelligible.
+
+2) Products with component sigantures which referred to other components
+   did not work correctly.  (The symptom was an error message which was
+   both unintelligible and bogus.)
+
+3) Missing argument inference did not work properly in conjunction with
+   coercions.
+
+4) Type modification sometimes destructively updated the signature of
+   the original type.
+
+5) Multiple files on command line were ignored without warning.
+
+6) Code generated for forgetting coercions was likely to be wrong if the
+   original type had more than 32 components (e.g. for ChStr).
+
+Since Version 0.3:
+
+1) Inclusion of more than 1 separately compiled Russell program didn't work.
+    Temporary fix (V0.3 only):
+        cd src
+        adb -w Rc
+        sig_in+6?w 8146
+        ^D
+        make
+
+2) Trying to unparse an extern { ... } construct caused the compiler to
+   crash.
+
+3) Under unlikely circumstances, the signature inference pass got stuck
+   in an infinite recursion.
+
+4) The compiler applied some unsafe optimizations to impure functions.
+
+5) The garbage collector did not reliably follow explicit "Ref" pointers.  This
+   caused occasional disasters.
+
+(After V0.4 sent to U. of Warwick:)
+
+6) Large atomic objects were not handled correctly by the garbage collector.
+   This caused file buffers for nonstandard files to be reallocated, and
+   this resulted in disaster.  Fix code in runtime/reclaim.c.
+
+7) Long division by negative numbers led to unfortunate results. Fix
+   Long_Div in runtime/long.c.
+
+Since Version 0.4:
+
+8) The Makefile for the source version neglected to do anything about
+   sigio.
+
+Since Version 0.5:
+
+9) The compiler occasionally crashed due to "amatch" initializing a much
+   bigger chunk of memory than it had allocated.
+
+Since Version 0.6:
+
+10) Documented potential problems with NULLs in strings.
+
+11) Functions returning lists could mistakenly receive stack allocated
+    activation records.
+
+12) Version number may have been wrong.
+
+Since Version 0.7:
+
+13) Subprograms could fail to be linked in eventhough some of their entry
+    points were referenced.  (not fixed in Version 0.8)
+
+14) Information about environment pointers for function calls being
+    obtainable by following the static chain was improperly propagated
+    for type returning functions.  Symptom: segmentation violation at
+    run time.
+
+15) With lists generated incorrect code when the index of a new component
+    was a multiple of 32.
+
+Since Version 0.8:
+
+16) Empty strings occasionally resulted in garbage assembly language code.
+
+Since Version 1.0
+
+17) Assembly code occasionally contained illegal addressing modes (Sun
+    version).
+
+18) Short integer constants requiring close to 32 bits were not always
+    handled properly in the Sun version.
+
+19) Storage allocator occasionally allocated arbitrarily large
+    amounts of memory.
+
+Since version 1.1
+
+20) Under unlikely circumstances, the code generator could diverge
+    when compiling a call to a function returned as a type component
+    by another function.
+
+21) Conditionals returning types or functions were not handled correctly.
+
+22) Various final code generator problems were fixed.
+
+Since version 1.2
+
+23) Sun code generator generated incorrect code for union query operations
+    appearing inside nested conditional expressions.  Final code generator
+    was changed to solve the problem.
+
+24) $+ inside a comment used to turn on debugging.  This happened too
+    easily by accident.  Changed to $$+
+
+Since version 1.3
+
+25) Syntax error messages in version 1.2 and 1.3 where even more bogus
+    than usual, due to a neglected recompilation.
+
+26) Constructive real exponential function did not work correctly on
+    negative arguments.
+
+
+Since version 1.4
+
+27) Bignum multiplication failed if one operand was 0 and the other was
+    negative.
+
+28) Function constructions that were immediately applied (without being
+    bound to a name) tended not to get compiled.  This resulted in a
+    link-time error.
+
+Since version 1.5
+
+29) Mk operations associated with certain product types allocated objects
+    that were too small.  This normally caused the resulting program
+    to die horribly. (Sun only)
+
+30) Functions named by quoted identifiers caused syntax errors in the
+    assembly language output.
+
+Since version 1.6
+
+31) Strings of types with redefined constants or concatenation were
+    not handled correctly.
+
+32) 5000! resulted in anomalous (but not disastrous) sbrk behavior.
+
+33) Selection types were not properly checked for signature correctness.
+
+34) The supplied xlong.r division routine was suceptible to off-by-one
+    errors.  This caused the calculator to loop on certain problems.
+
+35) Signatures of separately compiled functions that included applications
+    to type arguments were not handled correctly.  A common example of
+    this was a separately compiled function with result signature
+    "val List[T]".
+
+36) (Array[...])$ValueOf did not work.  The entry in the array type
+    value erroneously contained the function value for size.  One of
+    the implementations of the ValueOf functions did not find the array
+    size correctly.
+
+(Version 1.7 differs from 1.6 only in calculator version, and in that (36)
+was partiallyy fixed. Version 1.8 fixes it completely)
+
+37) Versions 1.7 and 1.8 contain compensating bugs in cg and cr.r.  "twoi"
+    must be initialized incorrectly for cos to work correctly.  Sin
+    is broken, but never gets called.
+
+Since version 1.8:
+
+38) Functions returning the result of a union query operation were
+    compiled incorrectly by the Sun versions of the compiler.
+
+39) Strings inside signatures were not handled correctly.
+
+40) Enumeration component names consisting of single character quoted
+    identifiers were handled incorrectly.  The use of single character
+    quoted identifiers had adverse effects on code quality in other
+    cases.
+
+41) A reference to a string in a signature could result in the compiler
+    looping if the signature was embedded in a use block that did not mention
+    the selection type of the string.  (Can probably be circumvented
+    with explicit selections.)
+
+42) Modification of 0 length types (e.g. Void) caused the compiler to
+    segmentation fault on Suns.
+
+43) The substitution algorithm occasionally failed to associate an
+    identifier with the correct binding occurrence.  This happened
+    only under fairly obscure circumstances.
+
+44) The compiler occasionally generated Pascal-like prosedure calling
+    sequences when this was not safe.
+
+Since Version 2.1
+
+45) Float$Out produced an error message when the argument was bigger than
+    2**16, even on a Sun.  The fix is to change the constant in
+    68k_runtime/float.c.  The test at the beginning of Float_Out should read:
+
+    if (x >= 2147483648.0 || x <= -2147483649.0) {
+
+46) Garg_expression in pass5d/appl.c neglected to save and restore
+    arg_loc around the second call to Gexpression.  This could cause
+    chaos under very obscure conditions.  We have never observed this
+    in practice.  Line 106 should be replaced by:
+
+	{
+	    int SAVarg_loc = arg_loc;
+	    Gexpression(p, SK, FALSE);
+	    arg_loc = SAVarg_loc;
+	}
+
+47) Line numbers produced by the compiler may be incorrect.  This is likely
+    only if large amount of program text are commented out.
+
+Since version 2.2:
+
+48) An application of a function whose signature is a (=== defined) identifier
+    crashed the compiler.  Workaround: Use #define instead of ===. Fix:
+    The following line near line number 124 in findapplsig.c
+
+		    NODE * decl = op -> id_last_definition;
+
+    should be
+
+		    NODE * decl = op -> signature -> id_last_definition;
+
+49) There were several code generator bugs, most of which were probably
+    irrelevant given the version 2.1 or 2.2 front end.  To be on the safe
+    side, add the call "free_temps()" at the end of procedure "lbl"
+    in label_code.c.
+
+50) The compiler reported a syntax error if the C preprocessor generated
+    two lines in a row containing line number information.  This happens
+    very rarely.  (If this bug is encountered, please request the new
+    version of src/pass1/scanner/scan.c.)
+
+51) The "ld" bug that resulted in _etext getting set incorrectly appears
+    to be more widespread then we thought.  If you get a "write failed"
+    message when rc is run by make to initialize itself (-d flag), try
+    defining LDBUG in src/main.c.
+
+Since version 2.3:
+
+52) The compiler dealt very ungracefully with an application of Array
+    to a type without New or V.  Fix:  Change the following lines
+    starting at around line 339 in pass4/fixhints.c
+
+#   ifdef DEBUG
+	if (e_V_sig == NIL) {
+	    dbgmsg("fixarray_sig: couldn't find V\n");
+	    abort(e_sig, e_V_sig, e_New_sig);
+	    return;
+	}
+	if (e_New_sig == NIL) {
+	    dbgmsg("fixarray_sig: couldn't find Newn");
+	    abort(e_sig, e_V_sig, e_New_sig);
+	    return;
+	}
+#   endif
+    
+    to 
+
+    if (e_V_sig == NIL || e_New_sig == NIL) { 
+	return;
+	/* Error may not yet have been caught, but it will be */
+    }  
+
+53)
+    The second declaration in fix_array_sig (in pass4/fixhints.c) should read
+
+    NODE * e_sig = sig_structure(etype -> signature);
+
+    instead of 
+
+    NODE * e_sig = etype -> signature;
+
+    Otherwise, array component types whose signature is an identifier
+    may be mishandled.
+
+54) Selections from types whose signature is an identifier were
+    mishandled.  Fix:
+	Starting at around line 320 in pass4/findidsig.c, change
+
+      found_tsig:
+	if (tsig != ERR_SIG && tsig -> kind != TYPESIGNATURE) {
+	    errmsg1(
+		p,
+		"Identifier %s selected from non-type",
+		getname(p -> id_str_table_index)
+	    );    
+	    p -> sig_done = SIG_DONE;
+	    chgsig(p, ERR_SIG);
+	    return(SUCCESS); /* error has been dealt with */
+	} 
+
+    to
+
+      found_tsig: 
+	if (tsig != ERR_SIG && tsig -> kind != TYPESIGNATURE) {
+	  tsig = sig_structure(tsig);
+	  if (tsig -> kind != TYPESIGNATURE) {
+	    errmsg1(                                              
+		p,                                                
+		"Identifier %s selected from non-type",           
+		getname(p -> id_str_table_index)                  
+	    );                                                    
+	    p -> sig_done = SIG_DONE;                             
+	    chgsig(p, ERR_SIG);                                   
+	    return(SUCCESS); /* error has been dealt with */
+	  }
+	} 
+
+    In pass4/findapplsig.c around line 226, add
+
+		  if (par_sig -> kind == LETTERID     
+		      || par_sig -> kind == OPRID) {
+		    par_sig = sig_structure(par_sig);
+		  }
+
+    following the line
+
+		  par_sig = r -> par_signature;  
+
+    In findsig.c, at around line 532, change
+
+		    /* find signatures of types */                          
+			maplist(s, p -> usl_type_list, {                    
+			    if((q = findsig(s,FALSE)) != SUCCESS) {         
+				p -> sig_done = SIG_UNKNOWN;                
+				return(q);                                  
+			    }
+			});
+
+    to
+
+		    /* find signatures of types */
+			maplist(s, p -> usl_type_list, {
+			    if((q = findsig(s,FALSE)) != SUCCESS) {
+				p -> sig_done = SIG_UNKNOWN;
+				return(q);
+			    } else {
+				if (s -> signature != ERR_SIG
+				    && (s -> signature -> kind == LETTERID
+					|| s -> signature -> kind == OPRID)) {
+				    chgfld(&(s -> signature),
+					   sig_structure(s -> signature));
+				}
+			    }
+			});
+
+    In checksigs.c, around line 364, change
+
+	    maplist(q, p -> usl_type_list, {
+		checksigs(q,FALSE);
+		if (q -> signature != ERR_SIG
+		    && q -> signature -> kind != TYPESIGNATURE) {
+		    errmsg0(q, "Non-type appears in use type list");
+		}
+	    });
+
+    to
+
+	    maplist(q, p -> usl_type_list, {
+		checksigs(q,FALSE);
+		if (q -> signature != ERR_SIG) {
+		    if (q -> signature -> kind != TYPESIGNATURE) {
+			chgfld(&(q -> signature),
+			       sig_structure(q -> signature));
+			if (q -> signature -> kind != TYPESIGNATURE) {
+			  errmsg0(q, "Non-type appears in use type list");
+			}
+		    }
+		}                                                        
+	    });
+
+55) The RIC instructions for heap allocation were, in rare instances,
+   incorrectly translated to 68020 code.  Symptom: Segmentation faults, etc.
+
+   Change line ~368 in cg_src/codegen.c from
+
+	dest = newmap(arg2(p),(ANYREGISTER|TEMP),ANY,&dmaptype);
+
+   to
+
+	dest = newmap(arg2(p),(ANYREGISTER|TEMP),ALLOCATED,&dmaptype);
+
+   Also make the identical change around line 440 in the same file.
+
+56) Both casts to short in the definition of is_proper_obj in
+   68k_runtime/runtime.h shouls be removed.  Otherwise allocation of
+   very large objects can result in a divide by 0 trap.
+   
+57) Signature comparisons on refrences to separately compiled objects
+   were done incorrectly.  On the Sun this resulted in bad code getting
+   past the signature checker.  (On the Vax it may have had the opposite
+   effect.)
+    Starting at around line 286 in pass3/comp_st.c, change
+
+	    case EXTERNDEF:
+	    case REXTERNDEF:
+		return(strcmp(p -> ext_name, q -> ext_name));
+
+    to
+
+	    case EXTERNDEF:
+		return(strcmp(p -> ext_name, q -> ext_name));
+ 
+	    case REXTERNDEF:                                  
+		return(strcmp(p -> r_ext_name, q -> r_ext_name));
+
+58)  Declarations of the form
+
+	type === extern { "..." }[],
+
+    where type is mentioned in the signature of another .r file,
+    could result in excessively large signature specifications attached
+    to .o files.  This resulted both in excessive disk consumption, and
+    in excessive memory consumption by the compiler.  (We observed > 5 Meg
+    for some 200 line files.  Growth was exponential in extern nesting level,
+    so minor variations could have a substantial impact on this.)
+      The fix is fairly major:  (All parts are interdependent.
+    Partial fixes will probably result in a nonfunctional compiler.)
+
+    a)  Obtain the new version of sigio/sig_in.c.
+
+    b)  Delete most of the code for the REXERNDEF case at around line 452
+	in sigio/sig_out.c.  It should read:
+
+	case REXTERNDEF:
+		putw(REXTERNDEF, Soutfile);
+		put_string(Soutfile, p -> r_ext_name);
+		break;
+
+    c)  Change the code associated with the following production
+	in pass1/parser/grammar.y (around line 687).  The corect code
+	is given below.  Note that this is much shorter than what it
+	used to be.  (The bulk of the code migrated to sig_in.c).
+
+	| EXTERN '{' QSTRING '}' =
+	    {
+	      has_externs = TRUE;
+	      $$ = mknode(REXTERNDEF, read_signature($3), $3);
+	      $$ -> sig_done = SIG_DONE;
+	    }
+
+Since version 2.4:
+
+59)  Functions declaring local function-returning functions could mistakenly
+   be called with stack allocated activation records.
+
+    In pass5d/cl_analyze.c, starting at aroud line 367, change
+
+		    if (cp_globals || !need_closure) {
+			ar_refs = old_ar_refs; 
+		    } else {
+
+    to
+
+		    if (cp_globals) {
+			ar_refs = old_ar_refs;  
+		    } else if (!need_closure) {
+			ar_refs |= old_ar_refs;
+		    } else {
+
+    In pass5c/analyze.c, starting at around line 628, change
+
+			if (initial) {                             
+			  /* Add the call to call graph */         
+			    add_call(current_fcs,                  
+				     op_sig -> fsig_construction); 
+			} else {
+
+    to
+
+			if (initial) {
+			  /* Add the call to call graph */
+			    add_call(current_fcs,
+				     op_sig -> fsig_construction);
+			    if (is_descendant(op_sig -> fsig_construction,
+					      current_fcs -> fcs_fc)) {
+				/* Callee may be inside otherwise */
+				/* unevaluated rhs of declaration */
+				i &= ~NO_CONSTR;
+			    }
+			} else {
+
+60)
+    The code generator contained bug that resulted in occasional
+    random stores.  Around line 1893 in cg_src/table.c, change
+
+  } else if ((src) && (dest)) {
+     fprintf(fout,"|(%d) has mapped (%s) and allocated (%s)n",loc,src,dest);
+     return( src );
+	     ^^^
+
+    to
+
+  } else if ((src) && (dest)) {
+     fprintf(fout,"|(%d) has mapped (%s) and allocated (%s)n",loc,src,dest);
+     return( dest );
+
+61)
+    The code generator occasionally truncated labels.  This bug could
+   also have caused random code generator crashes.
+
+    In cg_src, around line 513, change
+
+	char * labstr = (char *)gcalloc(20);
+
+    to
+
+	char * labstr = (char *)gcalloc(strlen(label)+2);
+
+Since version 2.4b:
+
+62) Parameter identifiers bound to signatures were handled incorrectly,
+   as were identifiers bound with "==" to signatures.  Both were reported
+   as errors.  The latter bug was legitimized by adding the statement:
+
+     An identifier used as a signature must be bound in a surrounding parameter
+     declaration (with signature "signature") or in a "===" declaration whose
+     right side is a valid signature.
+
+   to the "signatures" help file.  (Other declarations were useless in any
+   case, since no interesting expressions can have such signatures.)  The
+   former problem can be fixed by making the following changes:
+   Replace the last few lines in pass3/sigids.c:
+
+	default:
+	    if (q -> kind == LETTERID || q -> kind == OPRID) {
+		errmsg1(q,                                     
+			"Identifier %s not bound transparently to signature",
+			getname(q -> id_str_table_index));
+	    } else {
+		errmsg0(q, "Signature expected");
+	    }
+    }
+}
+
+   by: 
+
+	default:
+	    if (p -> kind == LETTERID || p -> kind == OPRID) {
+		if ( p -> id_last_definition == NIL
+		     || p -> id_last_definition -> kind != PARAMETER
+		     || comp_st(p -> id_last_definition -> par_signature,
+				sig_Signature, NIL, NIL) != 0) {
+		  errmsg1(q,
+			  "Identifier %s not meaningfully bound to a signature",
+			  getname(q -> id_str_table_index));
+		}
+	    } else {
+		errmsg0(q, "Signature expected");
+	    }
+    }
+}
+
+
+   and adding the declaration
+
+     extern NODE * sig_Signature;
+
+   to the top of that file.
+
+   In the same file, around line 89, move the lines
+
+	    /* Check that it's not a forward reference */
+	      if (def -> post_num >= p -> post_num) {
+		errmsg1(p, "Forward reference to %s in === declaration",
+				getname(p -> id_str_table_index));
+	      }
+
+   into the "if (def -> kind == DECLARATION)" conditional that immediately
+   follows.  They should be inserted immediately after the declaration of
+   id_def.
+
+
+   Change the definition of sig_structure (around line 372 in pass4/finddecl.c)
+   to:
+
+NODE * sig_structure(sig)              
+NODE * sig;                            
+{                                      
+    NODE * result = sig;               
+				       
+    while (result -> kind == LETTERID || result -> kind == OPRID 
+	   && result -> id_last_definition -> kind == DECLARATION
+	   && result -> id_last_definition -> decl_sig_transp) { 
+	result = result -> id_last_definition -> decl_denotation;
+    }
+    return(result);
+}
+
+    Around line 170 in pass4/findapplsig.c, remove the lines:
+
+		       IFDEBUG(
+			   if (par_sig -> id_last_definition
+				       -> kind != DECLARATION
+			       || !par_sig -> id_last_definition
+					   -> decl_sig_transp) {
+			      dbgmsg("Findapplsig: bad param sign");
+			   }
+			)
+
+   Starting at around line 84 in match.c, replace the following code:
+
+      while (asig -> kind == LETTERID || asig -> kind == OPRID) {
+#       ifdef DEBUG
+	  if (asig -> id_last_definition -> kind != DECLARATION
+	      || ! asig -> id_last_definition -> decl_sig_transp) {
+	      dbgmsg("match: bad asig\n");
+	  }
+#       endif
+	asig = asig -> id_last_definition -> decl_denotation;
+      }
+      while (psig -> kind == LETTERID || psig -> kind == OPRID) {
+#       ifdef DEBUG
+	  if (psig -> id_last_definition -> kind != DECLARATION
+	      || ! psig -> id_last_definition -> decl_sig_transp) {
+	      dbgmsg("match: bad psig\n");
+	  }
+#       endif
+#       ifdef TRACE
+	  printf("Match: original psig: (%X, %d)", psig, psig -> refcount);
+	  unparse_file = stdout;
+	  unparse(psig);
+	  printf("\n");
+#       endif
+	psig = psig -> id_last_definition -> decl_denotation;
+#       ifdef TRACE
+	  printf("Match: Replaced psig by (%X, %d) ", psig, psig -> refcount);
+	  unparse_file = stdout;
+	  unparse(psig);
+	  printf("\n");
+#       endif
+      }
+
+    by
+
+      if (asig -> kind == LETTERID || asig -> kind == OPRID) {
+	asig = sig_structure(asig);
+      }
+      if (psig -> kind == LETTERID || psig -> kind == OPRID) {
+	psig = sig_structure(psig);
+#       ifdef TRACE
+	  printf("Match: Replaced psig by (%X) ", psig);
+	  unparse_file = stdout;
+	  unparse(psig);
+	  printf("n");
+#       endif
+      }
+
+Since version 2.4c:
+
+63) The compiler died if the user program contained certain unusual
+   applications of the Array function.  In pass4/fixhints.c, around line 237
+   (near the beginning of int_value), replace the line:
+
+	    if (e -> id_def_found &&
+
+   by
+
+	    if (e -> id_def_found && e -> sel_type == NIL &&
+
+64) Applications of functions with one or more parameters with signature
+  "signature" that had arguments with run-time significance following
+  arguments with no run-time significance (e.g. signature "type{}"
+  or "var Void") were sometimes compiled incorrectly.  The fix involves
+  changing the calling convention so that arguments carrying no runtime
+  information are explicitly passed, unless they occur at the end
+  of the argument list (the common case).
+
+  Replace pass5d/appl.c with the new version.
+
+  In pass5c/allocate.c, around line 267, replace:
+
+		if (Gflag && Vstatic_level != 0
+		    && vacuous_arg(p -> par_signature)) {
+		    /* Recycle last location, since it doesnt matter */
+		    p -> displacement = Vnext_free - 1;
+		} else {
+		    p -> displacement = Vnext_free++;
+		}
+
+  by
+		p -> displacement = Vnext_free++;
+
+  Around line 510, in the same file, replace
+
+	maplist (v,p->signature->fsig_param_list,Vallocwalk(v));
+
+  by
+
+	{
+	    NODE * params = p -> signature -> fsig_param_list;
+	    int n_params = length(params) - n_vacuous_params(params);
+	    register int i = 0;
+
+	    maplist (v,p->signature->fsig_param_list, {
+		if (i < n_params || Vstatic_level == 0) {
+		  /* May be passed explicitly, reserve space */
+		  Vallocwalk(v);
+		} else {
+		  /* Map it onto the last real parameter */
+		  v -> displacement = Vnext_free - 1;
+		  v -> level = Vstatic_level;
+		}
+		i++;
+	    });
+	}
+
+
+  In the same file, insert the declarations before the declaration
+  of Vallocate:
+
+  /* Compute the number of known vacuous parameters appearing at the */
+  /* end of a a parameter list.                                      */
+  static boolean found_non_vacuous; /* Saw a real argument */
+  static n_vacuous;                /* Number of vacuous arguments found so far */
+
+  static void check_vacuous(p)
+  NODE * p;
+  {
+      if (!found_non_vacuous) {
+	  if (vacuous_arg(p -> par_signature)) {
+	      n_vacuous++;
+	  } else {
+	      found_non_vacuous = TRUE;
+	  }
+      }
+  }
+
+  int n_vacuous_params(p)
+  NODE *p;    /* parameter list */
+  {
+      if (!Gflag) return(0);
+		   /* Vax implementation passes everything explicitly */
+      found_non_vacuous = FALSE;
+      n_vacuous = 0;
+      maprlist(p, check_vacuous);
+      return(n_vacuous);
+  }
+ 
+  In pass5d/compile_stubs.c, around line 120, change
+
+      {
+	int arg_count = 1;
+
+	maplist(s, sig -> fsig_param_list, {
+	  if (!vacuous_arg(s -> par_signature)) {
+	    gen2(GAR, arg_count, T1);
+	    gen3(STI, ar_loc, arg_count++, T1);
+	  }
+	});
+      }
+
+  to
+
+      {
+	NODE * params = sig -> fsig_param_list;
+	int n_args = length(params) - n_vacuous_params(params);
+	register int arg_count; 
+			    
+	for (arg_count = 0; arg_count < n_args; arg_count++) {
+	    gen2(GAR, arg_count, T1);
+	    gen3(STI, ar_loc, arg_count, T1);
+	}
+      }  
+
+   In pass5d/sl_analyze.c, around line 200, add the function definition
+
+  /* Call sl_analyze1 on p if non_vac is true or p is not an identifier */
+  /* Used in conjunction with maprlist_non_vacuous.                     */
+  cond_sl_analyze1(p, needed)
+  NODE * p;
+  boolean needed;
+  {
+      extern boolean is_id();
+
+      if (needed || !is_id(p)) {
+	  sl_analyze1(p);
+      }                           
+  } 
+
+   In the same file, around line 324, change
+
+		maplist(s, p -> ap_args, {
+		    extern boolean vacuous_arg();
+ 
+		    if (!is_id(s) || !vacuous_arg(s -> signature)) {
+			sl_analyze1(s);
+		    }
+		});
+
+   to
+
+		maprlist_non_vacuous(p -> ap_args, cond_sl_analyze1);
+   
+   In pass5d/codegen.c, around line 513, replace
+
+	int n_args = length(p -> signature -> fsig_param_list);
+					    /* Trailing var Void not counted */
+ 
+   by
+
+	NODE * params = p -> signature -> fsig_param_list;
+	int n_args = length(params) - n_vacuous_params(params);
+
+   Starting a line later, delete
+
+      if (impure(p -> signature)) {
+	  n_args --;
+      }
+ 
+      /* check for strange arguments (this should be fixed ...) */
+	maplist(s, p -> signature -> fsig_param_list, {
+	    if (s != last(p -> signature -> fsig_param_list)
+		&& vacuous_arg(s -> par_signature)) {
+		errmsg0(p, "Cant pass type{} or var Void parameter to external\n"
+	    }
+	});
+
+    In pass5d/find_inline.c, around line 50, replace
+
+	int nargs = length(fsig -> fsig_param_list);
+
+    by
+
+	int nargs = length(fsig -> fsig_param_list)
+		    - n_vacuous_params(fsig -> fsig_param_list);
+ 
+    A few lines later, delete
+		       
+	if (nargs != 0 
+	    && vacuous_arg(last(fsig -> fsig_param_list) -> par_signature)) {
+	    nargs--;
+	}
+
+    Around line 130 in the same file, replace
+
+		    if (!vacuous_arg(s -> par_signature)) { 
+			param_num++;
+		    }
+
+    by
+
+		    param_num++;
+
+    Around line 173 in the same file, replace
+
+		nargs = 0;
+		maplist(s, args, {
+		    if (!vacuous_arg(s -> signature)) {
+			nargs++;
+		    }
+		});
+
+    by
+
+		nargs = 0;
+		i = 0;
+		maplist(s, args, {
+		    i++;
+		    if (!vacuous_arg(s -> signature)) {
+			nargs = i;
+		    }
+		});
+
+    A few lines below, replace
+
+		    if (!vacuous_arg(s -> signature)) {
+
+    by
+
+		    if (c_arg < nargs) {
+
+65) On a Sun 3, C interface routines generated as a result of the
+    -X compiler flag did not properly save and restore registers a4 and a5.
+
+    In pass5d/op_codes.h, at around line 164, add the following definition:
+
+#define    GFU 9     /* GF is about to be updated, or AR is about  */
+		     /* to be updated inside a BSF function.       */
+		     /* Such a hint always precedes the first such */
+		     /* update in a routine.                       */ 
+
+    In pass5d/RIC.c, at the end of init_RIC_table, at around line 86,
+    add the line:
+
+      add_RIC_table("GFU",GFU);
+
+
+    In codegen.c, around line 206, just before
+
+	  gen2(MOV, RL, GF); 
+
+    add the line
+
+	  gen1(HINT, GFU);
+
+    At around line 473 in the same file, immediately preceding
+
+	    gen2(MOV,AR,GF);
+
+    again add the line
+
+	    gen1(HINT, GFU);
+
+    In pass5d/compile_stubs.c, at around line 135, just before
+
+      gen3(LDI, T1, 0, GF);
+
+    again add the line:
+
+      gen1(HINT, GFU);
+
+    Near the end of cg_src/codegen.c is a routine called hint.  Move
+    the check at the beginning:
+
+	if (! checkflag) 
+		return;
+
+    into both the OPT and DEA clauses of the following statement.
+
+    Just before the default clause in the switch statement, add the following:
+
+	/* 9 */ case GFU:  /* Added 6/3/89                         - HB */  
+			/* a4 and a5 may be updated.  Make sure they get */
+			/* restored for a non-Russell caller.            */
+			save_reg(A4, REGMASK);
+			save_reg(A5, REGMASK);
+			break;
+
+
+    Be sure to re-make first the code generator (in src/cg_src) and then
+    the compiler itself (in src).
+
+66) The Float$Puts routine could scribble beyond the end of the object it
+    allocated.  In 68k_runtime/float.c, change the line
+
+    lgth = strlen(buf);
+
+    at the beginning of Float_Puts to
+
+    lgth = strlen(buf)+1;
+
+    Make the same change in runtime/float.c (if you use the Vax version).
+
+67) There were a couple of fundamental bugs in the maintenance of environments.
+    Closures built inside loops or tail-recursive calls could conceivably
+    end up with the environment of a later iteration.  This was almost
+    always hidden by other optimizations, and thus encountred only in
+    contrived examples.  Nonetheless, the fixes were substantial.  Get
+    version 2.5 or later.
+
+68) Declarations inside string selection types were not handled correctly.
+    Get version 2.5 or later for a fix.  You probably didn't mean to do this
+    anyway ...
+
+69) Declarations inside infered selection types or arguments were not handled
+    correctly.  Ditto.
+
+70) The function needs_new_nonl in pass5d/cl_analyze.c was buggy.  The
+    line that read
+
+		    && p -> level <= level) {
+
+    should read
+
+		    && p -> id_last_definition -> level < level) {
+
+    This could possibly result in incnsistent decisions about activation
+    record structure (which would probably be detected as an internal
+    compiler error), though this hasn't been observed.
+
+71) The compiler crashed on rare occasions while processing a type
+    modification.  The following block starting at around line 169
+    in pass4/findmpsig.c:
+
+		  {
+		    int tp;
+		    tp = special_tp(a -> a_body[i]
+				      -> decl_denotation
+				      -> signature
+				      -> fsig_special);
+		    if (tp == ARRAY_SIZE
+			|| tp == ARRAY_STD_NEW
+			|| tp == ARRAY_PTR_NEW) {
+			a -> a_body[i] -> decl_denotation
+			  -> signature -> fsig_special = 0;
+		    }
+		  }
+
+    should be replaced by:
+
+		  {
+		    int tp;
+		    NODE * sig = a -> a_body[i] -> decl_signature;
+
+		    if (sig -> kind == FUNCSIGNATURE) {
+		      tp = special_tp(sig -> fsig_special);
+		      if (tp == ARRAY_SIZE
+			  || tp == ARRAY_STD_NEW
+			  || tp == ARRAY_PTR_NEW) {
+			  sig -> fsig_special = 0;
+		    }
+		  }
+
+Version 3.1 consists of version 3.0 with a newer version of the DEC/INRIA BigNum package.

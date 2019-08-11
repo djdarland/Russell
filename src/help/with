@@ -1,0 +1,33 @@
+The expression
+
+    type_expression with local_name { declaration; ... ; declaration }
+
+produces a new type, which is identical to that specified by the
+type_expression, except that new components corresponding to the declarations
+have been added.  If one of the newly declared identifiers has the same
+name and signature as a component in the original type, then that
+component is replaced.  The local_name is optional, and may be used
+to refer to newly introduced components, or old components which have
+not been replaced.  The type
+
+    Short with S { PLUS == S$+ } hide { + }
+
+Is the same as the original type Short, except that the "+" operation
+has been renamed as "PLUS".
+
+All components added to the type must have value, function, or type
+signature.
+
+As in "let" blocks, declarations are evaluated in the specified order.
+
+The signature of the resulting type is obtained from that of the original type
+by first deleting any redefined components, and then adding the new ones.
+As for "hide" and "export" constructs, all expressions appearing in the
+signature after the deletion step must be signature correct.
+
+Implementation Note:  Run-time forward references to explicit selections
+from the local name will generate a (run-time) error.  Other potential
+forward references to the local name will generate warnings, but no
+run-time checks.
+
+See also: let, hide

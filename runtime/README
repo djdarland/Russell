@@ -1,0 +1,31 @@
+This directory consists of runtime support routines for Russell on
+a Motorola 68K series processor.  Hopefully these routines are a little
+more portable than the VAX version.  Nonetheless, they currently
+only run on a 68020.
+
+Remarks:
+
+1.  Everything in this directory assumes we are using an approximate
+  marking algorithm in the garbage collector.  Every attempt is made
+  to reduce the probability of a non-pointer getting misidentified as
+  a pointer, but we do not make any guarantees to this effect.  The
+  garbage collector must be able to accomodate such misinterpretations,
+  though they can clearly result in wasted space.
+
+2.  Unlike the VAX, the 68000 does not easily allow Russell procedure
+  calls to be compatible with C.  Thus we generate interface routines.
+
+3.  The following register assignments are used:
+	    a7  -  stack pointer
+	    a6  -  frame pointer
+	    a5  -  a.r. pointer (left unchanged in NO_SL calls)
+	    a4  -  pointer to global activation record
+
+    Occasionally bits and pieces of VAX specific code were left
+  around (inside appropriate ifdefs).  These assume that ap
+  takes the place of a5.
+
+4.  The first register allocated by the SUN C compiler to a pointer
+  register variable is a5.  The first one allocated to a non-pointer
+  register variable is d7.  Subsequent register variables are
+  assigned to decreasing register numbers.

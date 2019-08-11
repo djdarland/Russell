@@ -1,0 +1,51 @@
+Note: If you are a casual user of Russell and unfamiliar with Scheme,
+you are probably not interested in Callcc.
+
+Callcc may be used to get an explicit value representing the current
+computation environment.  A common use is for non-local exits from
+procedures.  It can also be used to implement coroutines and the like.
+Callcc has signature:
+
+    func[ body: func[cc: func[ val T ] val Void; impure] val T;
+          T: type {};
+	  impure ] val T
+
+The call
+
+    Callcc[ body, T ]
+
+results in a call to body, with the "current continuation" as an argument.
+The current continuation "cc" is a function, whose evaluation consists of the
+execution of the remainder of the program, as if callcc had returned the
+value passed to cc.  This execution of the remainder of the program is
+performed with the environment (identifier bindings) at the time of the
+Callcc, but the state (variable values) current at the time "cc" is called.
+A (possibly non-local) exit might be implemented as follows:
+
+        Callcc[
+	    func[ cc: func[val Short] val Void; impure ] val Short {
+                ...
+                if
+                    ... ==> ...
+                    else ==> (* exit *) cc[err_code]
+                fi
+                ...
+            }
+        ]
+
+The var Void parameter to Callcc is apparently necessary for type safety.
+It is passed on to allow functions with unrestricted side-effects (in
+conjunction with -L).
+
+Callcc is a Russell version of the call/cc construct in Scheme.
+
+Warning and Disclaimer:  This construct appears to have found a large number
+of adherents in the Scheme community.  It is not clear to the author that it
+should be directly accessible to the average programmer.  Explicit
+undisciplined use of Callcc can result in extremely unreadable code.  It is
+suggested that it be used to implement any other needed control constructs,
+and then not be explicitly referenced further.
+
+Implementation note: Callcc was implemented as an afterthought, and involves
+copying the run-time stack.  This is faster than you might think, since
+anything big is likely to be heap allocated.

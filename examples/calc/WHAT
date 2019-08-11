@@ -1,0 +1,74 @@
+  This directory contains a Russell implementation of constructive real
+numbers.  The underlying idea is to represent a real number as a function
+from a precisions specification to an approximation accurate to the
+indicated presision.  For efficiency reasons, these functions "remember"
+the best known approximation to a number.  More details can be found
+in "cr/cr.r" or the paper entitled "Constructive Real Interpretation
+of Numerical Programs" in the SIGPLAN '87 Proceedings.
+  The following is a rough description of the contents of files in this
+directory and in the cr subdirectory.
+
+calc.man -  A man page for the (Sun version of) the calculator.
+
+xlong.r -   An extended large integer data type.  Adds functions to the
+	    built-in long data type.  Note the machine dependent "#define".
+
+cr/cr.r -   defines a Russell type of constructive real numbers.  Provides
+	    basic arithmetic operations, sqrt, exp, ln, etc..
+
+cr/interval.r - Interval data type.  The representation of a constructive
+		real includes an interval approximation to speed things
+		up.
+
+cr/rat.r - Rational number data type.
+
+cr/fusion.r - Constructive real data type that uses rational arithmetic
+	      whenever possible.  The goal is again to speed things up.
+
+primes/Zmod.r - An implementation of the ring of integers modulo n.
+
+primes/prime_test.r - Solovay-Strassen primality test.
+
+calc.r - Desk calculator interface for inf_prec.r.  It provides a
+	 RPN desk calculator user interface.  All stack entries
+         are displayed on the screen.  The stack grows down.  Keys used
+	 as operators are displayed on the screen.  The screen is
+	 managed through the curses library.  Consequently this should
+	 work for any terminal described in the termcap database.
+         Resizing of Sunview screens should be handled appropriately, except
+	 that the help screen disappears in short windows.  It will run in
+	 an X window, but does not understand resizing in this environment.
+
+window.r - defines a Russell interface to curses.
+
+curses.c - functions corresponding to curses macros, to make them
+	   callable from Russell.
+
+term.c - Grubby C code needed to deal with Sunview screens.  (Generates
+	 3 warnings under Sun 4.0.  This is both meaningless and hard
+	 to avoid, since signal is declared inconsistently in different
+	 Sun releases.)
+
+xcr.r - A Fortran/C interface to the constructive reals.  Must be compiled
+	with -X after calc has been made.
+
+test.f - A trivial Fortran driver.
+
+loadtest - The command needed to link test.f against the constructive reals
+	   package.
+
+Makefile - "make calc" creates a desk calculator utility "calc" in this
+	   directory. 
+
+
+Authors: Hans-J. Boehm & Vernon Lee
+
+Known Problems:
+    xlong should have been implemented as a collection of functions
+    operating on Long's.  Alternatively, the compiler should understand
+    coercions.  As it stands, there are too many explicit coercions
+    floating around.
+
+    More careful correctness proofs should be worked out for many of the
+    operations.
+

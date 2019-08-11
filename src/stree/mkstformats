@@ -1,0 +1,3 @@
+cat stformats.m streedefs.h > stftmp.c
+$1/cpp/cpp -Dvax=1 -Dpdp11=0 < stftmp.c | $1/fixmacros | sed -e "/^#/d" | $1/fixstrings > stformats.h
+rm stftmp.c

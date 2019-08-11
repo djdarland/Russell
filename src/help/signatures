@@ -1,0 +1,118 @@
+The Russell notion of a signature corresponds to that of a type in Pascal.
+It is different from the Russell notion of a type (which is just a
+collection of operations).
+
+Signatures are used to syntactically check that expressions are not used
+in inappropriate contexts, i.e. that the results they produce are not
+misinterpreted.
+
+Signatures have one of the following forms:
+
+    identifier
+
+    val type_expression
+
+    var type_expression
+
+    func [parameter_specifier; ...; parameter_specifier] result_signature
+
+    type local_name { component_specifier; ...; component_specifier }
+
+    signature
+
+An identifier used as a signature must be bound in a surrounding parameter
+declaration (with signature "signature") or in a "===" declaration whose
+right side is a valid signature.
+
+The local_name in type signatures is optional and is used to give a name
+to the type itself, so that it can be referenced in component signatures.
+
+Each parameter_specifier has the form:
+
+    identifier : parameter_signature
+
+where "identifier :" is optional.
+
+If several parameters have the same signature, then their specification can
+be collapsed to:
+
+    identifier, identifier, ..., identifier : signature.
+
+Each component_specifier in a type signature has one of the forms
+
+    identifier : signature
+
+    characters
+
+    identifier : field type_expression
+
+    identifier : readonly field type_expression
+
+("characters", "field", and "readonly" are reserved words.)  The first
+form specifies a component and its signature explicitly.  The specified
+signature may not be a variable signature.  The same abbreviation as
+for parameter specifications is allowed for multiple components with the
+same signature.  The signature may be omitted for the following identifiers
+with default signatures:
+
+    Identifier                  Default Signature
+
+    New                         func [ ] var T
+    :=                          func [ var T; val T ] val T
+    =, <, >, <=, >=, <>         func [ x, y: val T ] val Boolean
+    ^+, ^*                      func [ x, y: val T ] val T
+    V                           func [ var T ] val T
+    any quoted identifier       func [ ] val T
+
+(The name "T" is used here and below to represent the local type identifier.)
+
+The keyword "characters" specifies components whose names are the ASCII
+characters (with the exception of some infrequently used control characters),
+and with signature
+
+        func [] val T
+
+The specification
+
+        x : field t
+
+is an abbreviation for
+
+        x : func [val T] val t;
+        x : func [var T] var t
+
+If "readonly" is specified, then only the former is included.
+
+It must be apparent which instance of an identifier is meant when that
+identifier occurs inside a signature.  In particular the compiler does not
+consider signature information in making such a determination.  This means,
+in particular, that a signature may not mention an overloaded type component.
+
+Two signatures are treated as identical if they differ only in the following
+respects:
+
+1)   Reordering of type signature components.
+
+2)   Renaming of local identifiers, especially parameter names and
+   local type names.  Omission of parameter names.
+
+3)   Grouping of parameter names with identical signature.
+
+4)   Reordering of guarded commands.
+
+5)   Use of strings or explicit expansions.
+
+A signature may appear as an expression.  The signature of such an expression
+is the reserved word "signature".  This is useful primarily in that it allows
+binding of identifiers to signatures (using the "===" form of declarations),
+and parametrization with respect to signatures, as in
+	    
+	let
+	    identity == func[x: S; S: signature] { x }
+	in ...
+
+Implementation Notes:
+  Signatures such as "val var Short" do not parse.  (They should more properly
+result in a signature checking error.)
+
+See also: declarations, record, individual constructs.

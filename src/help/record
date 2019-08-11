@@ -1,0 +1,43 @@
+The record construction provides functions for manipulating record (structure)
+values and variables.  Unlike a product variable, a record variable can be
+viewed as a collection of component variables, each of which can be
+separately updated.  A record construction is written as:
+
+        record { id1: type_expr1; ...; idn: type_exprn }
+                
+All type expressions must have signatures which include New, V, and
+assignment, with the standard signatures.  It has signature:
+
+        type t {
+            New; V; :=;
+            Mk: func [val type_expr1; ...; val type_exprn] val t;
+            id1: field type_expr1;
+            ...
+            idn: field type_exprn;
+        }
+
+The abbreviation
+
+            id: field type_expr;
+
+is accepted instead of
+
+            id: func [val t] val type_expr;
+            id: func [var t] var type_expr;
+
+where t is the local type identifier.  Similarly
+
+            id: readonly field type_expr;
+
+is accepted inside a type signature instead of the first of these two
+function component signatures.
+
+Note on Semantics: As a small concession to efficiency, the assignment
+operation returns the right operand, rather than a new value constructed
+from the results of the component assignments.
+
+Implementation Note: New, V , and := on records are rather inefficient.
+Products are frequently preferable.  A redesign of the language might
+omit records altogether.
+
+See also: product

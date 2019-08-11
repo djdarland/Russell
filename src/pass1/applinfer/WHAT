@@ -1,0 +1,5 @@
+This directory contains the RUSSELL expression parser.  It refines
+the initial parse tree built by the YACC generated parser.
+(This is really a very slow and stupid simple precedence parser.
+Unfortunately, we didn't realize this when it was written, and we haven't
+found it worthwhile to fix it.)

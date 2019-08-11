@@ -1,0 +1,47 @@
+  It is now possible to add identifiers to the global environment, so
+that they will be visible in various nested compilations.  This is
+useful for frequently used types that you don't want to declare as
+"extern"s in every compilation.  It is even more useful if it matters
+that all refrences to the file should reference the same instance (for
+example, because the top level function in that "extern" is expensive
+to evaluate.)
+  Identifiers are added to the initial environment by initializing the
+compiler with these predeclared identifiers, and then running the
+initialized compiler.  The main disadvantages of this procedure are:
+
+1.  If the initial environment changes in any way, everything using
+  that initialized compiler must be recompiled.
+
+2.  The generated initialized compiler executable is HUGE (~700K).
+  You should avoid having many of these lying around.
+
+The procedure for adding something to the initial environment is as
+follows:
+
+1. Build a file describing the environment.  This is a Russell program
+  that implicitly surrounds other programs compiled with the generated
+  compiler.  For example:
+
+  let
+	a == 17
+  in
+	^B
+  ni
+
+  would predefine a to be 17.  A ^B character is used as a placeholder
+  for the rest of the program.  Keep this file as small as possible,
+  since it is largely recompiled with every compilation.  Use "extern"s
+  for large pieces of code.  (Such extern's must be normally compiled before
+  the following step.)
+
+2. Compile this file with -dI.  (-d ==> generate a demand paged compiler
+  executable.  -I ==> use the standard pre-initialized compiler rather
+  than starting with a blank slate.)  This will generate a file called
+  Grc.x in the current directory.  (Yes, the compiler actually understands
+  even more undocumented flags.)
+
+3. Compile any files that need the new environment from the directory
+  containing Grc.x with a -u flag (in addition to the usual alphabet soup).
+  The flag simply tells rc to use the Grc.x from the current directory
+  rather than the standard place.
+

@@ -1,0 +1,52 @@
+These routines perform RUSSELL signature deduction and checking.
+
+
+Invariants and general observations:
+
+1.   Signatures never contain implied selections,
+   applications, V calls, or unresolved id references.
+   This invariant is established (by fiat) in the previous pass.
+     One consequence of this is that subst should never be asked
+   to substitute an incompletely specified expression inside
+   an arbitrary signature. (See 3 below however.)
+     Checksigs makes sure that selections in signatures are unambiguous,
+   independent of signature information.
+
+2.   If findsig is called on a local anonymous type identifier
+   it sets the signature field to an appropriate value, but
+   not the sig_done field.  This is necessary since such identifier
+   nodes are shared eventhough they may have different signatures
+   in different contexts.  Thus the signature is recomputed the
+   next time the same node is encountered.  Note that the signature
+   of all such nodes is constant during a single top level call
+   to findsig.  Thus resetting the signature field of such a node
+   is guaranteed not to clobber an old value which is still needed.
+
+3.  Findsig always determines the signatures of all subexpressions,
+   whether they are needed immediately or not.  Findsig also inserts
+   all omited selections, V calls, and constant applications.  Thus
+   it is generally safe to ask subst to substitute an expression into a
+   signature, provided findsig has been called on the subexpression,
+   as evidenced by the sig_done field.
+    The only problem with this is that some signatures can, and in order
+   to avoid unnecessary circularities should be, determined before
+   the signatures of all the subexpressions are known.  In this case
+   such an expression is put on the dontsubst list, and only an
+   attempt to actually substitute it will cause a circularity
+   to be detected.
+    Note that the dontsubst list can be cleared after a top level call
+   of findsig is complete since checksigs works bottom up.  Thus 
+   a top level call of findsig will only be made if the signatures
+   of all subexpressions are already known.
+    Missing constant applications, if they cannot be filled in the first
+   time, are filled in by the appropriate top level call to findsig.
+
+4.  The id_last_definition fields of identifiers may occasionally point
+   to the original declaration node of the identifier, and not to
+   subsequently made copies.  
+    For local type identifiers and parameters, it must be possible to
+   check easily whether an identifier is the one declared in a given
+   parameter node or type signature node.  Preorder numbers are copied
+   with the rest of a node, so they can be used to determine this.
+    (This whole scheme is probably no longer needed, but it would take
+   some time to get rid of its remaining uses.)

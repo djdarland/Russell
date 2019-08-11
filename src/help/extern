@@ -1,0 +1,71 @@
+  The keyword "extern" has two distinct uses.
+
+1) It may be used to introduce references to non-Russell functions.
+   A function construction may have the form
+
+       func[param_list; var Void]result_sig { extern "extern_func_name" }
+
+   Applying a function constructed in this way will result in a call to
+   the non-Russell function with the indicated name.  The external function
+   should either reside in the standard C library, or should be explicitly
+   linked to the compiled Russell program.
+
+   The external procedure name must be complete, that is, it should usually
+   start with an underscore character.  Restrictions apply to C routines
+   called in this way.  The main ones are:
+
+   a) They do not have to be pure functions, since they are forced to
+      take a var Void parameter.  They should however respect the
+      parameter and result signatures.  It is useful to note that
+
+             val ChStr    ~     char *
+	     val Short    ~     long (short in the Vax implementation)
+             val Float    ~     double *
+
+      Variables are usually represented as a pointer to a one word
+      cell containing the actual value.  (Float variables have the
+      same representation as values.)  Arrays are pointers to blocks
+      of storage, the first word of which contains the number of
+      elements in the array.  The var Void parameter is not actually
+      passed (except by the Vax code generator).  It should be ignored.
+
+   b)   Any references to malloc will get linked to standard
+      malloc (except for the old Vax code generator, where
+      life is much more complicated).  This means that objects
+      allocated this way should not contain references to Russell
+      objects, as such references will be hidden to the garbage
+      collector.  Use gc_malloc if you want references to be
+      found.
+
+2) A separately compiled Russell expression is denoted by
+
+            extern { "file_name" }
+
+   It is assumed that object code for the expression resides in file_name.o
+   in the current directory, and that its entry point was built from the
+   specified file name.  It is also assumed that signature (and
+   optimization) information is attached to the end of the file.  (I.e.
+   it is assumed that the file was produced with "rc -c" and was
+   moved to the current directory.)  The compiler will automatically
+   link the ".o" file to the compiler output.  (This is suppressed
+   if the -c option is specified.  Nested references to separately compiled
+   expressions currently require manual linking.)
+
+   If stack.o contains a separately compiled implementation of stacks,
+   (e.g. stack.r might contain a function construction, which given
+   a type argument T, produces the type of stacks of T) it can be bound
+   to the identifier "stack" with the following declaration:
+
+        let
+            stack == extern { "stack" }
+        in
+            ...
+        ni
+
+Implementation note:  Calls to C functions are slightly less efficient
+than from C, but not much.  Separately compiling Russell functions
+currently does not result in a major loss of efficiency.  In particular,
+tiny separately compiled functions may still be expanded in-line, and
+slightly bigger ones may still be called using a stream-lined calling
+convention.  On the negative side, even separately compiled functions
+are not guaranteed to show up on adb stack traces.

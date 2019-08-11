@@ -1,0 +1,7 @@
+Argc and argv are a builtin value and function reespectively.  Argc is
+the number of command line arguments, (incl. the command name itself).
+The function argv returns the ith command line argument, given an integer i.
+They have signatures:
+
+    argc: val Short;
+    argv: func[val Short] val ChStr;

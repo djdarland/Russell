@@ -1,0 +1,17 @@
+				 Russell String Table
+
+The string table is conceptually an infinite array of bytes, which is broken up
+into blocks, each of size STTBLKSZ. Strings are stored in string table
+entries, a new entry starting on the first word boundry after the last one
+in the table. Each entry can then be referenced as the index in this
+array of the first byte of its entry (a so called relative pointer). Blocks
+are numbered starting at 0, and a new block is allocated when the last
+one fills up. Strings are uniquely numbered (with their relational pointers) 
+in increasing order as they are entered, and these numbers can be used
+to test for string equality and order of first encounter.
+
+	For the purposes of entering and looking strings up quickly ,
+a seperate array of hash headers is kept during scanning. Each header
+points the start of a chain of entries which have the same hash.
+
+	After scanning, the table is written out to the string table file.

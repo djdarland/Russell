@@ -1,0 +1,93 @@
+initenv.r is a Russell program, containing a ^B where the user program
+          is to be inserted.
+
+          Note that the compiler sorts type signatures.  Any types
+          implemented by non-Russell code must be arranged in this
+          sorted order, and not necessarily in the order in which
+          the components appear in initenv.r.  (The order is determined
+          first by the ASCII ordering of the names, and then by an
+          ordering on signatures described in pass3/comp_st.c).
+
+The following additional syntax is allowed:
+
+ 1) The word "func" in a function signature may be followed by
+    an optional "standard" declaration and then an optional
+    "(inline "inline code")".
+
+    The "standard" declaration has the form: "(standard op size)".
+    Op must be one of :=, V, ptr_New, init_New, New, put, Callcc, Array,
+    +=, -=.  It declares that the operator behaves in the standard way.
+    (For += and -= "standard" means like the machine integer operations.)
+    (ptr_New allocated variables contain pointers, New allocated ones don't.)
+    Size is the size of variables of the type in question,
+    but must currently be one.  It is ignored for put, Array,
+    and Callcc.  "Standard" declarations are obligatory
+    for put and Callcc. For put and Callcc they are used to inhibit certain
+    optimizations which would otherwise be unsafe.  Any function saving
+    a continuation should be labelled (standard Callcc 0) and should
+    not have in-line code specified.  (It is also necessary that functions
+    behaving like "put" be called "put" in addition to the (standard put 0)
+    label.) For the others, esp. for New, they enable some special
+    optimizations. 
+
+    For the Vax code generator:
+    The inline code is a printf format.  The second (and third)
+    argument to the printf call will be a bit vector which should
+    be in r11 before a procedure call is made.  This is necessary
+    if there is any danger of invoking the garbage collector as
+    a result of the procedure call.
+    The following additional rules apply to the inline code:
+	a) Trailing newlines are omitted.
+        b) Any line ending with #--- is suppressed as part of
+           optimization.
+        c) Any line ending in #COMP opcode n
+           indicates that a comparison sequence of length n follows, and that
+           the next n-1 instructions following this one can be simulated
+           by replacing an immediately following pop and jeql by the specified
+           opcode.  The first line should perform the comparison and pop
+           both arguments of the stack.
+        d) The inline code should assume that arguments have been pushed
+           in reverse order onto the stack.  The result should
+           take their place.
+        e) At the end of every physical line of code everything
+           below sp should be dead.
+        f) There should be one instruction per physical line, except
+	   possibly for the first line in a #COMP sequence.
+
+    For the intermediate code generator:
+    The initial environment for the intermediate code generator is similarly
+    specified, except that inline syntax is different.  Arguments to the
+    function are denoted in the inline code as $1, $2, ...  The result
+    is denoted as RS.  The conventions involving '#' do not apply.
+    Var Void and type {} parameters are not passed explicitly.
+    The intermediate code (except for constants and strings, see below)
+    is not passed through printf.  See pass5d/op_codes.h for a cryptic
+    description of the intermediate code.  Ginitenv.r is the standard
+    initial environment for the intermediate code generator.
+    In-line code may assume that the argument virtual registers $1, $2, ...
+    are dead at the end of the in-line code sequence.
+ 
+ 2) The word "type" in a type signature may be followed by one or both
+    of the following options enclosed in parentheses:
+	a) The word "simple", indicating that the representation of the
+	   type does not contain either environment pointers or pointers
+	   to variables.
+
+	b) The word "constants" followed by 1 or 3 strings.
+	   In the case of 3 strings, another integer may follow.
+           The first gives inline code for single character quoted constants.
+	   The third specifies how to format each character in a string.
+           The second specifies a format in which the string representation
+	   as a whole should be enclosed.
+	   If the integer is present, it gives a maximum string length
+	   for which the expansion given by the second and third strings
+	   is valid.
+           The compiler assumes that if the first and the third string
+           are present strings have reasonable signatures, i.e.
+           they are elements of the type.
+
+Warning: The compiler makes some assumptions that Short, Boolean, and
+Void behave in a conventional manner.  They should not be omitted from
+the initial environment, nor altered substantially.  (Changing the
+default base of integer constants is considered substantial.)  Modified
+versions of these types may of course be created by the user program.

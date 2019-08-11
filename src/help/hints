@@ -1,0 +1,95 @@
+The following appear to be commonly encountered problems.  Please send
+mail to boehm@xerox.com if you have useful additions to this list.
+
+1.  A missing ; can cause two adjacent expressions (usually assignments)
+    to be parsed as one.  This is likely to generate strange error
+    messages, such as "Non-function used as operator".
+
+2.  A reference to an uninitialized product or union variable will
+    get caught as a reference to an address past the end of the
+    heap or to location 0.  The resulting message will indicate a
+    segmentation violation. (This, like all runtime errors, may eventually
+    be followed by an illegal instruction message, which may be ignored.
+    On the vax, with tracing is enabled, a stack trace will be provided.)
+
+3.  Floating point constants are limited to 9 digits before and 9 digits
+    after the decimal point.  (4 in the Vax implementation.)
+    The relative precedences of '.' and exponentiation are counterintuitive.
+
+4.  Dbx and adb stack traces are sometimes useful for
+    figuring out where things went wrong.  They may omit calls that were
+    expanded in-line and certain tail-recursive calls.  Arguments may
+    not be accurate.  (Most Russell functions appear to be
+    called with a single argument, namely a pointer to the activation
+    record for the called function.  Arguments start at an offset of
+    4 bytes from the beginning of this activation record. 
+    If the assembly language function name is prefixed by an "F", its
+    calling sequence is very similar to that for C functions, and adb
+    will probably print arguments correctly.  Very simple functions
+    are normally treated in this manner.)  The actual function name will
+    be embedded in the name printed by adb. (Note that this function name
+    normally includes a period, which must be escaped using a backslash
+    when typing it in an adb command.)
+ 
+5.  Parameters or type signature components involving an operator
+    identifier should be written with the ":" preceded by a blank. E.g.
+
+        + : func[x,y: val Z] val Z
+
+    is correct.  The parameter specifier
+
+        +: func[x,y: val Z] val Z
+    
+    will be interpreted as declaring parameter with name "+:".  This will
+    result in an error message pointing to the missing ":".
+
+6.  Explicit selections usually need to be specified for In and Mk operations,
+    since none of the arguments is likely to have the correct type to
+    select from.
+
+7.  Use double quotes for single character ChStr constants.  Single
+    quotes will normally cause digits to be interpreted as integers
+    instead.  (Of course ChStr$'2', will work fine.)
+
+8.  Unary minus has the same precedence as binary minus.  This means
+    expressions like a*-b will not get parsed in the usual way.
+    Use parentheses.
+
+9.  It is fairly easy for a Russell compiler to implement a very general
+    notion of constant folding.  Unfortunately this has served as an excuse
+    to put off implementing even simple constant folding.  If you care
+    about efficiency, bind constant expressions to identifiers.
+
+10. The error message "Variable ? imported ..." (the "?" is literally there)
+    usually indicates that a function requiring an inferred var Void
+    parameter was called from a function without a var Void parameter.
+    The compiler thus inserted a var Void identifier which violates the
+    import rule.
+
+11. Segmentation violations are generally due to uninitialized variables.
+
+12. If the linker complains of undefined symbols, it is probably due to
+    "bad" characters in the filenames for subcompilations.
+
+13. In the event of complaints about not being able to infer signature,
+    it is usually easiest to add function result signatures or
+    signatures to declarations.  Other strategies like reducing overloading
+    by renaming identifiers may also help, but should not be necessary.
+
+14. In response to a signature related error, the compiler may print
+    some information starting with "Attempted to match:".  This describes
+    the last attempted (and failed) signature match before the error.
+    It is sometimes, but not always, useful.  If it doesn't make any sense
+    to you, ignore it.
+
+15. If y has signature "var T", then the declaration "x == y" will
+    result in x being bound to a variable (location).  When y's value
+    changes, so does x's value.  If you want to bind x to y's value
+    at the time the declaration is evaluated, use "x == V[y]".
+
+16. Russell generated ".o" files contain absolute addresses in the address
+    space of the compiler that generated the file.  These will no longer
+    make sense if you change compiler versions.  Thus a change to the
+    compiler frequently requires recompilation of all Russell programs
+    compiled with -c.  If you forget to do this, the compiler is likely to
+    die with lots of error messages.

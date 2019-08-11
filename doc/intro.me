@@ -1,0 +1,1931 @@
+.fo //-%-//
+.ds s \ka\"                save current horizontal position
+.ds a \h'|\\nau'\"         adjust horizontal position to its saved value
+.po 1.1i
+.tp
+.sp 6
+.(b C
+.sz 14p
+\fBA Programmer's Introduction to Russell\fR
+.sp
+.sz 12p
+H. Boehm
+A. Demers
+J. Donahue
+.sz 10p
+.)b
+.nr pp 11
+.nr sp 12
+.nr fp 10
+.bp
+.uh Introduction
+.pp
+Our intent is to provide a highly informal, but hopefully
+comprehensible, description of the language Russell.  No attempt is
+made to provide a complete definition of the language;
+it is assumed that the on-line ``rhelp'' facility [Boe\ 85] is available
+for this purpose.
+.pp
+This description is aimed primarily at a reader who is about to start
+using the language.
+It includes discussion of both fundamental concepts and
+relatively superficial (but nonetheless important) syntactic issues.
+The reader who is interested only in conceptual issues might prefer
+to read [Don\ 85].
+.pp
+Russell is a very compact expression language which is nevertheless 
+extremely general and uniform in its treatment of functions and,
+more importantly, data types. 
+.pp
+By the term `expression language' we mean that there is no
+distinction between expressions and statements.  Any executable
+construct in the language returns a value.  In particular
+assignment `statements' and conditionals return values, which
+may or may not be used.  By the same token,  most
+constructs in the language can also potentially modify the
+value of some variable, and thus play the role of statements.
+.uh "A Simple Example"
+.pp
+We'll start with a very simple example which will serve to illustrate
+a few of the points which follow.
+.pp
+In keeping with tradition,
+we will use a declaration of the factorial function:
+.(b
+.(c
+1   fact == 
+2       func [ n : val Short ] val Short
+3           {  
+4               if 
+5                     \*sn > 0 ==> n * fact[ n - 1 ]
+6               #     \*an = 0 ==> 1
+7               fi
+8           }
+.)c
+.)b
+.pp
+Russell has a completely uniform declaration mechanism.
+An identifier ``a'' can be bound to a simple value, a function, a type,
+or a variable,
+with a declaration of the form ``a == b''.  This has the
+effect of binding the identifier a to the value produced by the
+expression b.
+We could use b == 0 to declare
+b to be equivalent to the integer constant 0.  (This is
+completely distinct from declaring an integer variable.
+The identifier b is purely a value.  It does not make sense to assign to it. )
+.pp                                              
+In this case, the expression appearing in the declaration
+is an explicit function construction (abstraction).  Its value is the
+factorial function whose body consists of lines 4-7.  The heading of the
+function construction (line 2) indicates it is ``a function mapping a single
+short (16 bits in the Vax implementation, 32 bits in the Sun implementation)
+integer value n to a short integer value''.  If we had wanted a factorial
+function that could produce arbitrarily large results without
+overflowing, the heading should have been:
+.(b C
+2       func [ n : val Long ] val Long            
+.)b
+.pp
+The body of the ``fact'' function is an expression whose value
+will be returned as the value of a function call.
+In this case the expression produces a simple integer value.
+In general, the body of a function may be any expression;
+it could just as well produce another function or a type.
+Similarly it might accept a function or type argument.
+.pp
+Here the body consists of a conditional.
+Here we used a slightly extended version of
+Dijkstra's guarded command notation [Dij\ 76].
+(More conventional, Algol-like syntax is also allowed.)
+Since Russell is an expression language, conditionals
+return a value.  In this latter respect Russell conditionals
+resemble Algol conditional expressions.
+.pp
+The conditional here should be interpreted as follows:  If
+the first guard is true, i.e. n is greater than 0, then the
+value returned is the value of the expression n*fact[n-1].
+Note that arguments to function applications (calls) are enclosed
+in square brackets rather than parentheses.\**
+.(f
+\**Function application syntax is actually quite flexible.
+Brackets may frequently be omitted.
+This is discussed below.
+.)f
+.pp
+If the second guard is true then the integer 1 is returned.
+If neither guard is true a run-time error occurs.
+If two or more guards of some conditional are all true, then
+any one of the corresponding expressions may be chosen to be evaluated.
+.pp
+Assuming n\ \(>=\ 0, the conditional could also have been written as:
+.(b
+.(c
+if
+      \*sn > 0 ==> n * fact[ n - 1 ] 
+#     \*aelse  ==> 1
+fi
+.)c
+.)b
+or as
+.(b
+.(c
+if n > 0 then
+      n * fact[ n - 1 ]
+else
+      1
+fi
+.)c
+.)b
+.pp
+So far, we have not introduced any variables or assignments.
+The identifier n denotes a fixed value, which cannot be changed.
+In order to look at variables, we first have to examine the notion of ``type''.
+.uh "What's Different about Russell?"
+.pp
+Russell was designed to explore a particular view of data types.
+Traditional programming language designs typically fall into one
+of two categories.  Languages like LISP impose essentially no
+type structure which could be checked by a compiler; a typical LISP compiler
+would allow any argument to be passed to any function or operator.
+(Executing the function call may of course result in a run-time error.)
+This allows a great deal of flexibility, but many trivial errors are likely
+to go undetected, at least until that section of the program is actually
+executed.  It also makes the compilers job much more difficult,
+since it cannot necessarily tell in advance whether a ``+'' should
+be compiled to, say, an integer or floating point add instruction.
+.pp
+Languages like Pascal solve these problems by imposing a very rigid
+type structure.  A Pascal compiler would object to an expression
+such as
+.(b C
+3 * False
+.)b
+.pp
+Unfortunately this results in a loss of generality.  Such languages make
+it particularly difficult to write general purpose, reusable software.
+It does not suffice to write one implementation of binary search
+trees; a different one must be provided for each kind of data to
+be stored in the leaves.\**
+.(f
+\**This can usually be avoided by defeating the type structure.
+This, at least partially, negates the purpose of having the type
+structure in the first place.
+.)f
+.pp
+A number of more recent language designs try to combine the flexibility
+of dynamically typed languages, such as LISP, with the reliability
+and efficiency resulting from compile-time type checking.  Russell
+is one such ``polymorphically typed'' language.
+.pp
+The fundamental view underlying Russell is that all objects
+manipulated by a Russell program are in fact elements of one 
+universal domain
+or set.  We may, if we wish, think of this set as being the set of all
+bit sequences.
+Thus we can identify an integer with its binary representation,
+a character string with a sequence of bits representing the ASCII codes
+for the characters, and a function with a sequence of bits representing
+the code to be executed to evaluate the function, possibly followed
+by another sequence of bits describing the environment in which
+the code is to be executed.  Thus the object itself gives us no
+information about how to interpret it.  The same bit string could
+represent either a character string or a function mapping integers
+to integers.
+(For a much more abstract view of such a domain see, for
+example, [Sto\ 77].)
+.pp
+What distinguishes one data type from another is not the set of
+its elements, but rather the set of operations (or functions) 
+that may be applied to interpret elements of the universal set.
+In fact, a data type \fIis\fR just that collection of operations.
+Thus the Boolean type \fIis\fR just the collection of functions
+and, or, not, ... .  What makes a value an integer is not any
+characteristic of the value itself, but the fact that it is
+intended to be interpreted by exactly these functions.
+.pp
+Many programming languages allow users to treat functions as data objects
+in at least some contexts, e.g. as parameters.  Since Russell data types
+are just collections of functions, they can similarly be treated as 
+data objects.  Furthermore, since both functions and data types are
+again part of the same universal data domain as other objects, this can be 
+done uniformly in all contexts.
+.pp
+Compile-time ``type checking'' is performed by associating a \fIsyntactic
+type\fP, or \fIsignature\fP with each expression.
+Such a signature specifies in which contexts an expression may appear.
+\fISignature checking\fP (type checking translated to Russell terminology)
+insures that an expression does not appear in
+a context in which it is not meaningful.
+Thus the value produced by an expression cannot be misinterpreted.
+.pp
+For example, assume we are
+representing integers using their binary representation.  Furthermore
+we represent the Boolean constants ``True'' and ``False'' as the bit
+strings ``1'' and ``0'' respectively.
+Signature checking in Russell will prevent us from writing the expression
+.(b C
+3 * False
+.)b
+in spite of the fact that it produces a well-defined answer.
+Clearly the 0 value produced by the expression ``False''
+is intended to be used in a ``Boolean'' context, and is not
+intended to be treated as an integer.
+This is reflected by assigning the expression ``False'' the signature
+``val\ Boolean'' (``Boolean'' value).  The signature of ``*'' is
+.(b C
+func [val Short; val Short] val Short\**
+.)b
+.(f
+\**Actually there are several instances of ``*'' with different signatures.
+Each of the types Short, Long, and Float has a separate ``*'' operation.
+They provide 16-bit integer, unlimited size integer, and floating point
+multiplication, respectively.
+.)f
+This indicates, among other things, that it is a function whose arguments
+must have signatures ``val\ Short'', and thus must be interpretable
+as short (i.e. 16 bit) integers.  Since the parameter signature
+for ``*'' (``val\ Short'') does not match the signature of the
+second argument expression (``val\ Boolean''), the above expression
+will be rejected by the compiler.
+.pp
+It is important to distinguish signatures, which are associated
+with expressions, and are purely syntactic objects, from types,
+which are collections of functions.
+``Short'' is a built-in type, which contains operations such as ``*''.
+It is convenient
+to use the same identifier (or expression, in general)
+inside signatures, to indicate appropriate uses of an expression.
+.uh "An Introduction to Imperative Russell"
+.pp
+It is much easier to write applicative (variable-free) programs in
+Russell than in most conventional languages.  Our experience indicates
+that small Russell programs tend to naturally be applicative.
+Nonetheless, it is easy to introduce variables if one prefers.
+We illustrate this by rewriting the ``fact'' function
+so that it uses a loop rather than recursion. (Clearly loops
+are not useful without variables.)
+.pp
+Variables, like functions and types, are themselves data objects.
+They identify a location where other values can be stored.
+.pp
+A short integer variable N can be declared by means of a declaration
+such as
+.(b C
+N == Short$New[ ]
+.)b
+.pp
+The type Short is,
+like all Russell types, nothing but a collection of functions.
+One of these functions is New.  It allocates a new integer
+variable and returns it.  Thus its signature is
+.(b C
+func [ ] var Short
+.)b
+.pp
+The $-symbol is used to indicate a selection from a type.  
+``Short$New''
+explicitly specifies the New function from the type Short,
+and ``Short$New[\ ]''
+is an expression which returns a new integer variable.  ``N''
+is then simply bound to the the result of this expression.
+.pp
+The loop construct has the same syntax as the conditional, except
+that `if' and `fi' are replaced by `do' and `od' respectively.
+(See [Dij\ 76].)
+It indicates that while one of the guards is true the corresponding
+expression should be executed.  A loop always returns the special value
+``Null''.
+.pp
+An imperative version of the factorial function can be written as:
+.(b
+.(c
+fact ==
+    func [ n : val Short ] val Short
+        {
+            let
+                N == Short$New[ ];
+                F == Short$New[ ]
+            in
+                N := 2;  F := 1;
+                do N <= n ==>
+                    F := F * N;
+                    N := N + 1
+                od;
+                F
+            ni
+        }
+.)c
+.)b
+.pp
+A block can be used anywhere an expression is legal.  Its general
+syntax is
+.(b C
+let <declarations> in <expressions> ni
+.)b
+where both declarations and expressions are separated by semicolons.
+The value of the block is the value of the last expression.
+Thus the value returned by the block in the example is the final
+value of the variable F.  As before this becomes the value returned
+by the function.
+.pp
+There is no separate notion of ``procedure'' in Russell.  Functions may
+may modify variable parameters.  The assignment operator ``:=''
+is an example of such a function.  It expects two arguments,
+a variable on the left and a value on the right.
+.uh "Full Versus Abbreviated Russell"
+.pp
+Both preceding examples have been written using syntax similar to that
+of other programming languages.  This is usually the case for real
+Russell programs.  Formally this syntax is only an abbreviation.
+``Full Russell'' syntax reflects the concepts underlying the language
+much more clearly, but is usually unpleasant to write.  It is
+useful to look at the full language, both to simplify explanations,
+and to understand the generality of the language.
+.pp
+Consider the assignment ``N\ :=\ N\ +\ 1'' in the preceding example.
+We stated previously that operations on ``Short'' values are components
+of the type ``Short''.  Thus the operation ``+'' does not exist by itself;
+it is one element in the ``Short'' collection of operations.  In full
+Russell, ``+'' would need to be replaced by ``Short$+''.
+.pp
+Similarly,
+``:='' is an operation provided by many types, including ``Short''.
+The instance provided by ``Short'' has signature
+.(b C
+func [var Short, val Short] val Short
+.)b
+indicating that it expects a location as its left argument, a value as
+its right argument, and returns a value (namely that of its right
+argument).  The value returned by the operation is discarded in this case.
+.pp
+As in other programming languages, the two occurrences of ``N''
+actually have different meanings.  The occurrence on the left side
+denotes a variable, or location, at which the value produced by the
+right side is to be stored.  The right side occurrence simply produces
+a value.  As declared, ``N'' has signature ``var Short'', which is
+appropriate for the left side.  On the right side it appears as an
+argument to ``Short$+'', which expects a ``val Short'' subexpression.
+To get from one to the other, we have to go from the location ``N''
+to the value stored there.  This is done by calling the ``V'' operation
+provided by most types.  In particular, ``Short$V'' has signature
+.(b C
+func[var Short] val Short
+.)b
+.pp
+A more complete version of the assignment would be
+.(b C
+N Short$:= Short$V[N] Short$+ Short$1
+.)b
+We have still used
+conventional infix notation for ``:='' and ``+''.  These are just function calls
+Thus a real purist could
+write the assignment in fully expanded Russell as
+.(b C
+Short$:=[N, Short$+[Short$V[N], Short$'1'[]]]
+.)b
+and have it be correctly recognized by the compiler.  (The interpretation
+of Short$1 is discussed in a later section.)
+.pp
+Appendix 2 contains a short summary of the differences between full Russell,
+and the abbreviated version which is normally used.
+.uh "Russell lexical structure"
+.pp
+Now that we have hopefully conveyed some rough feeling for the language,
+we finally start over at the beginning. 
+.pp
+A Russell program consists of a sequence of identifiers, keywords, strings,
+comments,
+and punctuation characters.  Upper versus lower case distinctions are
+significant in all contexts.
+An identifier may have one of three forms:
+.ip (1)
+It may consist of any letter
+followed by some number of letters and digits. "_" is
+considered to be a letter.
+.ip (2)
+Any sequence of characters enclosed in single quotes constitute an identifier.
+These identifiers are most commonly used for constants, as will be described
+in the next section.  A '-symbol can be included in such an identifier
+by doubling it, or preceding it by a ``\e'' character.
+.ip (3)
+Any sequence of `operator characters'.  These are:
+.(b C
+! %  &  * + - . / : < = > ? @ \e ^ ` | ~
+.)b
+By convention these are used as function names.
+.pp
+Some of the sequences formed using (1) and (3) are actually reserved for
+use as keywords and may not be used for other purposes.
+Note that none of these include upper case letters.
+These are:
+.(b
+.(c
+\fIKeywords\h'3i'\*sPurpose\fR
+
+cand, cor                                \*aconditional and, or
+do, od, if, fi, else, elsif, ==>         \*aconditionals, loops
+enum, record, prod, union, extend        \*abuilding types
+export, hide, with, constants            \*amodifying types
+let, use, in, ni, ==, ===                \*adeclarations
+val, var, func, type, field,
+characters, readonly                     \*asignatures
+extern                                   \*aseparate compilation
+<<, >>                                   \*aexplicit overload resolution
+:                                        \*aparameters, declarations
+.)c
+.)b
+.pp
+The syntax of strings
+is complementary to that of identifiers.  The following are
+legal strings:
+.ip (1)
+Any sequence of characters enclosed in double quotes.
+.ip (2)
+Any sequence of letters and digits starting with a digit.
+.pp
+The following are examples of strings:
+.(b
+.(c
+123                     \*s"123"
+2A1FB                   \*a"A1FB"
+"Hello"                 \*a"""" ("" represents a single " inside the string)
+"'"                     \*a"\e"" (same as """")
+.)c
+.)b
+The sequences \en, \er, and \et may be used to denote line-feed, carriage
+return, and tab characters inside strings and quoted identifiers.
+.pp
+The next section discusses the meaning of strings in the language.
+Usually they are interpreted as in other programming languages.
+In particular 123 will usually represent the integer and "Hello"
+the corresponding character string. The
+formal definitions differ however, both to allow treatment of infinite
+sets of constants within the Russell framework, and to allow the user
+the same mechanism in constructing his own types.
+.pp
+Russell comments are delimited by `(*' and `*)'.  Comments may be nested.
+Thus the following is legal:
+.(b C
+(* This is a comment (* This is a nested comment *) *)
+.)b
+.pp
+On the other hand,
+.(b C
+(* (* This is an improperly constructed comment *)
+.)b
+is illegal.
+.uh "Constants and Strings"
+.pp
+As we pointed out before, types in Russell are just collections
+of functions.  Thus the only way one can talk about particular values
+is by having functions in that type that produce them. 
+.pp
+Consider the built-in type Boolean.  It contains two functions,
+named ``True'' and ``False'',  with signatures (roughly speaking)
+.(b C
+func [ ] val Boolean.
+.)b
+These are functions with no arguments which produce
+a Boolean result.  Thus 
+we can always get the Boolean value false by writing
+``Boolean$False[\ ]''
+in full Russell, or, more commonly, just ``False''.
+.pp
+This allows us to deal with finite sets of constants for a given type.
+Since we always want to consider types as finite sets of operations,
+we need to extend this idea to handle infinite sets
+of constants (such as those in the built-in Short type).  This is
+done by treating strings, in the sense described above, as abbreviations.
+.pp
+The only Short constants provided explicitly (i.e. in the same way as ``True''
+and ``False'' for the Boolean type) are '0' through '9'.  (The '-symbols are
+part of the identifiers.)
+Also provided is a concatenation operation ``^+'' which, in this case,
+gives the value of the integer obtained by writing an integer next
+to another digit.
+Roughly what happens then is that
+the expression 123 is treated as an abbreviation for:
+.(b C
+('1'[ ] ^+ '2'[ ]) ^+ '3'[ ] 
+.)b
+.pp
+If the concatenation operator were not already built in,
+it could be declared as:
+.(b
+.(c
+^+ == func[ x, y : val Short ] {
+        let
+            '10' == 5 + 5
+        in
+            '10' * x + y
+        ni
+      }
+.)c
+.)b
+Note that using ``10'' instead of ``\ '10'\ '' would result
+in infinite recursion.
+.pp
+In the above example we have again omitted the selections of
+the constants '1', '2', and '3', as well as the ``^+'' operator, from the
+Short type.
+Formally strings are always selected from a type.  Thus we should
+have written ``Short$123''.
+This selection would normally be inferred, so that, in practice,
+writing ``123'' is usually sufficient.
+.pp
+All this allows us to define the meaning of (unquoted) strings
+a little more precisely.  In general 
+.(b C
+T$a\*<1\*>a\*<2\*>...a\*<n\*>
+.)b
+is expanded to
+.(b C
+((...((T$'a\*<1\*>'[ ]  T$^+  T$'a\*<2\*>'[ ])  T$^+  T$'a\*<3\*>'[ ]) ...)  \
+T$^+  T$'a\*<n\*>'[ ])
+.)b
+.pp
+Quoted strings are treated only slightly
+differently.  Since we want "" to be legal we have to generalize
+the treatment to handle this in a reasonable way.  We do this by 
+agreeing that '\ ' (2 single quotes) will implicitly be concatenated
+onto the left of any
+such string.  Furthermore, to distinguish such strings more explicitly from
+unquoted ones
+^* will be used as the concatenation operator.  Thus T$"ab"
+is expanded to
+.(b C
+(T$''[ ] T$^* T$'a'[ ]) T$^* T$'b'[ ]
+.)b
+.pp
+In accordance with this scheme, the builtin type ChStr (character strings)
+has constants, that is nil-ary functions, with names '' and 'c', for all
+characters c in the character set.  It also includes a ^* concatenation 
+function, which unlike the one for integers, really does
+character string concatenation.
+.pp
+We have gained something besides uniformity in this approach.
+It is possible to make use of the string mechanism for user defined
+types.
+For example, we can define an `octal integer' type
+by simply modifying the builtin type ``Short'' in the following two
+ways: First the constants '8' and '9' have to be deleted.
+Secondly ^+ now has to multiply
+by 8 rather than 10.  As will be described later Russell allows
+the user to easily construct such new types.
+.uh "Some Notes on Expression Syntax"
+.pp 
+Russell provides the following primitives for building expressions:
+.ip 1.
+Selection from a type.  A component function f of a type T may be
+selected by writing 
+.(b C
+T$f
+.)b
+.ip 2.
+Function constructions (lambda abstraction in lambda calculus terminology).
+Any expression E can be turned into a function by writing
+.(b C
+function_signature\** { E }
+.)b
+.(f
+\**The result signature may be omitted if it can be inferred.
+.)f
+Any identifiers appearing in E can be
+treated as parameters by including them as such in the signature.
+The above declarations of factorial functions
+are simple examples of this.
+.ip 3.
+Function application.  A function f may be applied to arguments 
+a\*<1\*>\ ...\ a\*<n\*> by writing
+.(b C
+[a\*<1\*>, ... , a\*<j\*>] f [a\*<j+1\*>, ... , a\*<n\*>]
+.)b
+Which arguments go before the function an which go after is a choice that
+can be made arbitrarily (though hopefully consistently) by the programmer.
+If one of the argument lists is empty it can always be omitted.  (As
+mentioned above, if both are empty they can usually, but not always,
+both be omitted.)  Thus any function can be treated as an infix, prefix,
+or postfix function.  (We could introduce more reasonable syntax for the
+factorial function by declaring it as "!\ ==\ func\ ...\ ".)
+.ip 4.
+Blocks.  The use of blocks to introduce declarations was illustrated above.
+Russell allows two other kinds of blocks.  The block
+.(b C
+let in <expressions> ni
+.)b
+can be abbreviated as
+.(b C
+( <expressions> ) . 
+.)b
+.ip
+The construct
+.(b C
+use <comma_separated_list_of_type_expressions> in <expressions> ni
+.)b
+tells the compiler that it should use the types given in inferring omitted
+selections in the second list of expressions.  Otherwise it is equivalent to
+.(b C
+( <expressions> ) .
+.)b
+Note that in inferring such selections
+the compiler will first try to use the types of the arguments and
+then search surrounding "use" lists inside out.  
+(As it turns out this means that "use" lists are primarily useful
+for implicit selections of constants, which have no arguments.)
+Furthermore, in abbreviated Russell,
+any user program is treated as if it were embedded in 
+the following construct:
+.(b
+.(c
+use Float in use ChStr in use Boolean in use Short in
+        user_program
+ni ni ni ni
+.)c
+.)b
+.ip 5.
+Sequence control constructs.  Loops and conditionals were described
+above.  (Conditionals can also be written in a more Pascal-like
+if-then-else form, not described here.)
+Conditionals can sometimes be abbreviated by the conditional
+and/or constructs:
+.(b
+.(c
+expression\*<1\*> cand expression\*<2\*>
+expression\*<1\*> cor expression\*<2\*>
+.)c
+.)b
+Here all expressions return Boolean values.
+Function calls in Russell always pass arguments by value,
+and thus must evaluate the arguments first.
+This is not always desirable with the Boolean functions ``and'' and ``or''.
+The ``cand'' and ``cor'' constructs are similar to ``and'' and ``or'',
+except that they are not call-by-value operations.
+(This is hinted at by the absence of [ ] around the ``arguments''.)
+The second ``argument''
+is only evaluated if necessary.  Thus e\*<1\*> cand e\*<2\*>
+is actually equivalent to
+.(b
+.(c
+if
+      \*se\*<1\*>   ==> e\*<2\*>
+#   \*aelse ==> Boolean$False[ ]
+fi
+.)c
+.)b
+.ip 6.
+Type constructions and modifications.
+These provide ways to build new types
+out of existing ones.  They are discussed below.
+.pp
+A few more remarks on the syntax of applications and
+selections are in order at this point.
+First, an expression such as [a]b$c is currently ambiguous.
+The function b could produce a type, and thus the expression 
+could be interpreted as ([a]b)$c.
+This is resolved by having
+selections bind more tightly than application.  Thus the correct 
+interpretation is [a](b$c).
+.pp
+The second problem is that the above syntax would require us to write
+the statement
+.(b C
+x := x + 1
+.)b
+as
+.(b C
+[x] := [[x] + [1]]
+.)b
+This would, at best,  be acceptable only to LISP programmers.
+Thus the actual syntax allows dropping the brackets for functions used
+as either binary infix, or as unary prefix operators.  A standard
+FORTRAN style precedence scheme is used to disambiguate the resulting
+expressions.
+It is worth noting that this scheme relies purely on the identifiers
+appearing in the expression,
+and not at all on any semantic or signature information.
+.uh "The Anatomy of a Signature"
+.pp
+As previously mentioned, each Russell expression has a signature
+associated with it.  This signature describes how the result produced 
+by that expression should, and should not, be interpreted.
+.pp
+Russell expressions always produce objects which are intended to
+be used as either simple (i.e. non-function, non-type) values, variables,
+functions, types, or signatures.  In order to distinguish between these,
+there are five different kinds of signatures, corresponding
+to the above five categories.  They are described somewhat informally below.
+.ip "Value signatures -"
+The general form of such a signature is
+.(b C
+val T
+.)b
+where T is an expression denoting a type.  Informally it indicates
+that the value produced by the corresponding expression
+should be interpreted as a value of type T.
+More formally it means only that the result 
+produced by the expression should only be interpreted by (that is
+passed as a parameter to) a function that expects an argument of
+signature val T.
+Thus one way of viewing the 
+whole issue is that the expression T is just a tag used to match
+up functions with proper arguments.
+.ip
+An alternate view is the following:
+We want to guarantee that the first-class value in question
+is passed only to functions that know how to interpret it.  An
+obvious way to do that is to keep track, in its signature, of all 
+the functions that can be applied to it.  Since usually all these functions
+are components of a type, we use the expression representing
+that type as a shorthand.  (In fact some functions not in T may also
+expect val T arguments.  These however are usually built out of the
+``primitive'' functions in T.)
+.ip
+As an example consider the following expressions, where it is assumed
+that all identifiers have the natural meanings:
+.(b 
+.(c
+a) 1 + 2
+b) (BoundedStack[Short, 10])$push[ S, 3 ]
+c) (BoundedStack[Short,5+5])$push[ S, 3 ]
+.)c
+.)b
+.ip
+(a) is a simple integer expression.  It has signature ``val Short''.
+.ip
+In (b) and (c) we assume that BoundedStack is a function which takes
+two arguments.  The first is the type of the individual elements
+to be pushed onto the stack.  The second is the maximum size of
+the stack.  Its result is the corresponding type of bounded stacks.
+We assume that everything works in an applicative fashion, so
+that the push operation returns a stack value.  The signature of
+(b) then is ``val BoundedStack[Short,10]''.  That of (c) is
+``val BoundedStack[Short,5+5]''.  
+.ip
+It should be emphasized that signatures are purely syntactic
+objects, which are determined using some simple rules described below.
+In particular nothing in the whole signature mechanism knows anything
+about the semantics of ``+''.  Thus the signatures of (b) and (c) are
+completely distinct, and the functions in ``BoundedStack[Short,5+5]''
+Cannot be used to interpret objects of signature 
+``val BoundedStack[Short,10]''.  This restriction rarely
+causes any real inconvenience.  (If we want to do any
+syntactic ``type checking'' at all, some such restriction is clearly essential.
+Semantic equivalence of Russell
+type expressions is in general undecidable.)
+.ip
+Conversely, the above interpretation requires that two syntactically identical
+type expressions should always denote the same set of functions.
+It does not make sense to say that S has signature
+``val\ BoundedStack[Short,x]'', where x is a variable; the value of x may
+change, but certainly the collection of functions used to access S should
+not.  In order to insure that this property holds, Russell
+generally enforces the
+following \fIimport rule\fP: \fINo expression with function or type
+signature may mention a non-local variable\fP.
+(As described below, the orecise rule can be somewhat more relaxed.)
+It follows from this
+that no expression may depend on (or alter) variables it does not
+explicitly mention.  Thus no function or type valued expression can
+depend on the values of variables.
+.ip "Variable signatures -"
+The general form of a variable signature is
+.(b C
+var T
+.)b
+where T is a type expression, as above.  This indicates that the result of
+the expression is a variable (or location) which can hold an object to
+be interpreted as by the functions of type T.  Usually (though
+not always) the only thing that can be done with an object of signature
+``var T'' is to pass it as an argument to ``T$:='' or ``T$V'', or to bind an
+identifier to it.
+.ip
+The most common example of an expression of signature ``var T'' (other than
+a simple variable) is
+.(b C
+T$New[ ]
+.)b
+where New is the function in T that allocates a new variable.  Another
+example is
+.(b C
+A.1
+.)b
+where A is a variable of an appropriate array type, and ``.'' is the name
+of the subscription operator in the (built-in) array type.
+It produces the location of the first element of the array.
+(Array types usually have two versions of the ``.'' operation.
+In addition to the one mentioned here, there would normally be an
+operation mapping an array \fIvalue\fP and an index into a component
+\fIvalue\fP.)
+.ip "Function signatures -"
+In order to insure that functions are passed only appropriate arguments,
+it is clearly necessary that their signature include the signatures of
+the arguments, as well as the signature of the result.
+.ip
+Function signatures may also include the names of
+the formal parameters.  Although these are not important in determining
+the correctness of a particular application, there are nevertheless
+two reasons for putting them here.  First the syntax of function
+constructions requires it. (There's nowhere else to put them.)  The
+second, more important one, should become apparent when we
+state the rule for determining the signature of an application.
+.ip
+The syntax for function signatures is
+.(b C
+func[param\*<1\*>; ... ; param\*<n\*>] result_signature
+.)b
+where each param\*<i\*> is a list of parameter names with identical signature,
+and the signature itself:
+.(b C
+id\*<1\*>, ... , id\*<m\*> : parameter_signature
+.)b
+If one of the param\*<i\*> includes only a single parameter name which
+is not otherwise used, then both it and the `:' can be omitted.
+A signature such as
+.(b C
+func[x,y: val Short] val Short
+.)b
+is considered to be identical to
+.(b C
+func[x: val Short; y: val Short] val Short
+.)b
+.ip
+Function signatures are usually written explicitly only in function headings.
+Even in this case, the result signature
+may be omitted whenever it can be easily
+determined from the body of the function.
+.ip
+Some examples of function signatures were already given above.  
+More interesting examples will be presented below in conjunction with
+type signatures.
+.ip "Type signatures -"
+If we want to specify how a type expression can be used, we need 
+two kinds of information.  First, we need to know what operations
+can be selected from it.  Second, we need to know how those operations
+themselves can be used.  Thus a type signature consists of
+operation names, and of the signatures corresponding to those names.
+The syntax is:
+.(b C
+type { op\*<1\*>; ... ; op\*<n\*> }
+.)b
+.ip
+The syntax for the individual op\*<i\*> is the same as that used for
+parameters in a function signature (except that no names can be
+omitted, and all signatures have to be either type or function signatures).
+.ip
+The simplest example is the builtin type Void.
+It has no operations as part of the type.
+.ip
+Its signature is therefore:
+.(b C
+type {}
+.)b
+.ip
+There is a built-in function Null, which has signature ``func[ ]\ val\ Void''.
+(Recall that a Void value is also produced by the do\ ...\ od loop.)
+.ip
+Now consider a type VOID which has the function Null as its only component.\**
+.(f
+\**Such a type could be declared as
+.br
+.ce 1
+VOID == Void with { Null == Null }
+.br
+It would make sense to use this as the built-in type.  The other
+alternative was chosen only so that we could write ``Null[ ]'' instead of
+of ``Void$Null[ ]''.
+.)f
+It would have signature
+.(b C
+type { Null: func [ ] val VOID }
+.)b
+.ip
+Unfortunately, this notion of a type signature won't get us very far.
+.ip
+It is frequently useful to
+build a new type which behaves like an existing one, but is never-
+theless distinct from it.  For example, we may wish to have two types,
+Meters and Feet with the same operations of addition, subtraction etc.
+By keeping them distinct we can use the signature checking mechanism
+to guarantee that we don't get the two mixed up.
+.ip
+We should be able to build both of these types by first constructing
+Meters, and then simply using the declaration:
+.(b C
+Feet == Meters
+.)b
+to get the type feet.  (Note once more that the signature mechanism is
+purely syntactic.  Thus ``val Feet'' and ``val Meters'' are still distinct
+signatures, and we can thus achieve the desired protection.  In fact,
+this is probably too much protection.  In reality, we would want to 
+introduce some conversion functions at some point.  Again the
+signature checking mechanism can assure that these are used exactly
+where they are appropriate.)
+.ip
+To illustrate what goes wrong in a simple context, let's try the analogous
+exercise with the type VOID.  We use the declaration
+.(b C
+VOID2 == VOID
+.)b
+to get a second type with identical characteristics.  Certainly its signature
+has to be the same as that of Void, namely
+.(b C
+type { Null : func [ ] val VOID }
+.)b
+But what we wanted was
+.(b C
+type { Null : func [ ] val \fIVOID2\fR }
+.)b
+.ip
+The problem is that Null should return
+value of whatever type it is a component of, not the specific type
+VOID.  Therefore we need to give this type a name in the signature.  Such
+a local type name is written immediately after the `type' keyword
+in the signature.  Thus a more appropriate signature for VOID\** would be
+.(b C
+type V { Null : func [ ] val V }
+.)b
+Now the construction of VOID2 works properly.
+.(f
+\**This version of VOID is harder to obtain.  It might be declared as
+.br
+.ce 1
+VOID = extend { Void } with V { Null == func[ ] { V$In[Null] } } export{ Null }
+.br
+These constructs are discussed below.
+.)f
+.ip
+We conclude with two more examples.  The built-in type Short will
+serve as the first.  Its signature is:
+.(b
+.(c
+type S {
+	New; :=; V; < ; > ; = ; <=; >=; <>;
+	'0'; '1'; '2'; '3'; '4'; '5'; '6'; '7'; '8'; '9';
+	- : func [ val S ] val S ;
+	+, -, *, /, **, %, ^+ : func [ x,y : val S ] val S;
+	+=, -= : func [var S; val S] val S;
+	get: func [var Void] val S;
+	put: func [val S] val S;
+	puts:   func [val S] val ChStr;
+	shift : func [what, how_much: val S] val S;
+	New: func [ ] var S;
+	New: func [ val S ] var S;
+}
+.)c
+.)b
+.ip
+(The function ``get'' returns an integer read from the standard
+input file, ``put'' prints an integer, and ``puts'' converts an
+integer to its decimal character string representation.
+The second ``New'' function initializes the freshly created variable.)
+.ip
+The above makes use of yet another form of abbreviation.  Operation
+names such as ``V'' tend to occur in many types with the same signature.
+They therefore
+have default signatures associated with them which can be omitted from
+a type signature.  Such names and the associated signatures are given
+in appendix 2.
+.ip
+As a final illustration, the following is a possible signature of the
+BoundedStack function used above:
+.(b
+.(c
+func [ T : type { New; V; := }; val Short ]
+	type S {
+		push : func [ val S; val T ] val S;
+		top  : func [ val S ] val T;
+		pop  : func [ val S ] val S;
+		empty: func [ ] val S
+	}
+.)c
+.)b
+.ip
+The signature indicates that the BoundedStack function expects
+an integer and a type argument.  The type argument used must include
+the functions New, V, and :=.  
+.ip
+The signature checking rules
+described below allow the actual type argument to have additional
+components as well.  Thus the builtin Short type would be an
+acceptable argument.  In fact if we were willing to be slightly
+clever about the implementation of the BoundedStack function
+we would not even have to require that the parameter include
+the three functions specified.  The parameter signature would then be given
+simply as
+.(b C
+type {}
+.)b
+and any type whatsoever could be passed to it.  (If the three operations
+are provided then an array implementation could be used.)
+.ip "The signature ``signature'' -"
+Signatures themselves may appear as expressions.  Such expressions
+do not compute interesting values.  (Since there are no interesting
+operations that are applicable to signatures, there is not much we
+can do with such a value in any case.)  Being able to write
+signatures in expression contexts does however allow us to
+write functions that operate uniformly on values, variables, functions,
+and types.  This will be illustrated below.
+It also allows us to give names
+to long signatures so that they don't need to be repeated.
+For example, We could write
+.(b
+.(c
+let
+    \*ss === val Short;
+    \*afact == func[n: s] { ... }
+in ...
+.)c
+.)b
+We use ``==='' instead of ``=='' to indicate that ``s'' and ``val Short''
+should be considered to be completely identical, even for
+purposes of checking signature correctness.
+.uh "The Signature Calculus"
+.pp
+The Russell type checking system can be described by a pair of rules for
+each language construct.  The first rule gives constraints on the
+signatures of the subexpressions.  These constraints must be satisfied
+for the expression to be signature correct.
+The second gives the signature of the construct itself.
+.pp
+Signature constraints usually require that two or more signatures be
+``the same''.  This means that they should be syntactically identical,
+with the following exceptions\**:
+.(f
+\**The present compiler allows some other minor differences, such as reordered
+guards in conditionals.  We list only those that are likely to be of interest.
+.)f
+.ip 1.
+Parameter names and local type identifiers may differ, provided they
+are uniformly renamed.
+.ip 2.
+Type signatures may list components in different order.  (The components
+must, however, have the same names.)
+.ip 3.
+Parameters with identical signatures may, or may not, be grouped together.
+.ip 4.
+The left side of a ``==='' declaration is viewed as an abbreviation for
+the right side.
+.pp
+As we pointed out earlier, type expressions may not depend on the values
+of variables.  Thus, if two signatures are the same,  then all type
+expressions they contain must actually denote the same types.
+.pp
+As an example of the general approach, consider a function construction
+such as
+.(b
+.(c
+func [x: val Short] val Short {
+     if  x\s-2%\s+22 = 0 ==> x/2   #   else ==> 3*x+1  fi
+}
+.)c
+.)b
+(``x\s-2%\s+22'' yields the remainder of dividing x by 2.)  A large number of
+constraints
+needs to be checked to insure that this is signature correct.
+We will elaborate on a few of them.
+.pp
+The checking rule for the conditional requires that all clauses
+have the same signature,\**
+.(f
+\**This constraint is not enforced when the value of the conditional
+is immediately discarded.  Specifically, if x, y, and z are ``Short''
+variables then
+.br
+.ce 1
+if x > 0 ==> y := x # else ==> put["error\en"] fi; z := y; ...
+.br
+is signature correct, in spite of the fact that the first clause of the
+conditional has signature ``val Short'', and the second has signature
+``val ChStr''.  A similar situation occurs if the conditional is the body
+of a function with val Void signature.
+.)f
+In our example this is satisfied since
+``x/2'' and ``3*x+1'' both have signature ``val Short'' (for reasons
+discussed below).  The checking rule also requires
+all guards to have signature ``val Boolean''.
+The guard ``x\s-2%2\s+2\ =\ 0'' satisfies this constraint.  The second guard
+abbreviates ``not\ x\s-2%\s+22\ =\ 0'' and thus also has
+the appropriate signature.
+.pp
+The signature of the conditional itself is that of the arms.
+In our example, the conditional, and thus the body of the function,
+has signature ``val Short''.
+.pp
+Similar rules exist for function constructions.  We require that the
+specified result signature (if any) match the signature of the body.
+The signature of the construction is that specified by the heading
+(with the possible addition of an inferred result signature).
+Thus the above function construction has signature
+.(b C
+func [x: val Short] val Short
+.)b
+which may be abbreviated to
+.(b C
+func [val Short] val Short
+.)b
+since the parameter name is not significant for signature checking.
+.pp
+Signature calculus rules for the other language constructs are given
+in [Boe\ 85].  Only two of them are
+non-obvious,
+and they are described below.  We first examine function applications.
+.pp
+Given our examples so far, an obvious set of rules for function
+applications would be:
+.ip (1)
+The parameter signatures in the function signature must be the same as
+the signatures of the corresponding argument subexpressions.
+.ip (2)
+The signature of the function application is the result signature of the
+function.
+.pp
+Unfortunately, this is no longer adequate, once we start taking advantage
+of the Russell type structure.  As a simple example, consider writing
+an identity function.  A first attempt might be:
+.(b C
+identity == func [x: ?] ? { x }
+.)b
+Clearly, it should be possible to apply this function to any simple
+value, any function, any type, or any variable.
+Substituting,
+say, ``val Short'' for ``?'' would restrict it to one argument signature,
+and is thus
+not acceptable.  This situation is dealt with in
+Russell by passing the signature associated with the argument as another
+argument.  Thus we would rewrite the identity function as
+.(b C
+identity == func [x: S; S: signature] S
+.)b
+.pp
+Alternatively, if we wanted to restrict the function to only simple
+values, we could write it as
+.(b C
+identity2 == func [x:\ val T; T:\ type {}] val\ T
+.)b
+This was necessary in earlier versions of the language.
+.pp
+If we wanted to apply the identity function to the (short) integer 13,
+we would write
+.(b C
+identity[13, val Short]
+.)b
+which can be abbreviated as\**
+.(f
+\**Trailing arguments may be omitted if they can be inferred from the
+explicit ones.
+.)f
+.(b C
+identity[13]
+.)b
+This application is not signature correct by rule (1) above.  First, ``13''
+has signature ``val\ Short'', and not ``S''.  Clearly, the
+parameter signature ``S'' is intended to denote the second parameter, and
+should not be used literally in the comparison.  Thus the checking
+rule needs to be adapted to read:
+.ip (1)
+The signatures of the argument subexpressions must match the
+parameter signatures, \fIafter any parameter names in the parameter
+signatures have been replaced by the corresponding actual argument\fP.
+.pp
+Thus we first replace the ``S'' in the signature of ``x'' by ``Short'',
+and then check
+that the resulting parameter signature matches the signature of ``13''.
+.pp
+In the case of ``identity2'', we would write the function call as
+``identity2[13,\ Short''].
+Here
+another problem occurs when we check that the argument ``Short'' matches
+the second parameter signature.  The type ``Short'' contains a large
+number of operations, but the parameter signature calls for none.
+This should not matter; the signature ``type{}'' was intended
+to indicate that we did not require any operations from the type
+``T''.  Thus the word ``match'' in our revised rule should be interpreted to
+mean that the two signatures are either the same, or they are both type
+signatures, and the argument signature contains a superset of the
+operations in the parameter signature.  Any type signature ``matches''
+the signature ``type{}''.
+.pp
+Finally, rule (2) needs to be updated to correspond to the revised
+checking rule.  The application ``identity[13,\ val Short]'' should have
+signature ``val\ Short'', rather than ``S''.  Thus we write
+.ip (2)
+The signature of the function application is the result signature of the
+function \fIwith parameter names replaced by actual arguments\fP.
+.pp
+A situation similar to that occurring for applications occurs for
+selections of an operation from a type.  The ``+'' component of the
+type ``Short'' has signature
+.(b C
+func [val S; val S] val S
+.)b
+where S is the local type identifier.
+But the signature of ``Short$+'' should be
+.(b C
+func [val Short; val Short] val Short
+.)b
+(In particular, we need to insure that ``1\ +\ 2'' has signature ``val\ Short'',
+and not ``val\ S''.)  Thus the signature of a selection is the signature of
+the component, \fIwith the local type identifier replaced by the type
+expression preceding the $-sign\fP.
+.uh "The question of purity"
+.pp
+As was pointed out above, we require that two syntactically
+identical type expressions appearing inside signatures refer to
+the same type value.  The signature ``val T'' implies that
+operations from the type ``T'' are applicable.  But this only
+make sense if the type expressions ``T'' evaluates to a well-defined
+type value.
+.pp
+This requires that a type expression may not depend on the value
+of a variable.
+In the original version of the language [Boe\ 80], this was enforced
+by requiring that neither type valued expressions nor function valued
+expressions (which could, after all, be called from type valued
+expressions) may mention variables.
+.pp
+Unfortunately, the restriction that functions be ``pure'', i.e.
+not mention variables, has proved to be impractical.
+It forbids functions that update debugging or profiling information.
+More importantly, it prevents functions from ``remembering'' values
+that it previously computed to reduce the running time of subsequent calls.
+.pp
+In order to avoid these problems, we optionally allow a more liberal
+restriction on functions.  (This is invoked with the -L option to
+the compiler.)
+.pp
+This is based on the introduction of a variable
+(called FS for historical reasons) that represents the entire
+state of the machine and its file system.  It has signature
+``var Void''.  There are no operations that allocate Void variables,
+so this is the only such variable available.  (The use of the Void
+type is rather arbitrary.  A new and different type could have been
+introduced instead.)
+.pp
+A function that has access to a var Void variable, that is a function
+that was passed a var Void variable as a parameter, has access to the
+entire machine state, and thus may access global variables.
+(We currently insist that the var Void parameter be the last
+parameter of the function.)  Such functions are known as ``impure''
+functions.
+This scheme still insures that type valued expressions always produce
+the same value, since a type expression may not mention the variable
+FS, and there is no possibility of allocating a local variable with
+``var Void'' signature.
+.pp
+This scheme is made syntactically much more pleasant by the following
+two conveniences:
+.ne 4
+.ip 1.
+The entire user program is implicitly surrounded by
+.(b
+.(c
+let impure === var Void in ... ni
+.)c
+.)b
+.ip 2.
+Arguments with var Void signatures may be omitted.
+They are automatically inferred to be the trailing var Void argument
+of the innermost surrounding function (or FS at the outer level).
+.pp
+The first point allows reasonable syntax for impure functions.
+A ``function'' that increments the global variable ``x'' by a value ``y''
+passed as a parameter can be written as
+.(b C
+func[ y : val Short; impure] { x += y }
+.)b
+.pp
+The second point assures that it is essentially never necessary to
+explicitly pass FS to an impure function; calls to impure functions
+look like calls to pure functions.
+.uh "Building Types"
+.pp
+Much of Russell is devoted to the creation and manipulation of types.
+This is what gives the language most of its flexibility.
+Rather than discussing the necessary facilities in detail, we give
+an overview of what's available, and defer to [Boe\ 85]
+for the details.
+.lp
+Types in Russell are obtained:
+.ip 1)
+as built-in types,
+.ip 2)
+by applying built-in type-producing functions,
+.ip 3)
+through the use of type constructors provided by the language, or
+.ip 4)
+by modifying some existing type.
+.sp
+.pp
+The built-in types provided by the current implementation are:
+.ip Void 12
+Provides no operations.  Void values are used where the
+value of an expression is not of interest.
+.ip Boolean 12
+Provides standard Boolean (logical) operations.
+.ip Short 12
+Provides 16 bit integer operations.
+.ip Float 12
+Provides (64 bit) floating point operations.
+.ip Long 12
+Provides operations on integers of size limited only by machine memory
+constraints.
+.lp
+Built-in type producing functions are:
+.ip Array 12
+Requires a (``Short'') size, and an element type as arguments.
+The result is a type containing operations to access arrays of the
+given size and element type.  A two-dimensional array of 100 by 100 floating
+point numbers might be declared as:
+.(b
+.(c
+matrix == Array[100, Array[100, Float]];
+A == matrix$New[ ];
+.)c
+.)b
+The element A\*<i,j\*> can then be referenced as:
+.(b C
+A.i.j
+.)b
+.ip List 12
+Provides operations on linear lists containing elements of the specified
+argument type.  Operator syntax is chosen so that it is relatively
+easy to build functions on a variable number of arguments by writing them
+as functions on lists
+.ip LList 12
+Similar to List except that an efficient ``lazy'' cons operation,
+i.e. one that
+defers evaluation of its second argument, is provided.
+.ip Ref 12
+Provides operations on ``references'' or ``pointers''.
+.sp
+.lp
+The following type constructions are provided.  Note that the above types
+and functions are simply predeclared identifiers, and are not otherwise
+special.  Type constructions, on the other hand, are really language
+primitives, with associated syntax.
+.ip prod 12
+Provides Cartesian product operations, that is, functions to manipulate
+tuples of objects.  in particular, the resulting type includes
+a function ``Mk'' to build a tuple,
+functions to select a component of a tuple, and ``New'', ``:='', and ``V''
+functions to manipulate product variables.
+For example,
+.(b C
+prod { i: val Short; x: val Float }
+.)b
+contains operations on pairs, the first of which represents an integer,
+and the second of which represents a floating point number.  These
+would include ``Mk'' to build a pair, ``i'' to obtain the first component,
+and ``x'' to obtain the second component.  They would have signatures
+.(b
+.(c
+func [val Short; val Float] val t
+func [val t] val Short
+func [val t] val Float
+.)c
+.)b
+where t is the local type name.
+.ip " " 12
+The signature of one component may depend on another component.
+We may build a product such as:
+.(b C
+prod { x: val T; T: type { ... } }
+.)b
+Values corresponding to such a type are, in a sense, self-describing.
+They contain both a value (``x'') and information about how to interpret
+it (``T'').  Objects in the sense of ``object-oriented programming''
+can be built in this manner.
+.ip " " 12
+Since the result of an expression with product type can be assigned
+to a variable, and a product may have function or type components,
+product types may also be used simply to convert between functions
+and assignable objects.
+.ip " " 12
+As an example, the function ``fact'' defined
+earlier cannot be directly assigned to a variable. \**
+.(f
+\**It can be argued convincingly that both this, and the distinction
+between ``Ref'' and ``var'' should and could have been avoided
+by changing the design of the signature calculus.  We agree,
+and we may eventually make the necessary changes.
+.)f
+assignment operations provided by the language require the second
+subexpression to have ``val'', and not ``func'' signature.)
+On the other hand, if we let T be
+.(b C
+prod { x: func [val Short] val Short }
+.)b
+then T$Mk builds a product with one field, that is, it has signature
+.(b C
+func [func [val Short] val Short] val T
+.)b
+Thus ``T$Mk[fact]'' has signature ``val\ T'', and can thus be assigned
+to a ``var\ T'' variable (using the assignment operation provided by the
+product).  The ``T$x'' operation can be used to convert back.
+.ip union 12
+Informally, a union construction is similar to a product construction,
+except that an object of the type contains only one of the kinds
+of objects specified, rather than all of them at once.
+In the Russell view, a union type contains operations to convert
+back and forth between the union type, and a number of other types.
+.ip " " 12
+The names of these operations are built by adding standard prefixes
+to the component names specified in the union construction.
+Thus if T is defined
+as
+.(b C
+T == union { i: val Short; x: val Float }
+.)b
+then T will contain operations to convert between ``val Short'' (the
+signature of the ``i'' field) and the union type, as well as between
+``val Float'' and the union type.
+More precisely, ``T$from_i'' will convert from ``val\ Short'' to ``val\ T'',
+``T$to_i'' will convert in the other direction, ``T$is_x'' will test
+whether a ``val T'' expression actually represents a ``val Short'',
+and thus whether ``T$to_i'' may be safely applied.
+Analogous functions will be included for the ``x'' component.
+.ip " " 12
+It is allowable to give the union (or a product)
+a local name to facilitate recursion.
+For example:
+.(b
+.(c
+union U { \*send: val Void;
+          \*aother: val prod { first: val Short; rest: val U } }
+.)c
+.)b
+operates on elements which are either ``Null'' or consist of an integer
+and another similar element.  Thus such an object is effectively a
+list of integers.
+.ip record 12
+This is similar to the ``prod'' construction,
+except that all fields must have ``val'' signature,
+and that individual fields of ``record'' variables may be assigned to.
+.ip enum 12
+Builds enumeration types (scalar type in Pascal
+terminology).
+.ip extend 12
+Creates a copy of an existing type with conversion operations between
+the new and old types.
+.sp
+.lp
+Russell types may be modified with the following language
+constructs:
+.ip with 12
+Adds operations to, or replaces operations in, an existing type.
+The syntax is
+.(b C
+old_type_expression with local_type_name { new_operation_declarations }
+.)b
+New operations may refer to old ones (or to themselves) by selecting
+from the local type name.
+.ip export 12
+Remove any unmentioned operations from an existing type.
+.ip hide 12
+Remove the specified operations from an existing type.
+.uh "Separate Compilation"
+.pp
+Russell provides for a rather simple-minded, but effective,
+separate compilation facility.  Any function that refers only
+to built-in identifiers (and parameters to the function)
+may be placed in a separate file and compiled by itself.
+The function in file ``filename.r'' can be referenced in other
+files with the expression:
+.(b C
+extern { "filename" }
+.)b
+.pp
+Typically separately compiled functions will produce types.
+For example, stacks could be implemented by placing the following
+Russell program in a file ``stack.r'':
+.(b
+.(c
+func [element_type: type{}] {
+    (List [element_type]) with stack {
+	empty == stack$nil;
+	top == stack$head;
+	pop == stack$tail;
+	push == func [S: val stack; x: val element_type] { cons[x,S] };
+    } export { New; :=; V; top; pop; push }
+}
+.)c
+.)b
+The body of this function takes the built-in type producing function
+``List'' and applies it to the type of stack elements (the parameter
+to the stack implementation).  The ``with'' construct is then used
+to add operations appropriate for stacks.  Finally the ``export''
+clause removes all operations from the resulting type except those
+that are appropriate to stacks.  (For example, the ``cons'', ``head'' and
+``tail'' operations from the original list type are removed.  But the
+original assignment operation is preserved, since it applies equally
+well to stacks.)
+.pp
+The above implementation, once compiled, can be referenced from
+a main program using, for example,
+.(b
+.(c
+let
+    stack == extern { "stack" };
+in ...  (stack[Short])$push ... ni
+.)c
+.)b
+.pp
+Compilation of the main program will examine information produced by
+the compilation of ``stack.r'' in order to check signature correctness
+of the main program (and to produce better code for it).
+.pp
+We require that subsidiary functions be compiled before those functions
+that reference them.  This restriction can be effectively circumvented
+(sometimes at the cost of some execution efficiency) by parametrizing
+different program sections with respect to all other units they reference.
+For example, we could rewrite the above main program (in file ``main.r'') as
+.(b
+.(c
+func [ stack: func [ t: type{ } ] type s {New; := ; V; empty: func [ ] val s; ...} ] {
+     ...  (stack[Short])$push ...
+}
+.)c
+.)b
+It is now possible to compile it without first compiling the stack program.
+We do need to subsequently compile a main program that specifies how
+to assemble the various program pieces.  In this case, it would read simply
+.(b C
+extern {``main''} [ extern { ``stack''} ]
+.)b
+.uh "Examples"
+.pp
+We conclude with some more examples.
+.ip 1.
+The following is the factorial function we saw before, modified to compute
+results of essentially unbounded size, and embedded in
+enough context to turn it into a complete program:
+.(b
+.(c
+let
+    ! == func [ n : val Short ]
+                {  
+                    if 
+                          \*sn > 0 ==> Long$In[n] * ((n - 1)!)
+                    #     \*an = 0 ==> Long$1
+                    fi
+                 };
+    x == Short$New[ ];
+in
+    do
+        (put["Factorial of?"]; x := get[FS]) >= 0  ==>  put[x!]; put["\en"]
+    od
+ni
+.)c
+.)b
+The program will calculate factorials until it is given a negative input.
+Note that the do ... od construct in Russell can be used to simulate
+a number of other loop constructs, including a repeat ... until loop,
+by moving more of the loop body into the guard.\**
+.(f
+\**Dijkstra's original construct does not allow side effects in guards.
+Thus this comment does not apply to his language.
+.)f
+.ip 2.
+This, and the following example, illustrate the use of functions
+as objects to be manipulated by the program.
+.ip
+Certain operations are naturally viewed as mapping functions to
+functions.  Many programming languages force us to modify this
+view, and to recast them in a different framework.
+Russell allows them to be represented directly.
+.ip
+Here we look at (a naive view of) numerical differentiation.
+We give a function ``derivative'' which returns an approximation to the
+derivative of a given function.  We illustrate its use
+by embedding it in a program which uses it to multiply 13 by 2,
+the hard way:
+.(b
+.(c
+let
+    epsilon == 0.0001;
+    derivative == \*sfunc [f: func[val Float]val Float] {
+                  \*a    func[x: val Float] val Float {
+                  \*a        (f[x] - f[x - epsilon])/epsilon
+                  \*a    }
+                  \*a};
+.)c
+.)b
+.(b
+.(c
+    square == func[x: val Float] {x * x};
+    double == derivative[square]
+in
+    put[double[13.0]]; put["\en"];
+ni
+.)c
+.)b
+.ip 3.
+The last illustration is an unusual implementation of binary trees.
+The following is a function which expects a type describing values
+stored at leaves as an
+argument, and produces a corresponding binary tree type as its result.
+The result type contains functions to obtain the left or right
+subtree of a given tree, to obtain the value stored at a leaf,
+to build a leaf containing a given value, to combine two subtrees
+into a new tree, and to inquire whether a tree consists solely of
+a leaf.  (The latter is provided directly by the union
+construction and is not explicitly implemented.)
+.ip
+A non-leaf tree could be represented as an explicit product or record type.
+We instead use a function which maps {left,\ right} to the left and
+right subtrees:
+.(b
+.(c
+func [L: type {}] {
+    let
+        lr == enum { left, right };
+    in use lr in
+        union B { leaf: val L; interior: func [val lr] val B }
+        with B {
+             left_sub_tree == \*sfunc [x: val B] {
+                              \*a  B$to_interior[x][left]
+                              \*a};
+             right_sub_tree == \*sfunc [x: val B] {
+                               \*a  B$to_interior[x][right]
+                               \*a};
+             leaf_value == B$to_leaf;
+             make_leaf == B$from_leaf;
+             make_tree == \*sfunc [l,r: val B] val B {
+                          \*a  B$from_interior [
+                          \*a      func [x: val lr] {
+                          \*a          if
+                          \*a                x = left  ==> l
+                          \*a          #   x = right ==> r
+                          \*a          fi
+                          \*a      }
+                          \*a  ]
+                          \*a}
+        }
+        export { \*sNew; :=; V; left_sub_tree; right_sub_tree; leaf_value;
+                 \*amake_leaf; is_leaf; make_tree }
+    ni ni
+}
+.)c
+.)b
+.uh "Acknowledgement"
+.pp
+We would like to thank Hausi Muller for his constructive criticism of
+an earlier draft of this paper.
+.uh References
+.ip "[Boe 80]" 12
+Boehm, H., A. Demers, and J. Donahue, ``An Informal Description of Russell''.
+Technical Report 80-430, Computer Science Department, Cornell University, 1980.
+.ip "[Boe 84]" 12
+Boehm, H., \fIA Logic for the Russell Programming Language\fP, Thesis,
+Cornell University, 1984.
+.ip "[Boe 85]" 12
+Boehm, H., Russell on-line ``rhelp'' facility.  Distributed with the Russell
+Compiler.  (A version of this paper is available as ``rhelp intro''.)
+.ip "[Boe 86]" 12
+Boehm, Hans-J., and Alan Demers,
+``Implementing Russell'', Proceedings of the SIGPLAN '86 Symposium
+on Compiler Construction, SIGPLAN Notices 21, 7, July 1986, pp. 186-195.
+.ip "[Dem 79]" 12
+Demers, A., and J. Donahue, ``Data Types are Values'', Department of Computer
+Science, Cornell University, Technical Report TR79-393, 1979.
+.ip "[Dem 80a]" 12
+Demers, A. and J. Donahue, ``Data Types, Parameters, and Type-Checking''.
+Proceedings, Seventh Annual Principles of Programming Languages
+Symposium, 1980, pp. 12-23.
+.ip "[Dem 80b]" 12
+Demers, A. and J. Donahue, ``Type-Completeness as a Language Principle''.
+Proceedings, Seventh Annual Principles of Programming Languages
+Symposium, 1980, pp. 234-244.
+.ip "[Dem 80c]" 12
+Demers, A. and J. Donahue, ``The Semantics of Russell: An Exercise in
+Abstract Data Types''.  Technical Report 80-431, Computer Science Department,
+Cornell University, 1980.
+.ip "[Dem 83]" 12
+Demers, A. and J. Donahue, ``Making variables abstract: an equational theory
+for Russell''. Proceedings, Tenth Annual Principles of Programming
+Languages Symposium, 1983.
+.ip "[Don 85]" 12
+Donahue, J., and A. Demers, ``Data Types are Values'', ACM Transactions
+on Programming Languages and Systems 7, 3 (July 1985), pp. 426-445.
+.ip "[Dij 76]" 12
+Dijkstra, E., \fIA Discipline of Programming\fR.  Prentice-Hall, 1976.
+.ip "[Hoo 84]" 12
+Hook, Jim, ``Understanding Russell - A First Attempt'', Semantics of Data Types,
+Proceedings, Springer Lecture Notes in Computer Science 173, 1984, pp. 69-86.
+.ip "[Sto 77]" 12
+Stoy, J., \fIDenotational Semantics: The Scott-Strachey Approach to
+Programming Language Theory\fR.  MIT press, 1977. See esp. chapter 7.
+.uh "Appendix 1 - Background"
+.pp
+The language Russell was developed at Cornell, primarily by the latter
+two authors.
+The concepts involved
+are are discussed more fully in [Dem\ 79], [Dem\ 80a],
+[Dem\ 80b], and [Don\ 85].
+.pp
+The purpose of the language design is to test the practicality of
+the type system in the context of a very small language
+(at least as measured by number of grammar productions).
+As a result, no attempt was made to address certain issues,
+notably that of concurrency.\**
+.(f
+\**It seems possible to graft a notion of concurrency onto the implemented
+language
+in a very inelegant fashion.  Later designs can deal with the
+issue more easily, though the proposed formal semantics generally
+do not.
+.)f
+.pp
+We described the implemented version of the language.
+The implementation differs form the language of [Boe\ 80] primarily 
+in that it corrects some problems with the signature calculus,  adds
+the ``prod'' type construction in place of the more restrictive ``image''
+construct, revises the semantics of ``extend'' and ``record'' for the sake of
+efficiency, provides explicit constructs to support separate compilation,
+and provides a different collection of built-in types and
+operations (which now includes ``Call/cc'').
+Unfortunately it does not incorporate a number of more
+recently proposed design changes, such as
+Algol 68 style ``ref'' types, and an
+explicit notion of ``purity'' in the signature calculus.  It also
+has not been brought into conformity with the ideas in [Hoo\ 84].
+.pp
+A number of language descriptions more formal than [Boe\ 80] have
+also been published.  [Dem\ 80c] gives a denotational/operational
+definition, using a Russell subset as the meta-language.
+[Dem\ 83] gives a purely equational definition of much of the language.
+[Boe\ 84] performs the same task in an axiomatic framework.
+[Hoo\ 84] provides a more mathematical
+interpretation of the type structure of the language.
+.pp
+Currently implementations exist for Sun 3 and Vax machines.
+The Vax implementation is described in [Boe\ 86].
+For details on obtaining a copy, please send mail to boehm@rice.edu.
+.uh "Appendix 2 - Abbreviations"
+.pp
+The following kinds of abbreviations are allowed by the current implementation
+in at least some contexts.
+.ip 1.
+Selections from a type T can usually be omitted if any of the arguments
+has signature ``val T'' or ``var T''.
+It is also possible to specify a list of
+``default'' types for selections.
+Types such as ``Short'' normally appear on this
+list.
+.ip 2.
+Applications of V functions can usually be omitted.
+.ip 3.
+Square brackets ``[ ]'' denoting function application with no arguments
+can be omitted if there presence can be inferred from signature information.
+.ip 4.
+Trailing arguments to function applications can usually be omitted if their
+identity can be determined from the remaining arguments, if their
+signature is var Void, or if the function is named ``.'', and the application
+``looks like a floating point constant''.
+.ip 5.
+Function result signature can be omitted if they can be ascertained
+from the body of the function construction.
+.ip 6.
+Application brackets can be omitted if they can be reconstructed from the
+precedences described above.
+.ip 7.
+Strings may be used to abbreviate certain kinds of repeated concatenations,
+as described above.
+.ip 8.
+Type components with certain names have associated default signatures.
+If such components have the indicated signature, then the signature
+specification may be omitted from a type signature.  The following
+is a complete list of such names:
+.(b
+.(c
+Identifier\h'3i'\*sDefault Signature
+
+New                         \*afunc [ ] var T
+:=                          \*afunc [ var T; val T ] val T
+=, <, >, <=, >=, <>         \*afunc [ x, y: val T ] val Boolean
+^+, ^*                      \*afunc [ x, y: val T ] val T
+V                           \*afunc [ var T ] val T
+any quoted identifier       \*afunc [ ] val T
+.)c
+.)b
+.ip
+In all of the above, T represents the local type name.  If none is explicitly
+specified it is generated by the compiler.
+.pp
+Selection types and omitted arguments are inferred
+primarily in a ``bottom-up'' manner.  That is arguments to function
+applications are used to infer selections of the function and to infer
+missing arguments for the application.
+The context in which the application appears is not used.
+.pp
+This means that selections of functions from types other than the
+type sof their arguments frequently need to be specified in some
+explicit manner.  In particular, the compiler is very poor at choosing
+types from which to select constants and ``prod'' ``Mk'' functions.
+The ``use <type list> in <expr> ni'' construct can be used to
+suggest types from which to infer such selections.
+.uh "Appendix 3 - Available On-line Help"
+.pp
+The following help files are available through the ``rhelp'' facility.
+A few of them are actually duplicates of each other.
+A number of topics are not even touched on in this introduction.
+Thus this list should also be useful in providing an overview
+of omissions from this document.
+.ip abort 15
+Function to ungracefully terminate execution.
+.ip alias 15
+Function to test whether two variables refer to the same location.
+.ip applications 15
+Function calls.
+.ip argc,\ argv 15
+Access command line arguments.
+.ip Array 15
+Function for constructing array types.
+.ip bignums,Long 15
+Unlimited size integers.
+.ip Boolean 15
+Built-in type.
+.ip Callcc 15
+Capture the current continuation associated with a computation.
+Can be used to implement exception handling, coroutines, etc.
+.ip cand 15
+Partial evaluation ``and''.
+.ip ChStr 15
+Built-in character string type.
+.ip coercions, 15
+.ip inference 15
+Acceptable abbreviations.
+.ip compiling 15
+How to invoke the compiler.
+.ip conditional,\ if 15
+Russell conditionals.
+.ip cor 15
+Partial evaluation ``or''.
+.ip declarations,\ let 15
+Blocks and declarations.
+.ip do,\ loops 15
+The Russell loop construct.
+.ip enum 15
+Enumeration type constructor.
+.ip eof 15
+Test for end of file on the standard input.
+.ip expand_hp 15
+Explicitly increase heap size.
+.ip export,\ hide 15
+Removing components from types.
+.ip expressions, 15
+.ip precedence 15
+Types of expressions and how they're parsed
+.ip extend 15
+Building new types with conversion functions
+.ip extern 15
+Access separately compiled Russell and non-Russell programs
+.ip File 15
+File I/O.
+.ip Float 15
+Built-in double precision floating point data type.
+.ip FS 15
+The ``machine state'' variable.
+.ip func 15
+Function constructions.
+.ip general 15
+How to get started;  also printed if no arguments are given.
+.ip hints,\ problems 15
+Common problems.
+.ip identifiers 15
+Lexical rules.
+.ip import_rule 15
+Restriction on the use of global variables in functions.
+.ip integer,\ Short 15
+The built-in 16 bit integer data type
+.ip intro 15
+A copy of this introduction.
+.ip limits 15
+Limits imposed by the compiler.
+.ip List 15
+Function for producing linear list types.
+.ip Null 15
+Val Void constant.
+.ip pointers,\ Ref 15
+Function for producing pointer types.
+.ip prod 15
+Product type constructor.
+.ip record 15
+Record type constructor.
+.ip selections 15
+Accessing a component of a type.
+.ip Signal 15
+An unusual interface to UNIX (trademark AT&T Bell Labs) signals.
+.ip signatures 15
+Brief description and syntax.
+.ip strings 15
+The unorthodox treatment of character strings and numeric constants.
+.ip trace 15
+Some simple debugging facilities.
+.ip union 15
+The type constructor.
+.ip Void 15
+The built-in type.
+.ip with 15
+Adding operations to types.

@@ -1,0 +1,10 @@
+The function eof tests whether end of input has been read on the standard
+input file.  Its signature is
+
+    eof: func[var Void] val Boolean
+
+Note: Currently all builtin I/O accesses standard input and standard
+output.  It is possible to access C library functions for more
+complicated operations.
+
+See also: Void, extern

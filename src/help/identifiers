@@ -1,0 +1,21 @@
+Russell identifiers must consist of one of the following:
+ 
+        1) an alphabetic character followed by 0 or more alphabetic
+           characters and digits.  "_" is an alphabetic character.
+
+        2) 0 or more characters (including \n, \t, \r, \') enclosed in
+           single quotes.
+
+        3) A sequence of one or more operator characters.  These are
+                ! % & * + - . / : < = > ? @ \ ^ ` | ~
+
+Any identifier occurring as an expression may optionally be followed
+by
+
+        << signature >>
+
+to explicitly indicate which, of a number of overloaded instances
+of the identifier, was intended.
+
+
+

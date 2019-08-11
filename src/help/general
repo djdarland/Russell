@@ -1,0 +1,10 @@
+Russell programs are compiled using the command "rc filename.r".  The
+resulting program can be run by typing "a.out". For more details try
+"rhelp compiling".  For an introduction to Russell type "rhelp intro".
+
+Help on other topics and language constructs can be obtained through
+"rhelp topic_name".  You might try "rhelp hints".
+
+All available help files mentioning a keyword can be obtained by typing
+"rhelp -k keyword".
+

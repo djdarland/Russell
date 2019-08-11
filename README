@@ -1,0 +1,99 @@
+Copyright 1986-1989 Hans-Juergen Boehm, Alan J. Demers, Kumar Srikantan,
+Vernon Lee, and Lucy Hederman.
+Copyright Digital Equipment Corporation & INRIA 1988, 1989.
+Copyright (c) 1990-1993 by Xerox Corporation.  All rights reserved.
+
+This material is provided as is, with no warranty expressed or implied.
+Any use is at your own risk.
+
+Permission is hereby granted to copy this compiler for any non-commercial
+purpose, provided the above notices are retained on all copies.  Further
+restrictions apply to the DEC/INRIA BigNum package.  These are stated in
+the file runtime/BigNum/doc/bnbody.tex.
+
+This work uses the BigNum package developed jointly by INRIA and
+Digital PRL.  It has been modified by Hans-J. Boehm in August 1990
+and February 1993 at Xerox PARC.  When you receive this software,
+please send mail to librarian@prl.dec.com to inform them that you
+have a copy of the package.
+
+----------------------------------
+
+This is V3.3 of the Russell compiler.  It has been recently used on
+SPARCstations and Sun 3 workstations under Sun OS 3.2,
+3.5, 4.0, and 4.1.  The resulting code has been run on
+a variety of other machines as well.  Unlike previous versions,
+this version is configured to generate (totally unreadable) C code
+from the intermediate code used by the compiler.  A direct to
+VAX assembly code generator is included, but the supporting
+run-time system is not.  A Motorola 68020 code generator and
+run-time system are available, but not included here.
+
+The distribution consists primarily of source code for the compiler,
+for the runtime environment, a collection of files comprising an
+on-line manual, and a collection of sample Russell programs, including
+a constructive real arithmetic package and desk calculator utility.
+
+Installation instructions are provided in a file called "INSTALLATION"
+in this directory.
+
+The authors would like to maintain a list of sites running the compiler.
+Please send notification of any new sites to boehm@xerox.com.
+
+An early version of the compiler was developed at Cornell University
+under NSF grant MCS 01048 and amendment MCS 8104010, with the help of
+Philip Matthews and Jim Hook.  It was then further developed by the
+first author at the University of Washington, and at Rice University,
+with partial funding under NSF grant number DCR 8607200 and DARPA/NSF
+grant CCR 87-20277.  The 68020 code generator was built by Kumar Srikantan.
+The static garbage collector in lh_opt was written by Lucy Hederman.
+The desk calculator and the underlying constructive real arithmetic package
+were written by Hans-J. Boehm and Vernon Lee.
+
+The Russell language was designed primarily by Alan Demers and
+J. Donahue.  The implementation is loosely based on "An Informal
+Description of Russell" (Boehm, Demers, and Donahue, Cornell Technical
+Report 80-430).  A more accurate description of the implemented
+language can be obtained through the supplied online manual, or
+from the "Programmer's Introduction to Russell" (Rice TR85-16).
+(A troff -me version of this report is included here as doc/intro.me.)
+A discussion of the design philosophy can be found "Data Types are
+Values", by Donahue and Demers, in the July 1985 issue of TOPLAS.
+
+Disclaimers:
+
+The Russell compiler has neither been verified, nor even thoroughly
+tested.  Bugs are not unheard of.  If you find any, please report
+them to Boehm@Rice.  Any use of the compiler is at your own risk.
+
+Some of the code in the compiler is not beautiful.  The underlying
+syntax tree structure violates various C type checking rules.  (Hence the
+-w flags on many of the compilations.)  Reasons for this are largely
+historical.  (Parts of the compiler date back to 1979.)
+
+The various ".mh" source files where automatically generated from
+"streedefs.h" and the corresponding ".m" file.  The generation was done
+with a modified version of cpp that we cannot easily redistribute.
+
+The type inference algorithm used by the compiler is workable, but not
+entirely satisfactory.  In particular, it is enough of a heuristic
+that some experimentation is likely to be needed to discover what
+type information can be inferred automatically.  "rhelp inference"
+gives a very rough description of the algorithm.  For some ideas
+on how to do this right, see the Proceedings of the SIGPLAN '89
+Conference on Programming Language Design and Implementation.
+
+The compiler itself is slow.  Fortunately machines have gotten fast
+enough that this is no longer very painful.  On a VAX 11/750, be
+prepared to wait and wait and ...
+
+Try "rhelp hints" for further known peculiarities.
+
+UNIX is a trademark of AT&T Bell Labs.
+
+VAX is a trademark of Digital Equipment Corporation.
+
+Sun 3 is a trademark of Sun Microsystems.
+
+SPARCstation is a trademark of SPARC International.
+

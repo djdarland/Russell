@@ -1,0 +1,53 @@
+The product construction allows the creation of Cartesian (possibly dependent)
+product types.  Thus products are lists with named components.  They
+vaguely correspond to Pascal records, but individual fields may not be
+modified.  A product construction has syntax:
+
+    prod local_type_id { param_list }
+
+where param_list is a semi-colon spearated list, with each element of the
+form
+
+    id: signature
+
+Multiple identifiers with the same signature can be combined, as with
+function parameters.  Var signatures are not allowed.
+
+The signature of the product
+
+    prod t {id1: sig1; ...; idn: sign}
+
+is
+    type t  {
+                New; :=; ValueOf;
+                Mk: func[id1: sig1; ...; idn: sign] val t;
+                id1: func[x: val t] sig1'
+                ...
+                idn: func[x: val t] sign'
+            }
+
+The identifiers are used as the names of the projection functions.
+They may occur free in the other signatures, as in
+
+    prod {T: type {...}; x: val T}
+
+The signature sigj' is obtained from sigj by replacing each occurrence
+of a component identifier y by t$y[x] (where t is the local type name,
+and y is the argument of the projection function).
+
+Since types and functions can appear as components, single element
+products are sometimes useful to obtain a type of "assignable functions",
+or "assignable types".
+
+The expressions appearing inside component signatures are not evaluated.
+Thus recursive union of product types are acceptable.
+
+Disclaimer to type theorists:  Because signatures of "product" components may
+depend on other components, "products" should formally be viewed as infinite
+sums, and not as Cartesian products at all.
+
+Implementation Note:  Product types are implemented fairly efficiently.
+Usually only Mk involves an explicit procedure call.  They are preferable
+to records whenever possible.
+
+See also: record

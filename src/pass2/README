@@ -1,0 +1,52 @@
+This pass builds builds the symbol table as part of the syntax tree.
+Identifiers are set up to point to a list of possible declarations for
+them.  The exact declaration is usually not determined until the signature
+checking pass (pass4) when overloading can be resolved.
+
+
+                   Symbol Table Organization
+
+    The symbol table is kept as a set of back pointers in the syntax tree.
+
+    1) An identifier node is one of:
+        a) operator identifier
+        b) letter identifier
+
+    2) From an identifier node, last_definition points at a definition
+       for that identifier in smallest enclosing scope.
+
+    3) A definition for an identifier is one of:
+        a) declaration definition
+        b) parameter definition
+        c) type signature definition
+        d) A modified type primary. This contains a pointer to
+           one of the following kinds of modifiers:
+            i)   with list definition
+            ii)  export list definition
+            iii) hide list definition
+           The fields described here are actually present in these
+	   modifiers.
+	e) The identifier itself.  This happens whenever the identifier
+	   is the defining instance for a type component.
+
+    4) From a definition node, previous_definition points at a definition
+       for that identifier in the same scope or in the smallest enclosing
+       scope.
+
+    5) From a declaration node, decl_scope points at the block in which
+       the declaration appeared.
+
+    6) From a parameter node, par_scope points at the function signature
+       in which the parameter appeared.
+
+    7) Since certain identifier nodes are both shared
+       and sometimes do not refer to the immediately surrounding definition
+       of that name (e.g. Boolean), id nodes with non-NIL last definition
+       fields are not touched. This is only true for usage, not a
+       definition.
+      
+    8) From an identifier or string node use_list points to the next 
+       enclosing use list (NIL if there is none).
+
+    9) From a use list node previous_list points to the next surrounding
+       use list.

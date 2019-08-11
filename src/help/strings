@@ -1,0 +1,45 @@
+The term "string" here includes both character string and integer constants.
+Strings in Russell consist either of a sequence of non-operator characters
+starting with a digit, or of any sequence of characters enclosed in double
+quotes.  In the latter case, the following escape sequences are recognized:
+
+   \t    A tab character
+   \n    A newline (LF) character
+   \r    A carriage return character
+   \c    where c is none of the above, stands for c
+   ""    A single quote character
+
+Technically strings must always be selected from a type, but this type can
+usually be inferred by the compiler.  The string "abc" is viewed
+as shorthand for the constants 'a', 'b', and 'c' concatenated.  That is,
+it is viewed as
+
+        (('' ^* 'a'[]) ^* 'b'[]) ^* 'c'[]
+
+where '', 'a', 'b', 'c', and ^* must all be present in the type from which
+the string is selected.
+
+Note that any string of characters enclosed in single quotes is treated
+as an identifier.  (Escape conventions analogous to those above apply.)
+
+Similarly 123 is interpreted as
+
+        ('1'[] ^+ '2'[]) ^+ '3'[]
+
+Note that unquoted strings may not be empty, and thus '' is not included.
+The difference in the concatenation operators is intended to suggest this.
+
+This whole scheme may appear unnecessarily complicated.  It is necessary
+to insure that types are (small) finite collections of operations.
+It can also be argued that it is philosophically pleasing, since it
+models a formal definition of the meaning of such constants exactly.
+On a more practical note, it makes it possible to define an integer
+type with octal constants by simply changing the ^+ operation.
+
+Implementation note:  Strings are not actually expanded in this way,
+provided the compiler can determine that all the operations possibly
+involved in strings of that type behave in an expected manner.
+Constants for a user-defined octal integer type would be handled
+rather inefficiently.
+
+See also: ChStr, Short

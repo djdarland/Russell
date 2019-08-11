@@ -1,0 +1,146 @@
+.TH CALC 1L "10 June 1991"
+.SH NAME
+calc \- desk calculator with user-specified, demand-driven precision
+.SH SYNOPSIS
+.B calc
+.SH DESCRIPTION
+.I Calc
+is a desk calculator utility that operates on constructive real
+numbers.  The underlying idea is to represent a real number as a function,
+to a level of accuracy specified by the user.
+The results displayed by the calculator are always accurate to the
+desired precision, no matter how they were derived.
+The expression ln((1+e**(-500))-1) correctly evaluates to -500.
+.LP
+The program can run on almost any terminal.
+Initially you should be sure that
+the window size is sufficient to display the help screen (at least 23 lines).
+.LP
+The left part of the display contains a window containing the calculator
+stack.  The right part of the screen contains a help menu.  The stack
+grows down from the top of the window.  Arithmetic operations apply to
+the last numbers entered (those closest to the bottom of the
+window).  In the case of binary operations, the last number is the
+second operand.
+.LP
+Numbers are added to the stack by typing them in and terminating them
+with a <space> (which will also cause them to be redisplayed in a standard
+format).
+The <return> key is recognized as a synonym for <space>.
+(This is not true under X windows, since it would prevent copying
+of multi-line numbers from other windows.)
+Basic arithmetic operations are performed by
+typing "+", "-", "*", or "/" after both operands are entered (the
+space following the second operand may be omitted).  More complicated
+operations are entered as described in the help window.  The program
+is case insensitive (with the exception of m/M, as described below).
+.LP
+Mistakes can be corrected with the <backspace> key.
+Pressing <backspace> without an incomplete number on the stack deletes
+the last number entered.
+The <delete> and <backslash> keys are recognized as synonyms for <backspace>.
+.LP
+Certain illegal operations (for example, division by 0)
+may cause the calculator
+to compute until it exhausts all available memory.  Such a nonterminating
+computation (or any other computation) can be aborted by typing the interrupt
+character (usually <control>C).
+.LP
+The calculator ensures that the error in the displayed value is strictly
+less than 1 in the least significant displayed digit.  
+If your terminal type is "sun", "xterm", or "xterms", you can
+obtain more precision by enlarging the window.
+In any case, it is possible to
+scroll sideways through the result using the ">" and "<" keys.
+These keys may be prefixed by integers to scroll larger amounts
+at once.  (Displaying PI and scrolling 100,000 digits to the
+right is known to take several hours on a Sun 3, however.)
+.LP
+Three display formats are provided.  In the standard \fIdec\fP format,
+numbers are entered in decimal and displayed in a fixed point decimal
+format.  The \fIhex\fP format is analogous, except that both entry and
+display are in hexadecimal.  In the \fIfloat\fP format, entry is in decimal,
+but results are displayed in scientific notation.  In this format, a number
+with magnitude smaller than 2**(-1000) may be displayed as 0.  (Displaying
+0 or a very small number in this mode may involve a noticeable delay.)
+Base conversions are possible (though a bit clumsy) by switching modes
+after a number is entered.  Typing "m" will switch to other modes
+in the order in which they are displayed in the help window.
+A capital "M" will switch to the dosplayed modes in the opposite order.
+.LP
+Both the factorial (!) and primality test (#) functions require
+that the argument is an integer.  They generate error messages
+if the argument is obviously not an integer.  For large arguments, the
+primality test operation performs a single Solovay-Strassen
+test on the number.  If it answers ``probably prime''
+then there is at most a 50% probability that the number is composite.
+If it answers ``composite'', the number is definitely composite.
+In the first case, the test may be repeated for increased confidence.
+(The error probability is actually much less than 50% for nearly
+all composite numbers.)
+.LP
+The truncation function (Z) may mistakenly round up numbers
+that are no more than 2^(-1000) less than an integer.
+.LP
+The bottom line on the display always contains the last keystrokes that
+were typed by the user.  In conjunction with a cut/paste facility
+provided by a window system, this can be used to get a very limited
+redo or programming facility.  In either of the decimal modes, input
+containing an explicit decimal exponent beginning with the letter e
+is interpreted as Fortran-style scientific notation.  This is allows
+easier pasting of previously computed values into the calculator.
+.SH FILES
+.TP
+\fI//import/calc/bin/calc\fP  ??fix for local convention??
+executable
+.SH "SEE ALSO"
+.LP
+The underlying constructive real package, as well as the desk calculator
+interface to it, are written in the programming language Russell.
+To obtain a compiler and source code for the calculator, send mail
+to boehm@parc.xerox.com.
+More details on the ideas underlying the implementation can be found in:
+.LP
+Hans-J. Boehm, "Constructive Real Interpretation of Numerical Programs",
+Proceedings of the SIGPLAN '87 Symposium on Interpreters and Interpretive
+Techniques, SIGPLAN Notices 22, 7 (July 1987), pp. 241-221.
+.LP
+Hans-J. Boehm, R. Cartwright, Michael J. O'Donnell, and Mark Riggle,
+"Exact Real Arithmetic: A Case Study in Higher Order Programming",
+Proceedings of the 1986 Lisp and Functional Programming Conference,
+pp. 162-173.
+.LP
+The implementation makes use of some of the algorithms used in Brent's
+multiple precision package.  These are described in:
+.LP
+Brent, R.P., "Fast Multiple-Precision Evaluation of Elementary Functions",
+Journal of the ACM 23, (1976), pp. 242-251.
+.LP
+bc(1), dc(1)
+.SH BUGS
+Indubitably.  Please report bugs to: boehm@parc.xerox.com.
+.LP
+As described above, some compromises are necessitated by the fact that
+equality on general constructive reals is undecidable.
+The calculator does not, in general, recognize 0 divisors, 0 arguments to
+the logarithm function, etc.  Similarly, in the \fIfloat\fP format,
+it does not distinguish very small numbers from 0.
+(For the restricted collection of
+operations in \fIcalc\fP, we don't know whether equality is really undecidable.
+If you know of such a result, please send mail to boehm@xerox.com.)
+.LP
+Better algorithms are known for a number of operations.
+Interval based representations of the constructive reals can be made to
+perform better than the representation used here.
+Rabin's primality test should be used instead of Solovay-Strassen.
+.SH AUTHOR
+Hans-J. Boehm, Xerox PARC and Vernon Lee, Zycad
+(e-mail: boehm@parc.xerox.com; scorpion@rice.edu or
+zycad!vernon@sun.com).
+Most of this work was done at Rice University, where it was supported
+in part by NSF grants MCS81-21844, DCR-8607200, DCR84-03530, and by
+the IBM Corporation.
+Manual page modified from authors' documentation by R. P. C. Rodgers,
+Statistical Mechanics of Biomolecules, Dept. of Pharmaceutical Chemistry,
+School of Pharmacy, University of California, San Francisco, CA 94143.
+

@@ -1,0 +1,10 @@
+The function Expand_Hp asks the system to expand the amount of memory available
+for the heap.  The Russell run-time system is normally stingy in its memory
+allocation.  It starts out with no heap, and expands only after "unsuccessful"
+garbage collections.  Any process which is known to use large amounts of memory
+can be sped up with an initial call to Expand_Hp.  Its signature is:
+
+        func [ val Short ] val Void
+
+The argument is the number of additional blocks to allocate.  The size of a
+block is currently defined to be 4K.

@@ -1,0 +1,15 @@
+Russell functions can be explicitly constructed by an expression of the
+form:
+
+        function_signature { ;_separated_expression_sequence }
+
+The result part of the function signature may be omitted if it is apparent
+from the body.  If it is given, it must match (i.e. be the same as,
+except for extra type components) as the signature of the last expression
+in the function body.
+
+An application of the resulting function will result in evaluation of
+the expression sequence with parameters bound to argument values.
+The value of the application will be that of the last expression.
+
+See also: signatures, applications.

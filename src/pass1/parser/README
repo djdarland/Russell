@@ -1,0 +1,12 @@
+   In order to build a parser from grammar type:
+	yacc -d grammar
+
+   Then recompile all programs which include y.tab.h, namely:
+        scan.c
+        restab.c
+        y.tab.c
+
+    Then put the compiler together in the usual manner
+    (documented elsewhere).
+
+        

@@ -1,0 +1,4 @@
+Alias is a built-in function.  It returns True iff the first two parameters
+refer to the same location.  It has signature:
+
+    Alias: func [x,y: var T; T: type {}] val Boolean;

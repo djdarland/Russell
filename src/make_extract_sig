@@ -1,0 +1,6 @@
+#
+cc -c -I. extract_sig.c
+cd sigio
+cc -c -I.. -I. -w sa_sig_in.c
+cd ..
+cc -o ../extract_sig extract_sig.o stree/mknode.o stree/prstree.o stree/unparse.o sigio/sa_sig_in.o stree/drefops.o datatypes/consnodes.o pass5d/RIC.o vr.o stree/listops.o stree/kindname.o pass5d/op_codes.o pass1/stt/stt.o stree/bitcnt.o gc/gc.a

@@ -1,0 +1,56 @@
+A Russell conditional expression has syntax
+
+if
+    guard_expression ==> expression; ...; expression
+#   guard_expression ==> expression; ...; expression
+    ...
+#   guard_expression ==> expression; ...; expression
+fi
+
+A guard_expression can be either an expression with signature "val Boolean",
+or the keyword "else".  The latter is an abbreviation for the negations
+of all non-else guard_expressions "and"ed together.
+
+The rightmost expressions corresponding to the guards must all have the same
+signature, unless the conditional is followed by a ";" and another expression
+(or it occurs inside a block with this property), or it is the body of
+a function construction with val Void result signature.
+
+The conditional is evaluated by evaluating the guard_expressions
+in any order, until a true guard is found, and then evaluating the expression
+sequence corresponding to the guard.  It is guaranteed that syntactically
+identical conditionals appearing in the same environment will yield
+the same result.  It is an error to evaluate a conditional with no true
+guards.
+
+The syntax
+
+if guard_expression1 then
+    expression; ...; expression
+elsif guard_expression2 then
+    expression; ...; expression
+else
+    expression; ...; expression
+fi
+
+abbreviates
+
+if
+    guard_expression1 ==> expression; ...; expression
+#   else ==>
+	if
+	    guard_expression2 ==>
+		expression; ...; expression
+	#   else ==>
+		expression; ...; expression
+	fi
+fi
+
+Any number of "elsif"s may appear.  A missing else clause defaults
+to "else ==> Null[]", where "Null" is always taken to be the predefined
+identifier, even if it has been redeclared in an intervening scope.
+
+Implementation Note:  The compiler really does reorder the first kind
+of conditional.  Relying on first to last evaluation is likely to result
+in disaster.  If order matters, use "if ... then ...".
+

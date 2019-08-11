@@ -1,0 +1,19 @@
+Array is a built-in function.  Given a (short) integer n, and a component
+type T, it returns the type of arrays of T which can be indexed by
+integers between 0 and n-1.  A period is used to indicate subscription.
+It has signature:
+
+    Array: func [size: val Short; comptype: type {New; V}]
+                type A {. : func [var A; val Short] var comptype;
+                        . : func [val A; val Short] val comptype;
+			New; V;
+			size: func [] val Short;
+		       };
+
+The size operation always returns the number of elements in the array,
+i.e. the first argument to the Array function.
+
+Implementation note:  New and V can be SLOW.  They may involve explicit calls
+to the corresponding operations of the component type.  Note however that
+V does not get used for component-wise array operations.  Subscript
+checks are inserted by the compiler, but removed by the optimizer.

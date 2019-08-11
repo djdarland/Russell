@@ -1,0 +1,31 @@
+A Russell loop has syntax
+
+do
+    guard_expression ==> expression; ...; expression
+#   guard_expression ==> expression; ...; expression
+    ...
+#   guard_expression ==> expression; ...; expression
+od
+
+A guard_expression can be either an expression with signature "val Boolean",
+or the keyword "else".  (Any loop with an "else" guard is guaranteed not to
+terminate.)
+
+The loop is evaluated by evaluating the guard_expressions in any order,
+until a true guard is found, and then evaluating the expression
+sequence corresponding to the guard.  This is repeated until an evaluation
+of all guards (in an arbitrary order, with "else" guards assumed true
+if no others are) results in no true guards being found.
+
+It is guaranteed that syntactically identical loops appearing in the same
+environment will terminate in the same state (if they do terminate).
+
+The signature of a loop is val Void.
+
+Implementation Note:  The compiler really does reorder loops.
+Relying on first to last evaluation is likely to result in disaster.
+For consistency, 
+
+do expression then expression; ... ; expression od
+
+is allowed, and always results in an infinite loop.

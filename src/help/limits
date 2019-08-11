@@ -1,0 +1,32 @@
+The compiler insists on the following size limitations.  Some of the less
+restrictive ones are probably not checked correctly.  Thus violations of
+these constraints may result in strange behaviour.
+
+1) Floating point "constants" are limited to 4 digits before, and 4 digits
+   following the decimal point.  (This is an unfortunate consequence of
+   the fact that they are treated as an application of a `.` operation
+   to Short values.  This should be checked correctly.)  The limit is 9
+   digits for non-Vax implementations.
+
+2) Strings are limited to slightly less than 1000 characters.  They are
+   likely to get compiled very inefficiently if they are longer than 150.
+
+3) Identifiers are limited to about 500 characters.
+
+4) File names are limited to slightly less than 100 characters.
+
+5) The number of separately compiled Russell programs included in any
+   one program is limited to 100.
+
+6) Enumerations, products, records, and unions are limited to 32767
+   components or fields.
+
+7) The number of array elements for the built-in array type is limited
+   to at most 32767, since the index type is taken to be Short.  (Applies
+   only to the Vax implementation.)
+
+8) Character string values (produced at runtime) are limited to 32766
+   characters.
+
+10) The number of identifiers declared in a single function is limited
+    to about 500.

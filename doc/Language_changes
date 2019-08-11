@@ -1,0 +1,105 @@
+
+  The implemented language differs from that described in the Informal
+Description (Cornell TR80-430) primarily in the following respects:
+
+0) Some bugs in the signature calculus have been "fixed".  Declaration
+   signature matching no longer involves argument parameter substitution.
+   (This could lead to situations in which it was impossible to write
+   down the signature of an identifier in a declaration.)
+   The export rule for hiding has been replaced by a constraint that
+   any expressions in the resulting signature must themselves be signature
+   correct.
+
+1) The types and functions known in the initial environment bear little
+   resemblance to those described.  Only Short (32 bits on a Sun) integers
+   and integers of unbounded size are implemented.  Arrays are always indexed
+   by Short.  Character strings, Booleans, and Arrays are also provided.
+   Reference types are provided in a simplified form.  Lazy and industrious
+   lists are provided, as is a poor implementation of floating point numbers.
+   An interface to UNIX signals is provided.  A Callcc primitive resembling
+   that of Scheme is provided.  A trace facility is present.  These are all
+   described in the corresponding "rhelp" entries.
+
+2) The ValueOf operation has been renamed V.
+
+3) Unions have syntax
+
+     union local_name { id : type_expression; ... }
+
+   Their signature has components named New, :=, V, to_id, from_id, is_id, ...
+   Extensions evaluate their "argument".
+
+4) The image construct has been replaced by the Cartesian product constructor
+
+    prod local_name { id : non_var_signature }
+
+   Its signature has components New, :=, V, Mk, id, ...
+
+5) The notion of a file system is much closer to UNIX.  To preserve the soundness
+   of the signature calculus, there exists a single variable FS with signature
+   var Void.  It is a parameter to input operations.  Thus all functions
+   which refer to such operations must also have access to a global variable.
+
+6) A facility to interface with C and UNIX has been provided.  A function
+   construction may have the form
+
+         func[param_list; var Void]result_sig { extern "extern_proc_name" }
+
+   The external procedure name must be complete, that is, it should usually
+   start with an underscore character.  Restrictions apply to C routines
+   called in this way.  The main ones are:
+
+   1) They do not have to be pure functions, since they are forced to
+      take a var Void parameter.  They should however respect the
+      parameter and result signatures.  It is useful to note that
+
+             val ChStr    ~     char *
+	     val Short    ~     long  (short on a VAX)
+	     var Short    ~     long *
+
+   2) Any references to malloc will get linked to the Russell atomic
+      object allocator (standard malloc on a Sun).
+      This means that objects allocated this
+      way should not contain references to Russell objects, as such
+      references will be hidden to the garbage collector.  On the VAX,
+      if such objects themselves are not to be collected, they should
+      be returned to the Russell program, so that they will be found.
+      (It is guaranteed that the garbage collector will not be invoked
+      as a result of calling malloc.  Thus it is usually not necessary
+      for C programs to obey Russell conventions about stack contents.
+      The garbage collector has also been hacked so that it should
+      not be confused by stdio stuff.)
+   
+7) The compiler tries to infer signature information, selection types,
+   V applications, and 0-ary applications whenever possible.  Very little
+   of this is done inside signatures.  The basic algorithm used outside
+   signatures is to topologically sort the signature dependency graph
+   for the whole program, and then to do these inferences in topological
+   order.  The compiler will either complain or start making guesses
+   if this dependency graph is circular.  It should always be possible
+   avoid any resulting error messages by adding explicit signature
+   information.
+
+8) The compiler tries to infer missing arguments to applications.
+   The omitted arguments must correspond to the last formal parameters.
+   This will be successful if
+
+	1) They can be inferred by unification of non-type argument
+	   and parameter signatures.
+
+	2) The parameter type is var Void.  (The innermost parameter
+	   with this signature is used.)
+
+        3) There are three parameters with val signature, and two
+	   arguments, both of which are unquoted strings
+	   and the name of the operator is '.'
+           The inferred argument will be the length of the second string.
+           (Technically a string which is the decimal representation
+           of the length.  Its type will be inferred using the usual
+           approaches.) This makes it possible for small floating point
+           constants to be recognized.    
+
+9) Selections in signatures may not refer to overloaded type components.
+
+10) The extern { "..." } construct was added to allow separate compilation
+    of Russell programs.

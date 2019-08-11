@@ -1,0 +1,97 @@
+Copyright 1986-1989 Hans-Juergen Boehm, Alan J. Demers, Kumar Srikantan,
+Vernon Lee, and Lucy Hederman.
+Copyright Digital Equipment Corporation & INRIA 1988, 1989.
+Copyright (c) 1990, 1991 by Xerox Corporation.  All rights reserved.
+
+This material is provided as is, with no warranty expressed or implied.
+Any use is at your own risk.
+
+Permission is hereby granted to copy this compiler for any non-commercial
+purpose, provided the above notices are retained on all copies.  Further
+restrictions apply to the DEC/INRIA BigNum package.  These are stated in
+the file runtime/BigNum/doc/bnbody.tex.
+
+This work uses the BigNum package developed jointly by INRIA and
+Digital PRL.  It has been modified by Hans-J. Boehm in August 1990
+at Xerox PARC.  When you receive this software, please send mail to
+librarian@prl.dec.com to inform them that you have a copy of the
+package.
+
+----------------------------------
+
+Installation instructions:
+
+0) Put the compiler in a directory in which you can leave it.  The
+   compilation driver "rc" will have path names to this directory embedded
+   in it.  The driver itself can be moved to a convenient place (such as
+   your ~/bin directory) after everything is built.  However, it references
+   other files in this directory.  To be on the safe side, you should try for
+   about 15 MB of free disk space before you move the compiler there.
+
+1) By default, the compiler is configured to generate C code, and to use
+   the native C compiler to compile the output.  On Sun 3s and some other
+   machines it is recommended that you use the GNU C compiler instead,
+   if you have it.  (It usually generates better code for Motorola processors,
+   and it presents better (but still inadequate) hooks for informing the
+   optimizer of the presence of a garbage collector.)  If you would like to
+   use gcc, change the macros at the top of RIC_to_C/main.c.  If you need
+   to use one of the older direct code generators,
+   send mail to boehm@xerox.com.
+   
+2) The compiler has recently been run on Sun 3s and 4s.  If you are running
+   on such a machine, skip the rest of this section.  For anything else, first
+   make sure that there is a garbage collector configuration for your machine
+   in the gc directory. If not, send mail to boehm@xerox.com to find out whether
+   one has been developed in the interim, or follow the suggestions there
+   for building your own.  Compile and run the test code in that directory
+   before proceding any further.  If your machine does not have
+   IEEE floating point, you will have to fix the shift and large integer
+   conversion routines in runtime/Float.c and runtime/SFloat.c.  The code
+   to write out a preinitialized compiler image (around line 450 in src/main.c)
+   is also rather fragile.  If your machine does not run UN*X a port will be
+   a major effort.  If your machine is not byte addressable,
+   does not have 32 bit pointers, or does not have 32 bit longs, then this
+   is a good time to give up.  If your machine does not have 32 bit ints,
+   then you should probably replace all references to the type "int" in the
+   source by "long".  This can possibly be done with a macro definition
+   in src/parm.h and runtime/runtime.h.  Note that parts of this
+   distribution (e.g. the garbage collector and bignum packages) explicitly
+   support architectures on which other parts of the compiler will not run in
+   their current form.
+   
+3) If you do not care about performance of the large integer package, you
+   may skip this step.  Go to the runtime/BigNum directory.  Type
+   "make <machtype>", where machtype is one of 68k, sparc, rs6000,
+   vax, ns, mips.  If none of these is applicable, type "make C32" instead,
+   or skip this step to build a version of the package that
+   contains no assembly code, but is substantially slower.
+
+4) If you are not using a VAX, or another machine that implements longjmp
+   by crawling up the stack, skip this step.  (Sun machines do not implement 
+   longjmp by crawling up the stack.  I believe MIPS machines also do not.)
+   If you are using a VAX, go to the runtime directory, and move both of the
+   files starting with vax_ to the same name without this prefix.  You may want
+   to save the general versions of these files. If you are using another
+   machine with a VAX like implementation of longjmp, you will have to
+   fix the Call/cc implementation for it to work correctly.
+
+5) Type "make" in the src directory.  If you are unfortunate enough to be
+   doing this on a slow machine (e.g. Vax 780 class), this is a good time to
+   take an extended break, for example, to eat a leisurely dinner.
+
+6) Move the compiler "rc" and the help utility "rhelp" to somewhere
+   on your path.  If you expect to have to do some compiler debugging,
+   do the same for the intermediate code print utility "diaplay", and
+   the "extract_sig" utility for printing signature information from
+   object files.  If you are a C shell user, type rehash.  To get
+   further directions, run "rhelp"
+   
+7) If you want the "-OO" flag (static garbage collection) to work, type
+   "make" in src/lh_opt.  This involves compiling significant amounts of
+   Russell code, and will again take a significant amount of time.
+
+8) Some disk space can be reclaimed by removing various .o files in the
+   directory subtree headed by src.  src/PRc and src/Rc may also be removed.
+
+9) It should now be possible to build the calculator utility
+    by typing make in examples/calc.

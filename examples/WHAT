@@ -1,0 +1,20 @@
+This is a somewhat haphazard collection of sample Russell programs.  Most
+of them were originally developed to test a particular aspect of the
+compiler.  When compiling them, you should observe the following:
+
+1) Some of them require compilation flags.  In general rc -pL should
+  work for any main program, rc -cpL for a program that is to be referenced
+  by an extern { ... } from another file.
+
+2) Seperately compiled subprograms must be compiled before the main
+  program.  That is, to compile "y.r" containing an extern { "x" },
+  you must compile "x.r" first.  Try "rhelp compiling" for more details.
+
+The most interesting example is a desk calculator utility that
+operates on constructive real (i.e. exact real) numbers.  (Exact
+here means that the answer is never off by more than 1 in the last
+displayed digit, no matter how long a sequence of calculations you enter.
+There are no cumulative rounding errors.  It is possible to scroll
+through results arbitrarily far to the right to obtain increased
+precision.
+

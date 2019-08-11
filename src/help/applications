@@ -1,0 +1,48 @@
+A number of traditional programming language constructs are subsumed by
+the Russell notion of a function application.  These include procedure
+and function calls, arithmetic and Boolean operations, assignments,
+and storage allocation for variables.
+
+The general syntax of a function application is
+
+    [arg_expr, ..., arg_expr] op_expr [arg_expr, ..., arg_expr]
+
+Which part of the argument list appears before or after the operator
+is not significant.
+
+Brackets surrounding an empty argument list may be omitted if
+
+1) there is an argument list on the other side of the operator, or
+
+2) the compiler can infer from signature information that the application
+   must take place.
+
+Brackets around single arguments may be omitted if there existence
+can be reconstructed from the precedences of the operators involved.
+The following are legal applications:
+
+    [a]f[b]     (equivalent to f[a,b])
+    x := 1      (equivalent to [x] := [1], or :=[x,1])
+    n!          (equivalent to [n]!)
+    x := (n!)   (equivalent to [x] := [(n!)])
+    f(n)        (equivalent to f n, and thus f[n])
+    3.1415      (equivalent to .[3,1415], which
+                 is expanded to .[3,1415,4])
+
+The operator expression op_exp must have function signature.
+Call its signature SIG.  Let SIG' be SIG with each occurrence of a
+parameter name in a parameter or result signature replaced by the
+corresponding argument expression.  The signatures of the argument
+expressions must be the same as the parameter signatures in SIG',
+with the exception that type arguments may contain components which
+are not required by the parameter signature.  The signature of the
+application is the result signature of SIG'.
+
+The order in which arguments to a function are evaluated is undefined.
+
+See also: import_rule, precedence, inference.
+
+Implementation note: The majority of function applications are not
+compiled into full procedure calls.  They may not show up on, for example,
+adb stack traces.  On the other hand, introducing many small procedures
+frequently does not result in a serious performance penalty.

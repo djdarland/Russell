@@ -1,0 +1,1 @@
+f77 test.f xcr.o cr/fusion.o xlong.o cr/cr.o cr/exp.o cr/interval.o cr/rat.o ../../runtime/russell_lib.o

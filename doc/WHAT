@@ -1,0 +1,8 @@
+  The documentation in this directory is aimed at someone who either
+
+1) happened to read a now obsolete description of Russell and quickly
+  wants to find out how the language has changed, or
+
+2) who wants to add "primitives" to the language.
+
+  If you are in neither category, you should try running "rhelp" instead.

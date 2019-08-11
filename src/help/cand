@@ -1,0 +1,26 @@
+The pseudo-operations "cand" and "cor" provide "conditional" and/or
+operations.  They do not evaluate their right argument unless they
+have to to determine the result.  In particular
+
+                a cand b
+
+is equivalent to
+
+                if
+                    a ==> b
+                #   else ==> False
+                fi
+
+and
+
+                a cor b
+
+is equivalent to
+
+                if
+                    a ==> True
+                #   else ==> b
+                fi
+
+where True and False are selected from the built-in Boolean type (and
+implicitly applied to empty argument lists).

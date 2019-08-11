@@ -1,0 +1,61 @@
+The builtin type long provides integers of unlimited (except for memory
+constraints) size.  Its signature is:
+
+    Long: type L {
+      (* constants *)
+	'0' :   func [] val L;
+	'1' :   func [] val L;
+	'2' :   func [] val L;
+	'3' :   func [] val L;
+	'4' :   func [] val L;
+	'5' :   func [] val L;
+	'6' :   func [] val L;
+	'7' :   func [] val L;
+	'8' :   func [] val L;
+	'9' :   func [] val L;
+      (* operations *)
+        % :     func [val L; val Short] val Short;  (* remainder *)
+        * :     func [x,y:val L] val L;
+        + :     func [x,y:val L] val L;
+        - :     func [x:val L] val L;
+        - :     func [x,y:val L] val L;
+        / :     func [val L; val Short] val L;
+        := :    func [var L; val L] val L;
+        < :     func [x,y:val L] val Boolean;
+        <= :    func [x,y:val L] val Boolean;
+        <> :    func [x,y:val L] val Boolean;
+        = :     func [x,y:val L] val Boolean;
+        > :     func [x,y:val L] val Boolean;
+        >= :    func [x,y:val L] val Boolean;
+        In:     func [val Short] val L;
+	New:    func [] var L;
+	New:    func [val L] var L;   (* initializes to arg value *)
+        Out:    func [val L] val Short;
+        V:      func [var L] val L;
+        ^+ :    func [x,y: val L] val L;
+	nbits : func [val L] val L;
+	nwords: func [val L] val L;
+	odd:    func [val L] val Boolean;
+        put :   func [val L] val L;
+	puts:   func [val L] val ChStr;
+        shift : func [what, how_much: val L] val L;
+    };
+
+The put function writes a long integer onto the standard output file.
+The puts function returns the (decimal) string representation of its
+argument.  The application shift[x,n] returns the largest integer which is
+no greater than x*(2**n). The nbits function returns the number of bits
+needed to represent a number in binary two's complement notation.
+The nwords function returns the number of longwords needed to represent
+a number.
+
+Division truncates toward 0.  The sign of the remainder is the sign of the
+dividend.  (See "rhelp short" for a relevant disclaimer.)
+
+Deficiencies: Only division by Short numbers is currently provided.
+Arrays indexed by Long numbers are not provided.
+
+Implementation Note:  Arithmetic operations are about as efficient
+as bignum operations in Lisp.  Long constants may be expensive to evaluate.
+
+See also: short, strings.

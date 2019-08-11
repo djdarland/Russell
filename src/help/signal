@@ -1,0 +1,49 @@
+Signal and Unsignal are built-in function which allows a type-safe interface
+to a simple version of UNIX signals.  Signal has signature
+
+    func [ sig_num: val Short; var Void ] val Boolean
+
+Unsignal has signature
+
+    func [ sig_num: val Short; var Void ] val Void
+
+The call
+    
+    Signal[n]
+
+binds the signal numbered n to the continuation at the call to signal.
+The call to Signal returns False.  If the signal is subsequently caught,
+control will be transferred back to the Signal call, with Signal
+now appearing to return True.
+
+The call
+
+    Unsignal[n]
+
+undoes the effect of a Signal[n] and reinstates the default system
+action for the signal.
+
+The effect of a Signal call is undone after the first signal of that
+type is called.  Signals may be substantially delayed due to garbage
+collection.  If multiple signals occur during a garbage collection, all
+but the last will be lost.
+
+Keyboard interrupts may be caught as follows:
+
+    let
+        SIGINT == 2;
+        intr_occurred == Signal[signum];
+    in
+        if
+           intr_occurred ==> action in response to signal;
+        #  else  => normal program action;
+        fi
+    ni
+    
+Note that this automatically reissues the Signal call after a signal
+has been caught.
+
+See also: Callcc, description of UNIX signals.
+
+BUG: Signal should probably also return the "continuation" at the time the
+signal occurred.  This would require some hacking ...

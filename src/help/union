@@ -1,0 +1,42 @@
+The union construction allows the creation of disjoint union types.
+Union type values can be thought of as having one of several different
+types.  Values must however be interpreted consistently.
+A union construction has syntax:
+
+    union local_type_id { param_list }
+
+where param_list is a semi-colon spearated list, with each element of the
+form
+
+    id: signature
+
+Multiple identifiers with the same signature can be combined, as with
+function parameters.  Var signatures are not allowed.
+
+The signature of the union
+
+    union t {id1: sig1; ...; idn: sign}
+
+is
+    type t  {
+                New; :=; ValueOf;
+		to_id1: func[val t] sig1;
+                from_id1: func[sig1] val t;
+                is_id1: func[val t] val Boolean;
+                ...
+                to_idn: func[val t] sign;
+                from_idn: func[sign] val t;
+                is_idn: func[val t] val Boolean;
+            }
+
+The "to_" functions are used to convert a union value to one of the
+component types.  They may only be applied if the union value was created
+with the corresponding "from_" function.  The "is_" functions are used
+to inquire about the correct interpretation of a union value.
+
+Since types and functions can appear as components, single element
+unions can, like products, be used to obtain a type of "assignable functions",
+or "assignable types".
+
+Implementation Note:  Runtime checks are performed for "to_".  The
+code to do such checks is currently removed by the -O optimizer.

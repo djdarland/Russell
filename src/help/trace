@@ -1,0 +1,55 @@
+(This is broken in the Sun implementation.  The comments regarding
+function names also apply to adb stack traces.)
+Specifying the -T flag for a Russell compilation makes it possible to
+obtain two kinds of tracing information:
+
+1)  Stack traces.  If the program terminates abnormally, it will
+    automatically print a list of active functions and their arguments.
+    The same information can be obtained by interrupting the program
+    while it's executing (normally with a ^C), and then requesting a
+    stack trace in response to the resulting query.
+
+2)  Execution traces.  The program may assign True to the built-in
+    Boolean variable "trace".  This will print the function name
+    and its arguments on each function entry and exit.  This may be
+    disabled by again assigning False to this variable.  It is also
+    possible to turn this kind of tracing on or off by first typing
+    ^C, and then responding "t" and "c" to the subsequent queries.
+
+The following comments apply to either kind of tracing:
+
+1)  The function names printed are those constructed by the compiler.
+    They generally have either of the following forms:
+
+            fn_FFFF.NNNN_MMMM
+            fn_FFFF_lnLLLL_MMMM
+
+    (In some contexts these may be preceded by an F.)  Here
+
+        FFFF  is the file name in which the function was defined.
+              This is nonempty only for -c compilations.
+        NNNN  is the name of the identifier bound to the function.
+              (This is used if the function construction is the right
+              side of a declaration.)
+        LLLL  is a line number near the end of the function construction.
+        MMMM  is a small number designed to insure uniqueness.
+    
+2)  If the argument has signature "var T" or "val T" where T is an unselected
+    type identifier denoting a type with a "put" component with an appropriate
+    signature, that function will usually be used to print the value.
+
+    In all other cases, the argument is printed as a hexadecimal number
+    denoting its representation.
+
+3)  Trace information is provided only for function constructions in
+    files compiled with the -T flag.  Built-in operations are not traced.
+
+Implementation Note:  This is intended only as a debugging facility.
+The -T flag causes the compiler to generate calls to library routines
+for each function entry and exit.  These library routines allocate storage,
+but never themselves invoke the garbage collector.  Thus storage requirements
+can grow dramatically under certain anomolous conditions.  Typically the
+storage penalty is minimal.  On the other hand, the time overhead for
+procedure calls will be approximately quadrupled.  Compile time is only
+slightly affected.
+

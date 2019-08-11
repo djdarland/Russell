@@ -1,0 +1,30 @@
+Boolean is a built-in type.  It implements conventional Boolean operations.
+It has signature:
+
+    Boolean: type B {
+      (* constants *)
+        False:  func [] val B;
+        True:   func [] val B;
+      (* operations *)
+        := :    func [var B; val B] val B;
+        <> :    func [x,y: val B] val B;
+        = :     func [x,y: val B] val B;
+        New:    func [] var B;
+	New:    func [val B] var B;   (* initializes to arg value *)
+        V:      func [var B] val B;
+        and:    func [x,y:val B] val B;
+        not:    func [val B] val B;
+        or:     func [x,y:val B] val B;
+        put:    func [val B] val B;
+        puts:   func [val B] val ChStr;
+    };
+
+The put function writes "True" or False" on the standard output file.
+The "puts" function returns either "True" or "False".
+
+Implementation note:  The 'and' and 'or' are functions are detrimental
+to the performance of the peephole optimizer.  The cand and cor constructs
+are usually preferred.  The implementation of Boolean values is
+compatible with C.
+
+See also: cand

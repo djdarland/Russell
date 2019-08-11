@@ -1,0 +1,30 @@
+The construct
+
+        type_expression$operation_name
+
+denotes the component named "operation_name" from the specified type.
+Selection binds more tightly than application.  Thus the type_expression
+should be parenthesized if it contains any function applications.
+
+A selection may optionally be followed by
+
+        << signature >>
+
+to indicate which, of a number of identically named components with
+differing signatures, was intended.  Thus if T is declared to be
+
+        Array[10, Float]
+
+then
+
+        T$. <<func[var T; val Short] var Float>>
+
+denotes the "variable returning" subscription operation, as opposed to
+
+        T$. <<func[val T; val Short] val Float>>
+
+which denotes the "value returning" one.
+
+The signature of the selection is that of the type component, with occurrences
+of the local type identifier replaced by the type_expression.
+

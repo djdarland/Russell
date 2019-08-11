@@ -1,0 +1,213 @@
+  The Russell compiler is invoked as
+
+        rc [options] filename.r [objfile.o ...]
+
+  Normally it produces an executable file named "a.out" in the current
+directory.  An assembly language version of the program is left in
+filename.s.  Usually, a C version of the program is left in filename.c.
+An assembled version of the program, excluding runtime support,
+is left in filename.o.  If separately compiled Russell programs are included,
+then ".objfilelist" is also created in the current directory and contains
+the list of separately compiled Russell programs which have been linked
+(or which must be linked, if the -c option is specified) with the compiler
+output.  (Any previous ".objfilelist" is removed in any case.)  If
+intermediate code is generated, it is left in filename.G.
+
+  A list of object files (with names ending in .o) may be specified
+whenever linking is called for.  These will be linked with the compiled
+Russell program.  Note that any separately compiled Russell programs
+mentioned by the "extern { ... }" construct will be linked automatically,
+without mention on the command line.  The command line facility is
+intended primarily for non-Russell routines.
+
+  The compiler recognizes a large number of options.  A complete list can
+be found in R/src/root/rc.c, where R is the directory in which the compiler
+was installed.  Most of these are obsolete, intended for debugging of the
+compiler, or used to change the initial environment in which user programs
+run.  The only options of any real use to the programmer are the following.
+The "p", "L", and "c" options are most frequently used.
+
+    -c  This is a partial compilation.  Produce a .o file with appended
+        signature information.  Do not link the result with the runtime
+        library.  The filename is used to generate labels, including that
+        of the entry point.  Thus files which will eventually be linked
+	together must have had distinct names when they were compiled.
+	They should also not be moved into differently named files.
+	(They may be moved between directories.)
+
+        An object file produced in this way can be referred to by another
+        Russell program as 
+
+		extern { "filename_without_extension" }
+
+	The following restrictions currently apply.  Note that these
+	are extremely unlikely to be violated if all parts of the
+	program reside in the same directory.
+
+	The path name given inside the "extern" construct must be valid
+	from all directories in which the compiler will be run, either
+	to compile the specified file, or to compile files that 
+	(transitively) mention it inside an "extern" construct.
+	A given file should always be referenced by the same path.
+	This normally requires that all compilations are run from the same
+	directory, or that absolute pathnames are used throughout.
+	(Symbolic links may provide a third alternative.)
+
+	File names used for subcompilations should contain only alphabetic,
+	numeric and underscore characters.  Path names should not mention
+	"..".  (These restrictions are necessary since path names
+	are embedded legibly in entry point names constructed by the
+	compiler.)
+
+        Currently any file being compiled this way must be a function
+        construction, whose signature does not mention extensions,
+	enumerations, records, or type modifications.
+	(The body of the function may of course mention these
+	constructs.)
+
+    -p  Invoke the standard C preprocessor (/lib/cpp).  (This works only if
+        none of the '#' characters associated with loops and conditionals
+        appear in column 1.)
+
+    -L  Apply the import rule in a Liberal manner.  Allow expressions with
+        function signature to import variables if their last argument has
+        var Void signature.  (A var Void parameter is used to indicate
+        that the function is "impure", i.e. may modify, or depend on,
+        arbitrary components of the state.)  We claim that this does not
+        affect the soundness of the type checking rules; in particular,
+	syntactically identical type expressions still mean the same thing.
+
+    -O  Generate faster code at the expense of compilation time and,
+	if necessary, code size.  This also results
+        in the deletion of various run-time checks.
+
+    -OO Invoke a static garbage collection pass on the intermediate code.
+	This results in code that performs explicit deallocations whenever
+	possible.  This normally results in fewer garbage collections,
+	especially for programs that perform large amounts of large integer
+	or double precision arithmetic.  It may or may not reduce overall
+	execution time over -O. -OOO also unwinds loops once to enhance
+	the effectiveness of this process.  This is based on code written by
+	Lucy Hederman for her Master's thesis.  It has been even less well
+	tested than the rest of the compiler.
+
+    -P  Produce profiling information for use by "gprof".  Execution counts
+        are included for all Russell routines except those expanded in-line.
+	Run-time system routines are not profiled unless the run-time system
+	is appropriately recompiled.
+        The function names printed are those constructed by the compiler.
+	It is usually straightforward to associate them with the source.
+	(Use "rhelp trace" for details.)  See the UNIX manual entry for
+	"prof" for more information on execution profiles.
+
+    -S  Produce only a .s file.  Do not assemble and/or link the result.
+	Note that Russell .o files for partial compilations (-c flag)
+	contain more that just a UNIX a.out file.  In particular,
+	hand assembling the .s file may not produce a usable .o file.
+
+    -G  Produce only an intermediate code file.  This can be examined
+	with the display command.
+
+    -r  Produce a relocatable a.out file.  (This flag is passed on to the
+	linker.)  Also suppresses linking against crt0.o, rrt0.o and the
+	standard C library.
+
+    -V  Verbose.  Produce cryptic messages describing optimizations performed
+	by the compiler.
+
+    -N  Tells the compiler that there will not be any calls to Callcc
+	or Signal (directly or indirectly) by any routine currently
+	being compiled.  This typically results in slightly
+	faster code (or incorrect code if Callcc or Signal actually are
+	called).
+
+    -l...
+	Passed through to loader to specify a library.
+
+    -C  Asks the compiler to clean up after itself.  ".G", ".s", ".c",
+	and ".objfilelist" files are removed.
+
+    -M  Do not assign any identifier bindings to virtual registers.
+	Primarily useful in that it may occasionally help to circumvent
+	a compiler bug by making the compilers job easier.  (Of course,
+	we hope there aren't any such bugs, but ...)  Normally slows down
+	the code.
+
+    -x  Generate code that is loadable into a Portable Common Runtime
+	world.  (PCR is available for ftp from arisia.xerox.com.)
+	This flag forces allocations to go through a procedure call in
+	order to allow for locking in a multi-threaded environment.
+	It has been used successfully with PCR3_4.  Typically the top
+	level file is compiled with -xX to generate C callable functions.
+	Subsidiary files are compiled with -x.  Normally pcr_runtime/rrt0.o
+	should be loaded before any Russell code.  The pcr_runtime
+	directory is distributed separately.  Send mail to boehm@xerox.com
+	if you cannot locate it on arisia.xerox.com.
+
+    -X  Produce externally callable code.
+	The file being compiled must contain a type valued expression.
+	All type components must be functions.  The resulting
+	object file must be linked against russell_lib.o (from
+	the 68k_runtime directory).  All components of the resulting
+	type must have names that are valid C identifiers, containing
+	at most 2 underscore characters each.  The resulting
+	object file will have entry points corresponding to each type
+	component.  (For functions intended to be called from Fortran,
+	the Russell function names should end with an extra "_" character.)
+	These may be called as though they were C language
+	functions, provided the following conventions are obeyed:
+
+	1.  The function whose name is the source file name with ".r"
+	   replaced by an "_" character (with ".r" deleted in f77)
+	   must be called before any of the type components.  If the
+	   main program is written in C, it should be passed argc and
+	   argv.  If the main program is written in Fortran, it suffices
+	   to pass a single argument of 0.
+
+	2.  References to Russell allocated objects may be retained
+	   by the caller, provided they can be found by the Russell
+	   garbage collector.  The collector follows all pointers
+	   residing in the data and statically allocated bss segments
+	   that are longword aligned and point to the beginning of a valid
+	   Russell allocated object.  If references to objects need to be
+	   embedded inside objects allocated by the caller, the caller
+	   should use gc_malloc (an interface to the Russell allocator),
+	   rather than the standard malloc, to allocate the enclosing
+	   objects.  (Gc_malloc behaves like malloc, except that the
+	   resulting object is cleared.) We claim that if the calling
+	   program is written in Fortran, these conditions are automatically
+	   satisfied.
+
+	3.  Parameters with signature "type{}", "var Void", or "Signature"
+	   should not be explicitly passed by the caller.  Russell "val Short"s
+	   are compatible with C "int"s.  Russell "val ChStr"s are
+	   are compatible with the C "char *" type.  Russell "Float"s
+	   are actually pointers to double precision values.  "Boolean"s
+	   are consistent with normal C usage.  Arrays are not directly
+	   compatible.  Products are implemented as pointers to C structs,
+	   with every component (except type{} etc.) occupying 1 longword.
+	   Recall that Fortran passes all arguments by reference.  Thus
+	   a Fortran integer corresponds to "Var Short", etc.
+
+	4.  Russell functions called from C or Fortran may currently not
+	   reference "built-in" functions defined explicitly as Russell
+	   functions in the initial environment description.  Currently
+	   this restriction applies only to the polymorphic "cons"
+	   operators "^".  If they are needed, they should be defined
+	   explicitly in the user program.  (The problem can also
+	   usually be circumvented by forcing in-line expansion with -O,
+	   but this is probably a bad practice.)
+
+    
+Notes: ".objfilelist" contains those routines which actually need to be linked.
+  Since the compiler may have expanded some included routines in-line, this
+  list may not contain every file mentioned in the source program.
+  Normally ".objfilelist" will contain duplicates; they are eliminated
+  before being passed to the loader.
+
+  A compilation with the -c option may be relatively slow.  The problem
+  is that the compiler must generate fully general code for certain constructs,
+  since it has no information about the context in which the function will
+  be used.  Much of the resulting code may never get used.  (In fact the
+  whole object file may never get linked with the main program.)
+

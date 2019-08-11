@@ -1,0 +1,32 @@
+Ref is a built-in function which produces reference or pointer types.
+Its signature is:
+
+    Ref: func [T: type {}]
+              type t { := : func [var t; val t] val t;
+                       = :  func [val t; val t] val Boolean;
+                       New: func [] var t;
+                       Nil: func [] val t;
+                       V:   func [var t] val t;
+                       In:  func [var T] val t;
+                       Out: func [val t; var Void] var T;
+                       ^ :  func [val t; var Void] var T;
+                     };
+
+The In function takes a variable of the argument type and produces
+a reference value, which may then be used as a component of a
+product, etc.  The Out function is type-safe only because it requires
+a var Void parameter, indicating that it may depend on, and change,
+anything.
+
+The "^" operator is equivalent to Out, and allows Pascal-like dereferencing
+notation.
+
+Reference types are meant to be avoided as much as possible.
+Use recursive products.
+
+Implementation Note:  It is frequently useful to build a "create"
+function, which allocates a new object and returns a pointer to it.
+This can be most efficiently done by defining a macro create(T)
+to be (Ref[T])$In[T$New[]].  It is also possible to add a create
+function to the reference type (using a with clause), but, for
+the moment, this generates worse code.

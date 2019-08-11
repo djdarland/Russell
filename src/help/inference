@@ -1,0 +1,83 @@
+  The compiler attempts to insert omitted applications of the V (ValueOf)
+operation, omitted applications of functions with no argument, certain
+kinds of omitted arguments to function applications, and omitted selections
+for identifiers.  If x is a Boolean variable, the expression
+         
+                    x and True
+
+would normally be converted by the compiler to
+
+          Boolean$V[x] Boolean$and Boolean$True[]
+
+  In addition, the compiler deduces when forgetting operations on types
+are called for.
+  Omitted applications of V, and omitted applications of functions with
+no arguments are inserted whenever an expression has signature var T
+or func[] val T, and it would be signature correct only with a signature
+of val T.  (In the case of an application of an identifier, the compiler
+first looks for instances of the identifier which will the arguments
+to match without coercion.)
+  Selections are inserted whenever no declared identifier with appropriate
+signature can be found.  The first attempt is to select from one of the
+argument types.  (The argument type of an operand with val or var signature
+is the type in the signature.  For a function the result type is used.)
+This is done in left-to-right order.  If this fails, various surrounding
+use-blocks are tried, inside-out, left-to-right.
+  Omitted arguments are inferred only at the end of an argument list.
+This will happen in 3 distinct cases:
+
+        1) The arguments can be inferred by unification of non-type argument
+	   and parameter signatures.
+
+	2) The parameter type is var Void.  (The innermost parameter
+	   with this signature is used.)
+
+        3) The first three parameters have val signature, and two
+           arguments, both of which are unquoted strings, and the name of
+           the operator is '.'
+           The third argument will be inferred to be the length of the second
+           string. (Technically a string which is the decimal representation
+           of the length.  Its type will be inferred using the usual
+           approaches.) This makes it possible for small floating point
+           constants to be recognized.  (This rule is applied before (1).)
+
+  The compiler attempts to insert omitted selections wherever an identifier
+occurs in an expression.  Omitted argument inference is attempted for any
+application.  Applications to no arguments, and applications of the V
+operation are inserted wherever they are found to be necessary as a
+result of signature matching.  This occurs in guards for do- or if-
+-expressions, on the right side of an if-expression, for a function body
+if an explicit result signature is given, and in an application.  Forgetting
+of type components is allowed in applications and function bodies, but not
+currently in conditionals.
+  It is worth noting that the compiler has to infer this information in
+conjunction with assigning signatures to expressions in the program.  The
+general "algorithm" it uses to accomplish this is to sort all subexpressions
+occurring in the program by the dependence of the signature of one sub-
+expression on those of other subexpressions.  It then assigns signatures
+and adds coercions, starting with those subexpressions which do not
+depend on other parts of the program.  This will fail if there are circular
+dependencies between subexpressions (as in let a == func[]{a[]} ...).
+The compiler will issue an error message if this happens.  It should always
+be possible to remedy such a situation by inserting more explicit signature
+information (let a == func[]val Short{a[]} ...).
+  Unfortunately, the "algorithm" used is sufficiently complicated, that
+it may not be apparent why a circularity did, or did not, arise.  In
+particular, the compiler has to consider the signature of an application
+to be dependent on the signature of the arguments, since they are likely
+to be used to infer selections for the operator.  Similar "extra"
+dependencies arise elsewhere.
+  Almost none of the preceding is done for expressions which appear
+inside signatures.  Only selections are inferred, and that is done
+solely on the basis of identifier names, and not their signatures.
+  In spite of all of this, this mechanism appears to rarely cause serious
+problems.  It is safe to experiment, since it is virtually guaranteed that
+the compiler will either infer correct information, complain about a
+circularity, or, on rare occasions, make an inappropriate inference which
+will result in a signature matching error.
+
+See also: float
+
+Note: If you make any discoveries which contradict the last paragraph,
+please send mail to boehm@washington.
+

@@ -1,0 +1,29 @@
+Void is a built-in type with no operations.  Null is a built-in constant
+of this type.  FS is a built-in variable of type Void.  FS (and any Void
+variable) is intended to represent the state of everything.
+They have signatures:
+
+    Void: type {};
+    Null: func [] val Void;
+    FS: var Void;
+
+The dependence of an expression on the outside world (in particular the
+UNIX file system) is indicated by forcing it to mention a var Void
+variable.  This insures that such an expression can never be mistaken
+as "pure" and embedded in a type expression.  All non-Russell external
+functions are forced to have such a parameter, since the compiler cannot
+tell what their value may depend on.  The same holds for the Out function
+of reference types.  (FS is essentially the only such variable, since Void
+does not have a New operation.  Thus there is no such thing as a local Void
+variable. The name "FS" is a bit of a misnomer in conjunction with references.)
+
+A var Void parameter should always appear in the last parameter position.
+The type inference algorithm should insure that the corresponding
+actual argument never needs to be explicitly present.
+
+A val Void signature can be interpreted to mean that no result of
+interest is returned.  Signature checking rules are somewhat relaxed
+to accomodate this view.  In particular, if a function result signature
+is val Void, the body may have any signature, and a conditional
+appearing at the end of such a body is not forced to have guarded
+commands with matching signatures.

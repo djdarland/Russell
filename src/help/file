@@ -1,0 +1,40 @@
+  File is a built-in type which provides basic access to UNIX files.
+Its signature is:
+
+    File: type f { = :  func [val f; val f] val Boolean;
+                   := : func [var f; val f] val f;
+                   Null: func [] val f;
+                   New: func [] var f;
+                   V:   func [var f] val f;
+                   close: func [val f] val Void;
+                   eof:   func [val f; var Void] val Boolean;
+                   flush: func [val f] val Void;
+                   open:  func [fname,mode: val ChStr] val f;
+		   readb: func [val f; var Void] val Short;
+                   readc: func [val f; var Void] val ChStr;
+                   seek:  func [val f; val Long] val Void;
+                   stderr: func [] val f;
+                   stdin:  func [] val f;
+                   stdout: func [] val f;
+                   write: func [val f; val ChStr] val ChStr;
+		   writeb: func [val f; val Short] val Short;
+                 };
+
+  An object of type file is usually one of the 3 constants stderr, stdin,
+and stdout, which refer to the UNIX standard error, standard input, and
+standard output files, or it is produced by a call to open.  The parameters
+to open are as for the C language "fopen" call.  The first argument is the
+file name.  The second is usually either "r" for reading or "w" for writing.
+Open returns Null[] if it fails.
+  Flush writes any data currently in the output buffer associated with
+that file.  The "=" operation tests equality of file objects (not file
+names).  It is primarily used for comparing the value returned by open
+agains Null[].  Readc reads a single character from the given file.
+Write writes a string of arbitrary length.  Eof tests whether an attempt
+was made to read past the end of a file.  Seek positions the file pointer
+at the byte position given by the second argument.  (This is currently
+always an offset from the beginning of the file.)
+
+Implementation Note: Files are equivalent to C streams, and may be
+passed to C routines which are declared to be external.  This should
+allow easy access to other C library I/O facilities.

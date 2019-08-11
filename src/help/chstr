@@ -1,0 +1,47 @@
+ChStr is a built-in type of character strings.  It implements string
+constants, single character input, string output, concatenation,
+and substring operations.  Functions to convert between strings of length 1,
+and the ASCII code of the chracter they contain are also present.
+See the "strings" entry for more information about string constants and
+concatenation.
+
+    ChStr: type CS {
+	characters;
+	'' :     func [] val CS;
+	. :      func [val CS; val Short] val Short;
+        := :     func [var CS; val CS] val CS;
+        <> :     func [val CS; val CS] val Boolean;
+        = :      func [val CS; val CS] val Boolean;
+        < :      func [val CS; val CS] val Boolean;
+        > :      func [val CS; val CS] val Boolean;
+        <= :     func [val CS; val CS] val Boolean;
+        >= :     func [val CS; val CS] val Boolean;
+        In:      func [val Short] val CS;
+        New:     func [] var CS;
+	New:     func [val CS] var CS;   (* initializes to arg value *)
+        Out:     func [val CS] val Short;
+        V        func [var CS] val CS;
+        ^* :     func [x,y: val CS] val CS;
+        getchar: func [var Void] val CS;
+        len:     func [val CS] val Short;
+        put:     func [val CS] val CS;
+        substr:  func [val CS; start,length: val Short] val CS;
+    };
+
+The "substr" operation requires a string, a starting position
+(0 for the beginning) and a length.  It returns the substring starting
+at the indicated position and of the indicated length (shorter if the
+original string is shorter than start+length).  The "Out" function
+returns the ASCII code of the first character in the string.
+The expression "s.i" evaluates to the ASCII code of ith character of s.
+"Out[s]" is equivalent to "s.0".  The "In" function returns a one character
+string.  The ASCII code of that character is the argument modulo 256.
+
+Note that NULL is used as a termination character.  Thus an explicit
+NULL in the middle of a string will cause the rest of the string
+to be ignored.
+
+Implementation note:  The implementation is compatible with C (for values).
+As a result, 'len' and 'substr' having running times proportional to the
+length of the string.  The same applies to the index operation ".", except
+in the presence of -O in the non-Vax implementation.

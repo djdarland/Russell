@@ -1,0 +1,17 @@
+This is the source for several passes over the syntax tree which follow the
+initial symbol table generation.  They performs the following tasks:
+
+	1.  Assign pre- and post-order numbers to each node in the tree.
+
+	2.  Set the def_found field of each identifier declared within
+		a function or type signature.  Clear the last_definition 
+		field and set the def_found field of all
+		identifiers explicitly selected from a type.
+
+	3.  Rearrange type signatures into a canonical order.
+		This canonical order consists of a single
+		DEFCHARSIGS node followed by a list of TSCOMPONENTs.
+
+	4. Standardize xlause ordering in conditionals.
+
+	5. Other minor manipulations.

@@ -1,0 +1,30 @@
+LList is a built-in type-producing function.  It provides linear lists
+consisting of elements of the argument type.  It is different from the "List"
+function in that the resulting type provides a version of the "cons" function
+which is lazy in its second argument.  Thus the tail of a list is not
+necessarily computed until it is actually needed.  This allows the manipulation
+of conceptually infinite objects.
+
+The signature of LList is:
+
+    LList: func[t:type{}] type l {
+                New; :=; V;
+                '' : func[] val l (*empty list*);
+                is_nil : func[val l] val Boolean (* is empty *);
+                cons: func[val t; val l] val l;
+                            (* add at left end *);
+                cons: func[val t; func[] val l] val l;
+                            (* cons, second argument lazily evaluated *);
+                head: func[val l] val t (* first element, error if empty *);
+                tail: func[val l] val l (* all but first, error if empty *);
+           }
+
+New initializes to '' or nil.
+Note that the reverse cons function of "List" is not provided.  Unlike
+"List", "LList" is primitive; it is not possible to implement it in
+Russell without extensive use of impure functions and the -L option.
+
+Implementation Note:  For reasons not entirely understood by the author,
+the implementation appears to be noticably more efficient than that obtainable
+in most LISPs.
+

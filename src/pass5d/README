@@ -1,0 +1,7 @@
+This is the Russell Intermediate Code (RIC) generator.  It produces
+an intermediate code file (.G) suffix.  This consists of binary encoded
+3 address code.  It must subsequently be translated to machine specific
+assembly language.  A very rudimentary disassembler (called "display") for
+.G files can be obtained by typing make_display in this directory (after
+the compiler has been built).  The semantics of the intermediate code
+instructions is partially given in "op_codes.h".

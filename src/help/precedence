@@ -1,0 +1,94 @@
+An expressions consists of a sequence of the following:
+
+a) identifiers (operator symbols such as + are identifiers)
+
+a) Function constructions ( func[param_list] result_signature { body } )
+
+b) Type constructions (extend, enum, record, prod, union)
+
+c) Selections from a type (type_expression$identifier)
+
+d) Type modifications (with, export, hide)
+
+e) parenthesized lists of expressions
+
+f) let blocks (to introduce declarations)
+
+g) use blocks (to specify types for implicit selection)
+
+h) pseudo-operators "cand" and "cor"
+
+i) argument lists enclosed in square brackets
+
+If such a sequence contains more than one of the above components, it is assumed
+to denote one or more nested function applications.  The following rules
+are used to parse such a sequence.
+
+Selections and/or type modifications are first associated with the immediately
+preceding component.  Effectively, "$", "hide", "export", and "with" have
+the highest precedence.
+
+The outermost operator for such an expression is assumed to be the
+rightmost component with lowest precedence (leftmost in the case of "**").
+(E.g. the outermost operator of a + b + c is the rightmost +.)
+If all components have infinite precedence, either the only one that
+is not an argument list, or the leftmost one is chosen.
+If the subsequence to the left of the outermost operator has more than
+one element, it is recursively converted to a (nested) application.
+The same applies to the right subsequence.  The whole sequence is
+then interpreted to denote the outermost operator applied to the result of
+the left and/or right subexpression (with applications of cand and cor
+interpreted as the appropriate conditional expressions).  If either
+subexpression is an argument list, the other one is added to it.
+If they are both lists they are concatenated.
+
+The following sets of expressions are equivalent:
+
+    a+b         [a]+b       [a]+[b]     +[a,b]      [a,b]+
+
+    n!          !n          [n]!        ![n]
+
+    f[a,b,c]    [a,b]f[c]   [a]f[b,c]   [a,b,c]f
+
+Note that parsing is not influenced by signature specifications.
+
+Expression components are assigned precedence as follows:
+
+a) Let blocks, use blocks, argument lists, and parenthesized expressions
+   have the precedence of the last expression appearing inside the body.
+
+b) Selections have the precedence of the identifier being selected.
+
+c) Constructions, type modifications, conditionals, and loops
+   have infinite precedence.
+
+d) Cor and cand have precedence 1 and 2 respectively.
+
+e) Other operator identifiers have precedence 3, unless they appear in
+   the following table.  Alphanumeric identifiers not listed below have
+   infinite precedence.
+
+    identifier              precedence
+        :=                      0
+        +=                      0
+        -=                      0
+        or                      4
+        and                     5
+        not                     6
+        =                       7
+        <                       7
+        <=                      7
+        >=                      7
+        <>                      7
+        >                       7
+        +                       8
+        -                       8
+        *                       9
+        /                       9
+        %                       9
+        ^+                      10
+        ^*                      10
+        **                      11
+        ^                       12
+        .                       13
+

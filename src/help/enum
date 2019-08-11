@@ -1,0 +1,22 @@
+Enumerations are finite scalar types with named elements.  Their syntax is
+
+        enum { id1, ..., idn }
+
+The signature of such an expression is:
+
+        type t {
+            (* Variable manipulation *)
+                New; :=; V;
+            (* Comparison *)
+                =; <>;
+            (* Miscellaneous *)
+                First, Last: func[] val t;
+                Pred, Succ:  func[val t] val t;
+            (* Conversion to and from standard representation (starts w/ 0) *)
+                Ord: func [val t] val Short;
+                OrdInv: func[val Short] val t;
+            (* Number of elements *)
+                Card: func[] val Short;
+            (* constants *)
+                id1, ..., idn: func [] val t;
+        }

@@ -1,0 +1,467 @@
+/*
+ *  Russell Compiler parameter file
+ */
+/*  include <whoami.h> */
+/* This refers to the machine used for compilation, not necessarily */
+/* the target machine.                                              */
+/* This is assumed in several places, e.g. streedefs.h */
+/* and other files which mention DEFCHARSIGS nodes     */
+/* The following functions were useful when we reference counted the */
+/* syntax tree.  Now we let the garbage collector worry about it.    */
+/* of substitution of constant name.          */
+/* for a string                            */
+/* be representable.                              */
+/* loaded at once.                             */
+/*
+ *	Various global type definitions
+ */
+/* We assume that booleans are initialized to FALSE */
+/*
+ *	Tuneable constants
+ */
+/* debugging error messages are output using dbgmsg */
+/* diagnostic debugging messages are output using diagmsg */
+/* SHOULD DISAPPEAR */
+/* specialized error output routines */
+/* parameters can be augmented by err_node and err_msg */
+/* turn off miscellaneous debugging      */
+/* to turn on allocation debugging define BAD here */
+/*
+ * stptrs declaration macros for use with streedefs.h
+ *  declares an array of bit vectors identifying those fields
+ *  which are considered to be pointers for reference count
+ *  purposes.
+ */
+/*
+ * Syntax Tree Structure Definitions
+ *
+ * This file is a collection of macro invocations
+ *
+ * The calling environment must contain definitions for
+ *
+ * TOP          called at the beginning
+ * START        called to start each structure declaration
+ * INT, UNSIGNED, REFCNT, NODEKIND, NODESTAR, VLINENO, STTINDX,
+ *      LISTPTR, BACKREF,CNSTAR(= pointer to Cons Node),STRPTR,
+ *	BITVECTOR, NBPTR, HNODESTAR (identical to NODESTAR except hidden,
+ *      i.e. not passed to mknode ), SIG, and HSIG.
+ *      (The latter two are used for pointers from expression
+ *      nodes to signature nodes.)
+ *              called to define individual fields
+ * FINISH       called to finish each structure
+ * BOTTOM       called to finish everything
+ */
+/*
+ *	Note that certain fields are not really part of the syntax tree,
+ * but rather comprise the symbol table.  In particular each identifier
+ * structure contains a field which eventually points to the last
+ * declaration in the innermost enclosing scope of that identifier.
+ * All constructs which can define a new identifier contain fields
+ * used for chaining all definitions of a given identifier together.
+ * If several of these constructs can occur in a given scope, i.e.
+ * in the case of declarations and parameters, another field is
+ * included to point back to some structure which uniquely identifies
+ * that scope, so that illegal multiple declarations can subsequently
+ * be detected.
+ *  Identifier nodes contain an additional field identifying the
+ * surrounding use list.  Use lists themselves are chained together
+ * like identifier declarations.  Thus the list of types from which
+ * selections can be inferred is easily identifiable.
+ *  Also the first field of any structure which can possibly represent
+ * a denotation is one for the signature of that denotation.  In general
+ * this field is hidden and not used until the signature deduction phase.
+ *  Any node which can declare an identifier (outside a signature)
+ * contains displacement and level fields in the third and fourth positions
+ * following the prefix.  The level number refers to function nesting
+ * depth before the storage allocation pass of the code generator, and
+ * is then changed to be activation record nesting depth.  (The two may
+ * differ, since blocks occasionally require activation records.)
+ *  Any signature field must be followed by a corresponding sig_done field.
+ */
+#ifndef STREEDEFS
+#  define SZSTANDARDPREFIX 4
+/* used to be 5, before we dropped refcount */
+#endif
+/*
+ * Notes:
+ *
+ */
+unsigned stptrs[] = {
+ 0
+,
+ 0
+   +(1<<27)
+   +(1<<26)
+    +(1<<23)
+    /* This declaration is transparent to */
+/* signature checking.                */
+    /* decl of an innermost let-declared identifier*/
+/* declared by r.h.s.  Used only for signature */
+/* transparent declarations.  References       */
+/* to signature transparent ids are counted    */
+/* as refs to the right side of their          */
+/* declarations for export rule checks.        */
+    /* Smallest pre-order number of declaration  */
+/* in this block which may require the value */
+/* of the declared identifier.               */
+/* Used to detect possible forward refs.     */
+    /* This is a variable which was unusually    */
+/* allocated.                                */
+# ifndef STREEDEFS
+/* Variable was directly stack allocated */
+#   define VAR_ON_STACK 7
+#       define SIMPLE_VAR_ON_STACK 1
+#       define PTR_VAR_ON_STACK 2
+#       define INIT_VAR_ON_STACK 4
+/* Array is contiguously allocated.      */
+#   define ARRAY_CONTIG 8
+/* Imported into nested scope            */
+#   define ID_IMPORTED  16
+/* Variable is referenced other than as  */
+#   define VAR_NONTR_REF 32
+/* argument to V or :=                   */
+/* With the -R option, the -G code generator keeps     */
+/* identifier bindings or variables in v. registers:   */
+/* displacement is v. register number  */
+#   define ID_IN_REG    64
+#   define SIMPLE_VAR_IN_REG   128
+#   define PTR_VAR_IN_REG      256
+#   define INIT_VAR_IN_REG     512
+#   define VAR_IN_REG          896
+/* r.h.s always evaluates to integer constant decl_const_val: */
+#   define DECL_CONST         1024
+#   define NOT_DECL_CONST     2048
+# endif
+    /* index for with list components       */
+    /* The rhs really needs to be evald     */
+,
+ 0
+   +(1<<27)
+   +(1<<26)
+    /* The only argument passed as this  */
+/* parameter.  NIL indicates no call */
+/* found so far. MULTIPLE_DEFS       */
+/* indicates that different arguments*/
+/* are passe, or we don't know the   */
+/* identity of the argument.         */
+/* MULTIPLE_TP_DEFS indicates that   */
+/* different arguments are passed,   */
+/* but they are all types with       */
+/* standard := and V operations.     */
+# define MULTIPLE_DEFS ((NODE *) 1)
+# define MULTIPLE_TP_DEFS ((NODE *) 2)
+# define is_real_def(x) (((unsigned) (x)) > 2)
+,
+ 0
+/* also used for unions */
+   +(1<<27)
+   +(1<<26)
+,
+ 0
+    +(1<<27)
+   +(1<<25)
+,
+ 0
+    +(1<<27)
+   +(1<<25)
+,
+ 0
+    +(1<<27)
+    /* Corresponding function construction */
+/* (if known) - used for optimization  */
+    /* Look at ststructs for definitions   */
+    /* ep can be found by tracing static   */
+/* chain from environment in which     */
+/* expression occurs.                  */
+    +(1<<21)
+   +(1<<20)
+,
+ 0
+    +(1<<27)
+    /* Representation can't point (indirectly) to   */
+/* activation records.  (Used for optimization) */
+   +(1<<24)
+    +(1<<23)
+    /* inline code for quoted single char  */
+    /* inline code for string as a whole   */
+    /* inline code for each string element */
+    /* maximum length for above string     */
+/* expansion.  -1 ==> default          */
+    /* inline code to concatenate string   */
+/* sections of long string.            */
+,
+ 0
+   +(1<<27)
+   +(1<<26)
+,
+ 0
+/* Gives list of quoted characters with */
+/* default signatures. Also used as a	*/
+/* type signature component.                    */
+/* Assumes ASCII, 32 bits per word              */
+# ifndef STREEDEFS
+#   define NVECTORS 4
+# endif
+    /* List of DCSEXCEPTION nodes         */
+/* for constants with non-nil special */
+/* or in-line code values.            */
+,
+ 0
+/* The signature of a signature */
+    +(1<<27)
+,
+ 0
+    +(1<<27)
+/* Activation record info, used only if INSIDE_LOOP and CONTAINS_CLOSURE */
+/* are both set, and the declaration list is not empty.                  */
+    +(1<<22)
+    +(1<<21)
+/* There is a sourrounding loop with no */
+#   define INSIDE_LOOP       1
+/* intervening blocks or function       */
+/* abstractions.                        */
+/* Also set if there is a possibility   */
+/* that the block may be reexecuted     */
+/* without leaving the surrounding      */
+/* function due to Call/cc calls.       */
+/* A closure value is built inside the  */
+#   define CONTAINS_CLOSURE  2
+/* block.                               */
+/* There may be an embedded Call/cc     */
+#   define CALLCC_CALL       4
+/* call.                                */
+/* We need an a.r. if this is inside a  */
+#   define REQUIRES_AR       8
+/* loop, and it either the block builds */
+/* a closure, or there is a Call/cc     */
+/* call embedded in the block.          */
+/* These imply that it is not safe to   */
+/* promote bindings to surrounding      */
+/* function activation record.          */
+/* It is known that there is no         */
+#   define NO_SURR_LOOP     16
+/* explicit loop between this block     */
+/* and the surrounding function         */
+/* construction.  Implies not           */
+/* INSIDE_LOOP, but can be computed     */
+/* much earlier.                        */
+,
+ 0
+    +(1<<27)
+    /* signature checking done flag */
+    +(1<<25)
+    +(1<<24)
+,
+ 0
+    +(1<<27)
+   +(1<<25)
+    +(1<<24)
+    /* enclosing var Void parameter */
+,
+ 0
+    +(1<<27)
+    +(1<<25)
+,
+ 0
+    +(1<<27)
+   +(1<<25)
+    /* Position of In operation in type sign. */
+,
+ 0
+    +(1<<27)
+   +(1<<25)
+    +(1<<24)  /* a list of parameter nodes */
+,
+ 0
+    +(1<<27)
+    +(1<<25)
+,
+ 0
+    +(1<<27)
+   +(1<<25)
+    +(1<<24)  /* list of parameter nodes */
+,
+ 0
+   +(1<<27)
+    +(1<<26)
+,
+ 0
+    +(1<<27)
+   +(1<<23)
+   +(1<<22)  /* NIL if this represents a coercion */
+    /* bit vector specifying components  */
+/* to be deleted.                    */
+    /* number of type components before  */
+/* deletions.                        */
+    /* Need to actually construct value  */
+,
+ 0
+   +(1<<27)
+    +(1<<26)
+,
+ 0
+   +(1<<27)
+    +(1<<26)
+,
+ 0
+   +(1<<27)
+   +(1<<26)
+   +(1<<25)
+,
+ 0
+,
+ 0
+    +(1<<27)
+,
+ 0
+,
+ 0
+,
+ 0
+    +(1<<27)
+    +(1<<25)
+,
+ 0
+    +(1<<27)
+    +(1<<25)
+,
+ 0
+   +(1<<27)
+   +(1<<26)
+,
+ 0
+    +(1<<27)
+    +(1<<25)  /* optional type denotation from which    */
+/* identifier is to be selected.          */
+    /* -1 ==> imm. surrounding local type id	*/
+/* Note that the local type id is in fact */
+/* always defined by a TYPESIGNATURE node */
+/* since this convention is used only for */
+/* id's with a default signature.         */
+    /* innermost definition of identifier     */
+    /* TRUE ==> last_definition points to     */
+/* actual definition rather than last     */
+/* overloading of the identifier and the  */
+/* sel_type field has its final value.    */
+    /* An application of the identifier       */
+    /* Need to check for erroneous forward ref */
+,
+ 0
+    +(1<<27)
+    +(1<<25)
+    +(1<<19)  /* An application of the identifier         */
+/* Useful for overload resolution           */
+    /* Need to check for erroneous forward ref */
+,
+ 0
+/* quoted string */
+    +(1<<27)
+    +(1<<25)
+    +(1<<22)
+,
+ 0
+/* unquoted string */
+    +(1<<27)
+    +(1<<25)
+    +(1<<22)
+,
+ 0
+   +(1<<27)  /* completed by signature deduction pass if */
+/* necessary.  */
+/* Activation record info */
+   +(1<<22)
+    /* used to hold the following bits of dataflow */
+/* information:                                */
+# ifndef STREEDEFS
+/* No special properties */
+#   define COMPLICATED  0
+/* Static link not needed,       */
+#   define NO_SL        1
+/* no "complicated" constructs,  */
+/* no accesses through AR.       */
+/* No calls to an output routine */
+#   define NO_PUT       2
+/* Environment can't be saved by   */
+#   define NO_CALLCC    4
+/* call/cc call.  This implies     */
+/* that it's safe to allocate      */
+/* variables directly on the stack */
+/* There are no nested fn constrs.  */
+#   define NO_CONSTR    8
+/* that could conceivably be        */
+/* exported.                        */
+/* Thus it is safe to copy id       */
+/* bindings into the closure itself */
+/* Closure must be explicitly represented */
+#   define NEED_CL     16
+/* Nonlocal bindings WILL BE copied to */
+#   define CP_GLOBALS  32
+/* closure. Requires that NO_CONSTR    */
+/* holds, that there aren't too many   */
+/* non-locals, that the closure needs  */
+/* to be explicitly built, that        */
+/* none of the non-locals constitute   */
+/* forward references, and that there  */
+/* are no calls to the procedure that  */
+/* could otherwise bypass evaluation   */
+/* of the operator.                    */
+/* All nested fn constructions that require  */
+#   define NO_AR_REFS  64
+/* a closure copy identifier bindings into   */
+/* the closure itself.  Thus it is           */
+/* automatically safe to allocate            */
+/* activation record on the stack.           */
+/* Known to call itself directly and */
+#   define DIR_REC    128
+/* tail-recursively.                 */
+/* There is a direct call to this  */
+#   define DIR_CALL   256
+/* procedure that does not require */
+/* an explicit closure.            */
+/* Procedure may indirect through   */
+#   define SL_ACC     512
+/* static link.  Thus it better be  */
+/* there.  (Accesses through AR are */
+/* possible even if SL_ACC is false)*/
+#   define NESTED_AR_BLOCK 1024
+/* Procedure contains a nested block that */
+/* requires its own activation record.    */
+# endif
+    /* List of occurrences of distinct   */
+/* non-local identifiers inside the  */
+/* function.  Meaningful only in the */
+/* presence of CP_GLOBALS.  Ordering */
+/* in list determines ordering in    */
+/* closure.                          */
+/* References to identifiers that    */
+/* are global to the entire program  */
+/* are excluded.                     */
+    /* need to generate code for body */
+,
+ 0
+/* A list of these is pointed to	*/
+                           /* by each funcconstructor (i.e.	*/
+/* lambda abstraction)		  	*/
+    /* Pointer to declaration		*/
+    /* Local/Global in surrounding scope	*/
+    /* Variable Index in surrounding scope	*/
+    /* Free Variable Index (in closure)	*/
+,
+ 0
+/* used as body of externally defined  */
+/* functions.                          */
+,
+ 0
+/* used as body of separately compiled  */
+/* Russell functions.                   */
+    +(1<<27)
+,
+ 0
+/* Single character type component with */
+/* in-line code or special field.       */
+    /* Same conventions as fsig_special  */
+    /* Must be BACKREF so that subst etc.*/
+/* don't try to follow it.           */
+,
+};
+#define STREEDEFS

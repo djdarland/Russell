@@ -1,0 +1,4 @@
+This is the RUSSELL scanner and parser.  String table manipulation
+and access routines are also provided in this directory.  The access
+routines are also used by later passes.
+

@@ -1,0 +1,74 @@
+Float is a built-in type providing double precision floating point operations.
+SFloat provides single precision floating point operations.
+
+Float has signature:
+
+    Float: type F {
+      (* operations *)
+	* :     func [x,y:val F] val F;
+	+ :     func [x,y:val F] val F;
+	- :     func [val F] val F;
+	- :     func [x,y:val F] val F;
+	. :     func [whole, fraction, fraction_length: val Short] val F;
+	/ :     func [x,y:val F] val F;
+	:= :    func [var F; val F] val F;
+        < :     func [x,y:val F] val Boolean;
+        <= :    func [x,y:val F] val Boolean;
+        <> :    func [x,y:val F] val Boolean;
+        = :     func [x,y:val F] val Boolean;
+        > :     func [x,y:val F] val Boolean;
+        >= :    func [x,y:val F] val Boolean;
+	In:     func [val Short] val F;
+	New:    func [] var F;
+	New:    func [val F] var F;   (* initializes to arg value *)
+        Out:    func [val F] val Short;
+	V:      func [var F] val F;
+	atan:   func [val F] val F;
+	cos:    func [val F] val F;
+	exp:    func [val F] val F;
+	exponent:
+		func [val F] val Short;
+	get :   func [var Void] val F;
+	ln:     func [val F] val F;
+	put :   func [val F] val F;
+	puts :  func [val F] val ChStr;
+	shift:  func [val F; how_much:val Short] val Short;
+	sin:    func [val F] val F;
+	sqrt:    func [val F] val F;
+	to_Long: func [val F] val Long;      (* Convert to bignum *)
+	to_SFloat: func [val F] val SFloat;  (* Convert to single precision *)
+    };
+
+The signature of SFloat is identical, except that the function "to_SFloat"
+is replaced by a "to_Float" function.  (On a Vax, both are aliases for the
+identity function.)
+
+Note that constants are provided in a very primitive way.  The constant
+1.2 is parsed as .[1,2].  The actual . operation provided has 3 arguments.
+The type inference algorithm treats this as a special case and inserts a
+3rd ardument which is the length of the second.  Thus the constant gets
+translated to .[1,2,1], which then computes the right value.
+This scheme fails if any of the numbers involved is too big for a
+Short constant.
+
+The "shift" function multiplies the first argument by 2**how_much.  The
+"exponent" function returns an integer n such that the absolute value of the
+argument is between 2**(n-1) and 2**n.  This should not be confused with "exp",
+the exponential function.  "Puts" converts a floating point number to a
+printable representation.
+
+Implementation note:  The implementaion of Float is terrible.  The type is
+provided so that toy floating point programs, and programs making occasional
+use of floating point, can run.  Aside from the above problem with constants,
+everything is currently SLOW.  Float numbers are represented by a pointer to a
+IEEE 64 bit floating point representation on the heap.
+  The SFloat type is an attempt to get reasonable floating
+point performance.  Unlike Float numbers, they are manipulated directly,
+without heap allocation.  Most operations currently still involve a procedure
+call, but on a 68881 equipped Sun 3, this appears to cost less than a factor
+of 1.5 in execution time.  SFloat numbers are represented as IEEE 32 bit
+floating point numbers.  NAN and infinity handling is sloppy (i.e. we
+haven't thought much about it).
+  Parts of the floating point implementation understand the floating point
+representation in great detail.  These are probably broken on non-IEEE
+machines.

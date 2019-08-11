@@ -1,0 +1,65 @@
+Short is the basic built-in integer data type.  Values may range between
+-2**(15) and 2**(15)-1.  All operations are performed mod 2**16.
+(On the Sum implementation operations are performed modulo 2**32.)  No
+overflow is reported (unless the appropriate hardware trap is enabled).
+(The Long type provides unlimited precision arithmetic).
+
+    Short: type S {
+      (* constants *)
+	'0' :   func [] val S;
+	'1' :   func [] val S;
+	'2' :   func [] val S;
+	'3' :   func [] val S;
+	'4' :   func [] val S;
+	'5' :   func [] val S;
+	'6' :   func [] val S;
+	'7' :   func [] val S;
+	'8' :   func [] val S;
+	'9' :   func [] val S;
+      (* operations *)
+        % :     func [x,y:val S] val S;  (* remainder *)
+        * :     func [x,y:val S] val S;
+        ** :    func [x,y:val S] val S;  (* exponentiation *)
+        + :     func [x,y:val S] val S;
+        - :     func [val S] val S;
+        - :     func [x,y:val S] val S;
+        / :     func [x,y:val S] val S;
+        (* assignment operations *)
+          := :    func [var S; val S] val S;
+          += :    func [var S; val S] val S;
+          -= :    func [var S; val S] val S;
+        < :     func [x,y:val S] val Boolean;
+        <= :    func [x,y:val S] val Boolean;
+        <> :    func [x,y:val S] val Boolean;
+        = :     func [x,y:val S] val Boolean;
+        > :     func [x,y:val S] val Boolean;
+        >= :    func [x,y:val S] val Boolean;
+        New:    func [] var S;
+	New:    func [val S] var S;   (* initializes to arg value *)
+        V:      func [var S] val S;
+        ^+ :    func [x,y: val S] val S;
+        get :   func [var Void] val S;
+        put :   func [val S] val S;
+        puts:   func [val S] val ChStr;
+        shift : func [what, how_much: val S] val S;
+    };
+
+The expression x += 1 is equivalent to x := x + 1.  Inequality is represented
+as <>.  The ^+ operation multiplies its left argument by 10 and adds
+its right argument to the result.  Division truncates toward 0.
+The sign of the remainder is that of the dividend.  (The authors know that
+this is the wrong thing to do.  We're just waiting for the hardware designers
+to catch on.)
+
+The put functions writes a short integer onto the standard output file.
+The puts function converts a short integer to a printable representation.
+The "get" function reads one from the standard input.  The application
+shift[x,n] returns the largest integer which is no greater than x*(2**n),
+modulo 2**16 (2**32 on a Sun).  The second argument to shift should be
+between -16 and 16 (-32 and 32 on a Sun).
+
+Implementation note:  Values are efficiently implemented.  Variables leave
+a little to be desired, but aren't too bad.  Representation for values is
+compatible with C.
+
+See also: long, strings.

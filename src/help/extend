@@ -1,0 +1,23 @@
+An extension is used to build a copy of a type with conversion functions
+between the original and the copy.  Its syntax is:
+
+        extend { type_expression }
+
+The signature of the result is the signature of the type expression with
+the addition of the following two components, where t is the local type
+name, i.e. refers to the type itself:
+
+        In:  func [val type_expression] val t
+        Out: func [val t] val type_expression
+
+The type_expression is evaluated as part of the evaluation of the extension.
+
+A variant Shrt of the builtin type Short that provides a function for
+adding "Short"s to "Shrt"s, but is otherwise incompatible with it,
+could be declared as:
+
+    Shrt == extend {Short} with S {
+		+ == func[x: val Short; y: val S]  val S {
+			    S$In[x] + y
+		     }
+	    } hide { In; Out }

@@ -1,0 +1,7 @@
+The built-in function abort has signature
+
+        func [] val Void
+
+It will terminate execution after printing a suitable message, printing
+a stack trace (if enabled by the -T compiler flag), and generating a
+core file.

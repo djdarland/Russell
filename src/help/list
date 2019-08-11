@@ -1,0 +1,40 @@
+List is a built-in type-producing function.  It provides linear lists
+consisting of elements of the argument type.  Its signature is:
+
+    List: func[t:type{}] type l {
+                New; :=; V;
+                '' : func[] val l (*empty list*);
+                is_nil : func[val l] val Boolean (* is empty *);
+                cons: func[val t; val l] val l;
+                            (* add at left end *);
+                ^* : func[val l; val t] val l;
+                            (* cons, with args reversed *);
+                head: func[val l] val t (* first element, error if empty *);
+                tail: func[val l] val l (* all but first, error if empty *);
+           }
+
+(New initializes to nil, denoted by ''.)
+  The List function is provided only for convenience and implementation
+efficiency; it can easily be implemented within Russell.
+  The reverse cons operation ^* exists only for historical reasons; its
+use is discouraged.
+  The New function initializes to the empty list (''[]).
+  In addition to the built-in List function, an overloaded polymorphic
+cons function is defined in the initial environment as:
+
+	^ == func[x: val T; y: val List[T]; T: type{}] {
+		cons[x,y];
+	     };
+	^ == func[x: val T; y: val T; T: type{}] {
+		cons[x, cons[y, (List[T])$'']];
+	     };
+
+  Recalling that "^" is right associative, this makes it possible to write
+the list with elements 1, 2, and 3 as "1 ^ 2 ^ 3" without further type
+specification or other baroque syntax.  This allows a convenient syntax
+for procedures with a variable number of arguments of uniform type.
+
+Implementation Note:  The non-Vax versions of the compiler with the -O flag
+insure that "^" actually compiles to in-line code, involving no procedure
+calls.
+

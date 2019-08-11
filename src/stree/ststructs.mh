@@ -1,0 +1,2383 @@
+/*
+ *  Structure declaration macros for use with streedefs.h
+ *  and basic structure manipulation primitives.
+ */
+# include "datatypes/consnodes.h"
+/* maximum number of fields in a node */
+# define MAXFIELDS 20
+/* A leading H indicates the field is hidden, and not a parameter to mknode */
+#define NIL 0
+#define LIST NODE *
+/*
+ * Syntax Tree Structure Definitions
+ *
+ * This file is a collection of macro invocations
+ *
+ * The calling environment must contain definitions for
+ *
+ * TOP          called at the beginning
+ * START        called to start each structure declaration
+ * INT, UNSIGNED, REFCNT, NODEKIND, NODESTAR, VLINENO, STTINDX,
+ *      LISTPTR, BACKREF,CNSTAR(= pointer to Cons Node),STRPTR,
+ *	BITVECTOR, NBPTR, HNODESTAR (identical to NODESTAR except hidden,
+ *      i.e. not passed to mknode ), SIG, and HSIG.
+ *      (The latter two are used for pointers from expression
+ *      nodes to signature nodes.)
+ *              called to define individual fields
+ * FINISH       called to finish each structure
+ * BOTTOM       called to finish everything
+ */
+/*
+ *	Note that certain fields are not really part of the syntax tree,
+ * but rather comprise the symbol table.  In particular each identifier
+ * structure contains a field which eventually points to the last
+ * declaration in the innermost enclosing scope of that identifier.
+ * All constructs which can define a new identifier contain fields
+ * used for chaining all definitions of a given identifier together.
+ * If several of these constructs can occur in a given scope, i.e.
+ * in the case of declarations and parameters, another field is
+ * included to point back to some structure which uniquely identifies
+ * that scope, so that illegal multiple declarations can subsequently
+ * be detected.
+ *  Identifier nodes contain an additional field identifying the
+ * surrounding use list.  Use lists themselves are chained together
+ * like identifier declarations.  Thus the list of types from which
+ * selections can be inferred is easily identifiable.
+ *  Also the first field of any structure which can possibly represent
+ * a denotation is one for the signature of that denotation.  In general
+ * this field is hidden and not used until the signature deduction phase.
+ *  Any node which can declare an identifier (outside a signature)
+ * contains displacement and level fields in the third and fourth positions
+ * following the prefix.  The level number refers to function nesting
+ * depth before the storage allocation pass of the code generator, and
+ * is then changed to be activation record nesting depth.  (The two may
+ * differ, since blocks occasionally require activation records.)
+ *  Any signature field must be followed by a corresponding sig_done field.
+ */
+#ifndef STREEDEFS
+#  define SZSTANDARDPREFIX 4
+/* used to be 5, before we dropped refcount */
+#endif
+/*
+ * Notes:
+ *
+ */
+  typedef union Node {
+    struct {
+#   define LISTHEADER 0
+                int ListHeader_kind;
+# ifndef kind
+#   define kind ListHeader . ListHeader_kind
+# endif
+
+           unsigned ListHeader_vlineno;
+# ifndef vlineno
+#   define vlineno ListHeader . ListHeader_vlineno
+# endif
+
+          int ListHeader_pre_num;
+# ifndef pre_num
+#   define pre_num ListHeader . ListHeader_pre_num
+# endif
+
+          int ListHeader_post_num;
+# ifndef post_num
+#   define post_num ListHeader . ListHeader_post_num
+# endif
+
+        ConsNode * ListHeader_lh_first;
+# ifndef lh_first
+#   define lh_first ListHeader . ListHeader_lh_first
+# endif
+
+        ConsNode * ListHeader_lh_last;
+# ifndef lh_last
+#   define lh_last ListHeader . ListHeader_lh_last
+# endif
+
+} ListHeader;
+    struct {
+#   define DECLARATION 1
+                int Declaration_kind;
+# ifndef kind
+#   define kind Declaration . Declaration_kind
+# endif
+
+           unsigned Declaration_vlineno;
+# ifndef vlineno
+#   define vlineno Declaration . Declaration_vlineno
+# endif
+
+          int Declaration_pre_num;
+# ifndef pre_num
+#   define pre_num Declaration . Declaration_pre_num
+# endif
+
+          int Declaration_post_num;
+# ifndef post_num
+#   define post_num Declaration . Declaration_post_num
+# endif
+
+        union Node * Declaration_decl_id;
+# ifndef decl_id
+#   define decl_id Declaration . Declaration_decl_id
+# endif
+
+        union Node * Declaration_decl_denotation;
+# ifndef decl_denotation
+#   define decl_denotation Declaration . Declaration_decl_denotation
+# endif
+
+        int Declaration_displacement;
+# ifndef displacement
+#   define displacement Declaration . Declaration_displacement
+# endif
+
+        int Declaration_level;
+# ifndef level
+#   define level Declaration . Declaration_level
+# endif
+
+        union Node * Declaration_decl_signature;
+# ifndef decl_signature
+#   define decl_signature Declaration . Declaration_decl_signature
+# endif
+
+        int Declaration_decl_sig_done;
+# ifndef decl_sig_done
+#   define decl_sig_done Declaration . Declaration_decl_sig_done
+# endif
+
+        int Declaration_decl_sig_transp;
+# ifndef decl_sig_transp
+#   define decl_sig_transp Declaration . Declaration_decl_sig_transp  /* This declaration is transparent to */
+# endif
+
+/* signature checking.                */
+         union Node * Declaration_decl_innermost_id;
+# ifndef decl_innermost_id
+#   define decl_innermost_id Declaration . Declaration_decl_innermost_id  /* decl of an innermost let-declared identifier*/
+# endif
+
+/* declared by r.h.s.  Used only for signature */
+/* transparent declarations.  References       */
+/* to signature transparent ids are counted    */
+/* as refs to the right side of their          */
+/* declarations for export rule checks.        */
+         union Node * Declaration_decl_previous_definition;
+# ifndef decl_previous_definition
+#   define decl_previous_definition Declaration . Declaration_decl_previous_definition
+# endif
+
+         union Node * Declaration_decl_scope;
+# ifndef decl_scope
+#   define decl_scope Declaration . Declaration_decl_scope
+# endif
+
+        int Declaration_decl_can_be_refd;
+# ifndef decl_can_be_refd
+#   define decl_can_be_refd Declaration . Declaration_decl_can_be_refd  /* Smallest pre-order number of declaration  */
+# endif
+
+/* in this block which may require the value */
+/* of the declared identifier.               */
+/* Used to detect possible forward refs.     */
+        int Declaration_decl_special;
+# ifndef decl_special
+#   define decl_special Declaration . Declaration_decl_special  /* This is a variable which was unusually    */
+# endif
+
+/* allocated.                                */
+# ifndef STREEDEFS
+/* Variable was directly stack allocated */
+#   define VAR_ON_STACK 7
+#       define SIMPLE_VAR_ON_STACK 1
+#       define PTR_VAR_ON_STACK 2
+#       define INIT_VAR_ON_STACK 4
+/* Array is contiguously allocated.      */
+#   define ARRAY_CONTIG 8
+/* Imported into nested scope            */
+#   define ID_IMPORTED  16
+/* Variable is referenced other than as  */
+#   define VAR_NONTR_REF 32
+/* argument to V or :=                   */
+/* With the -R option, the -G code generator keeps     */
+/* identifier bindings or variables in v. registers:   */
+/* displacement is v. register number  */
+#   define ID_IN_REG    64
+#   define SIMPLE_VAR_IN_REG   128
+#   define PTR_VAR_IN_REG      256
+#   define INIT_VAR_IN_REG     512
+#   define VAR_IN_REG          896
+/* r.h.s always evaluates to integer constant decl_const_val: */
+#   define DECL_CONST         1024
+#   define NOT_DECL_CONST     2048
+# endif
+        int Declaration_decl_sel_index;
+# ifndef decl_sel_index
+#   define decl_sel_index Declaration . Declaration_decl_sel_index  /* index for with list components       */
+# endif
+
+        int Declaration_decl_needed;
+# ifndef decl_needed
+#   define decl_needed Declaration . Declaration_decl_needed  /* The rhs really needs to be evald     */
+# endif
+
+        int Declaration_decl_const_val;
+# ifndef decl_const_val
+#   define decl_const_val Declaration . Declaration_decl_const_val
+# endif
+
+} Declaration;
+    struct {
+#   define PARAMETER 2
+                int Parameter_kind;
+# ifndef kind
+#   define kind Parameter . Parameter_kind
+# endif
+
+           unsigned Parameter_vlineno;
+# ifndef vlineno
+#   define vlineno Parameter . Parameter_vlineno
+# endif
+
+          int Parameter_pre_num;
+# ifndef pre_num
+#   define pre_num Parameter . Parameter_pre_num
+# endif
+
+          int Parameter_post_num;
+# ifndef post_num
+#   define post_num Parameter . Parameter_post_num
+# endif
+
+        union Node * Parameter_par_id;
+# ifndef par_id
+#   define par_id Parameter . Parameter_par_id
+# endif
+
+        union Node * Parameter_par_signature;
+# ifndef par_signature
+#   define par_signature Parameter . Parameter_par_signature
+# endif
+
+        int Parameter_displacement;
+# ifndef displacement
+#   define displacement Parameter . Parameter_displacement
+# endif
+
+        int Parameter_level;
+# ifndef level
+#   define level Parameter . Parameter_level
+# endif
+
+         union Node * Parameter_par_previous_definition;
+# ifndef par_previous_definition
+#   define par_previous_definition Parameter . Parameter_par_previous_definition
+# endif
+
+         union Node * Parameter_par_scope;
+# ifndef par_scope
+#   define par_scope Parameter . Parameter_par_scope
+# endif
+
+         union Node * Parameter_par_only_def;
+# ifndef par_only_def
+#   define par_only_def Parameter . Parameter_par_only_def  /* The only argument passed as this  */
+# endif
+
+/* parameter.  NIL indicates no call */
+/* found so far. MULTIPLE_DEFS       */
+/* indicates that different arguments*/
+/* are passe, or we don't know the   */
+/* identity of the argument.         */
+/* MULTIPLE_TP_DEFS indicates that   */
+/* different arguments are passed,   */
+/* but they are all types with       */
+/* standard := and V operations.     */
+# define MULTIPLE_DEFS ((NODE *) 1)
+# define MULTIPLE_TP_DEFS ((NODE *) 2)
+# define is_real_def(x) (((unsigned) (x)) > 2)
+} Parameter;
+    struct {
+#   define RECORDELEMENT 3
+/* also used for unions */
+                int RElement_kind;
+# ifndef kind
+#   define kind RElement . RElement_kind
+# endif
+
+           unsigned RElement_vlineno;
+# ifndef vlineno
+#   define vlineno RElement . RElement_vlineno
+# endif
+
+          int RElement_pre_num;
+# ifndef pre_num
+#   define pre_num RElement . RElement_pre_num
+# endif
+
+          int RElement_post_num;
+# ifndef post_num
+#   define post_num RElement . RElement_post_num
+# endif
+
+        union Node * RElement_re_id;
+# ifndef re_id
+#   define re_id RElement . RElement_re_id
+# endif
+
+        union Node * RElement_re_denotation;
+# ifndef re_denotation
+#   define re_denotation RElement . RElement_re_denotation
+# endif
+
+        int RElement_re_New_index;
+# ifndef re_New_index
+#   define re_New_index RElement . RElement_re_New_index
+# endif
+
+        int RElement_re_ValueOf_index;
+# ifndef re_ValueOf_index
+#   define re_ValueOf_index RElement . RElement_re_ValueOf_index
+# endif
+
+        int RElement_re_assign_index;
+# ifndef re_assign_index
+#   define re_assign_index RElement . RElement_re_assign_index
+# endif
+
+} RElement;
+    struct {
+#   define VARSIGNATURE 4
+                int VarSignature_kind;
+# ifndef kind
+#   define kind VarSignature . VarSignature_kind
+# endif
+
+           unsigned VarSignature_vlineno;
+# ifndef vlineno
+#   define vlineno VarSignature . VarSignature_vlineno
+# endif
+
+          int VarSignature_pre_num;
+# ifndef pre_num
+#   define pre_num VarSignature . VarSignature_pre_num
+# endif
+
+          int VarSignature_post_num;
+# ifndef post_num
+#   define post_num VarSignature . VarSignature_post_num
+# endif
+
+        union Node * VarSignature_signature;
+# ifndef signature
+#   define signature VarSignature . VarSignature_signature
+# endif
+
+        int VarSignature_sig_done;
+# ifndef sig_done
+#   define sig_done VarSignature . VarSignature_sig_done
+# endif
+
+        union Node * VarSignature_var_denotation;
+# ifndef var_denotation
+#   define var_denotation VarSignature . VarSignature_var_denotation
+# endif
+
+} VarSignature;
+    struct {
+#   define VALSIGNATURE 5
+                int ValSignature_kind;
+# ifndef kind
+#   define kind ValSignature . ValSignature_kind
+# endif
+
+           unsigned ValSignature_vlineno;
+# ifndef vlineno
+#   define vlineno ValSignature . ValSignature_vlineno
+# endif
+
+          int ValSignature_pre_num;
+# ifndef pre_num
+#   define pre_num ValSignature . ValSignature_pre_num
+# endif
+
+          int ValSignature_post_num;
+# ifndef post_num
+#   define post_num ValSignature . ValSignature_post_num
+# endif
+
+        union Node * ValSignature_signature;
+# ifndef signature
+#   define signature ValSignature . ValSignature_signature
+# endif
+
+        int ValSignature_sig_done;
+# ifndef sig_done
+#   define sig_done ValSignature . ValSignature_sig_done
+# endif
+
+        union Node * ValSignature_val_denotation;
+# ifndef val_denotation
+#   define val_denotation ValSignature . ValSignature_val_denotation
+# endif
+
+} ValSignature;
+    struct {
+#   define FUNCSIGNATURE 6
+                int FSignature_kind;
+# ifndef kind
+#   define kind FSignature . FSignature_kind
+# endif
+
+           unsigned FSignature_vlineno;
+# ifndef vlineno
+#   define vlineno FSignature . FSignature_vlineno
+# endif
+
+          int FSignature_pre_num;
+# ifndef pre_num
+#   define pre_num FSignature . FSignature_pre_num
+# endif
+
+          int FSignature_post_num;
+# ifndef post_num
+#   define post_num FSignature . FSignature_post_num
+# endif
+
+        union Node * FSignature_signature;
+# ifndef signature
+#   define signature FSignature . FSignature_signature
+# endif
+
+        int FSignature_sig_done;
+# ifndef sig_done
+#   define sig_done FSignature . FSignature_sig_done
+# endif
+
+         union Node * FSignature_fsig_construction;
+# ifndef fsig_construction
+#   define fsig_construction FSignature . FSignature_fsig_construction  /* Corresponding function construction */
+# endif
+
+/* (if known) - used for optimization  */
+        int FSignature_fsig_special;
+# ifndef fsig_special
+#   define fsig_special FSignature . FSignature_fsig_special  /* Look at ststructs for definitions   */
+# endif
+
+        int FSignature_fsig_slink_known;
+# ifndef fsig_slink_known
+#   define fsig_slink_known FSignature . FSignature_fsig_slink_known  /* ep can be found by tracing static   */
+# endif
+
+/* chain from environment in which     */
+/* expression occurs.                  */
+        char * FSignature_fsig_inline_code;
+# ifndef fsig_inline_code
+#   define fsig_inline_code FSignature . FSignature_fsig_inline_code
+# endif
+
+         union Node * FSignature_fsig_param_list;
+# ifndef fsig_param_list
+#   define fsig_param_list FSignature . FSignature_fsig_param_list
+# endif
+
+        union Node * FSignature_fsig_result_sig;
+# ifndef fsig_result_sig
+#   define fsig_result_sig FSignature . FSignature_fsig_result_sig
+# endif
+
+} FSignature;
+    struct {
+#   define TYPESIGNATURE 7
+                int TSignature_kind;
+# ifndef kind
+#   define kind TSignature . TSignature_kind
+# endif
+
+           unsigned TSignature_vlineno;
+# ifndef vlineno
+#   define vlineno TSignature . TSignature_vlineno
+# endif
+
+          int TSignature_pre_num;
+# ifndef pre_num
+#   define pre_num TSignature . TSignature_pre_num
+# endif
+
+          int TSignature_post_num;
+# ifndef post_num
+#   define post_num TSignature . TSignature_post_num
+# endif
+
+        union Node * TSignature_signature;
+# ifndef signature
+#   define signature TSignature . TSignature_signature
+# endif
+
+        int TSignature_sig_done;
+# ifndef sig_done
+#   define sig_done TSignature . TSignature_sig_done
+# endif
+
+        int TSignature_ts_simple_type;
+# ifndef ts_simple_type
+#   define ts_simple_type TSignature . TSignature_ts_simple_type  /* Representation can't point (indirectly) to   */
+# endif
+
+/* activation records.  (Used for optimization) */
+        union Node * TSignature_ts_local_type_id;
+# ifndef ts_local_type_id
+#   define ts_local_type_id TSignature . TSignature_ts_local_type_id
+# endif
+
+         union Node * TSignature_ts_clist;
+# ifndef ts_clist
+#   define ts_clist TSignature . TSignature_ts_clist
+# endif
+
+         union Node * TSignature_ts_previous_definition;
+# ifndef ts_previous_definition
+#   define ts_previous_definition TSignature . TSignature_ts_previous_definition
+# endif
+
+        char * TSignature_ts_const_code;
+# ifndef ts_const_code
+#   define ts_const_code TSignature . TSignature_ts_const_code  /* inline code for quoted single char  */
+# endif
+
+        char * TSignature_ts_string_code;
+# ifndef ts_string_code
+#   define ts_string_code TSignature . TSignature_ts_string_code  /* inline code for string as a whole   */
+# endif
+
+        char * TSignature_ts_element_code;
+# ifndef ts_element_code
+#   define ts_element_code TSignature . TSignature_ts_element_code  /* inline code for each string element */
+# endif
+
+        int TSignature_ts_string_max;
+# ifndef ts_string_max
+#   define ts_string_max TSignature . TSignature_ts_string_max  /* maximum length for above string     */
+# endif
+
+/* expansion.  -1 ==> default          */
+        char * TSignature_ts_meta_concat;
+# ifndef ts_meta_concat
+#   define ts_meta_concat TSignature . TSignature_ts_meta_concat  /* inline code to concatenate string   */
+# endif
+
+/* sections of long string.            */
+} TSignature;
+    struct {
+#   define TSCOMPONENT 8
+                int TSComponent_kind;
+# ifndef kind
+#   define kind TSComponent . TSComponent_kind
+# endif
+
+           unsigned TSComponent_vlineno;
+# ifndef vlineno
+#   define vlineno TSComponent . TSComponent_vlineno
+# endif
+
+          int TSComponent_pre_num;
+# ifndef pre_num
+#   define pre_num TSComponent . TSComponent_pre_num
+# endif
+
+          int TSComponent_post_num;
+# ifndef post_num
+#   define post_num TSComponent . TSComponent_post_num
+# endif
+
+        union Node * TSComponent_tsc_id;
+# ifndef tsc_id
+#   define tsc_id TSComponent . TSComponent_tsc_id
+# endif
+
+        union Node * TSComponent_tsc_signature;
+# ifndef tsc_signature
+#   define tsc_signature TSComponent . TSComponent_tsc_signature
+# endif
+
+} TSComponent;
+    struct {
+#   define DEFCHARSIGS 9
+/* Gives list of quoted characters with */
+/* default signatures. Also used as a	*/
+/* type signature component.                    */
+/* Assumes ASCII, 32 bits per word              */
+                int DefCharSigs_kind;
+# ifndef kind
+#   define kind DefCharSigs . DefCharSigs_kind
+# endif
+
+           unsigned DefCharSigs_vlineno;
+# ifndef vlineno
+#   define vlineno DefCharSigs . DefCharSigs_vlineno
+# endif
+
+          int DefCharSigs_pre_num;
+# ifndef pre_num
+#   define pre_num DefCharSigs . DefCharSigs_pre_num
+# endif
+
+          int DefCharSigs_post_num;
+# ifndef post_num
+#   define post_num DefCharSigs . DefCharSigs_post_num
+# endif
+
+         unsigned DefCharSigs_dcs_0;
+# ifndef dcs_0
+#   define dcs_0 DefCharSigs . DefCharSigs_dcs_0
+# endif
+
+         unsigned DefCharSigs_dcs_1;
+# ifndef dcs_1
+#   define dcs_1 DefCharSigs . DefCharSigs_dcs_1
+# endif
+
+         unsigned DefCharSigs_dcs_2;
+# ifndef dcs_2
+#   define dcs_2 DefCharSigs . DefCharSigs_dcs_2
+# endif
+
+         unsigned DefCharSigs_dcs_3;
+# ifndef dcs_3
+#   define dcs_3 DefCharSigs . DefCharSigs_dcs_3
+# endif
+
+# ifndef STREEDEFS
+#   define NVECTORS 4
+# endif
+         union Node * DefCharSigs_dcs_exceptions;
+# ifndef dcs_exceptions
+#   define dcs_exceptions DefCharSigs . DefCharSigs_dcs_exceptions  /* List of DCSEXCEPTION nodes         */
+# endif
+
+/* for constants with non-nil special */
+/* or in-line code values.            */
+} DefCharSigs;
+    struct {
+#   define SIGNATURESIG 10
+/* The signature of a signature */
+                int SignatureSig_kind;
+# ifndef kind
+#   define kind SignatureSig . SignatureSig_kind
+# endif
+
+           unsigned SignatureSig_vlineno;
+# ifndef vlineno
+#   define vlineno SignatureSig . SignatureSig_vlineno
+# endif
+
+          int SignatureSig_pre_num;
+# ifndef pre_num
+#   define pre_num SignatureSig . SignatureSig_pre_num
+# endif
+
+          int SignatureSig_post_num;
+# ifndef post_num
+#   define post_num SignatureSig . SignatureSig_post_num
+# endif
+
+        union Node * SignatureSig_signature;
+# ifndef signature
+#   define signature SignatureSig . SignatureSig_signature
+# endif
+
+        int SignatureSig_sig_done;
+# ifndef sig_done
+#   define sig_done SignatureSig . SignatureSig_sig_done
+# endif
+
+} SignatureSig;
+    struct {
+#   define BLOCKDENOTATION 11
+                int BlDenotation_kind;
+# ifndef kind
+#   define kind BlDenotation . BlDenotation_kind
+# endif
+
+           unsigned BlDenotation_vlineno;
+# ifndef vlineno
+#   define vlineno BlDenotation . BlDenotation_vlineno
+# endif
+
+          int BlDenotation_pre_num;
+# ifndef pre_num
+#   define pre_num BlDenotation . BlDenotation_pre_num
+# endif
+
+          int BlDenotation_post_num;
+# ifndef post_num
+#   define post_num BlDenotation . BlDenotation_post_num
+# endif
+
+        union Node * BlDenotation_signature;
+# ifndef signature
+#   define signature BlDenotation . BlDenotation_signature
+# endif
+
+        int BlDenotation_sig_done;
+# ifndef sig_done
+#   define sig_done BlDenotation . BlDenotation_sig_done
+# endif
+
+/* Activation record info, used only if INSIDE_LOOP and CONTAINS_CLOSURE */
+/* are both set, and the declaration list is not empty.                  */
+          int BlDenotation_ar_size;
+# ifndef ar_size
+#   define ar_size BlDenotation . BlDenotation_ar_size
+# endif
+
+           union Node * BlDenotation_ar_static_link;
+# ifndef ar_static_link
+#   define ar_static_link BlDenotation . BlDenotation_ar_static_link
+# endif
+
+          int BlDenotation_ar_static_level;
+# ifndef ar_static_level
+#   define ar_static_level BlDenotation . BlDenotation_ar_static_level
+# endif
+
+         union Node * BlDenotation_bld_declaration_list;
+# ifndef bld_declaration_list
+#   define bld_declaration_list BlDenotation . BlDenotation_bld_declaration_list
+# endif
+
+         union Node * BlDenotation_bld_den_seq;
+# ifndef bld_den_seq
+#   define bld_den_seq BlDenotation . BlDenotation_bld_den_seq
+# endif
+
+        int BlDenotation_bld_precedence;
+# ifndef bld_precedence
+#   define bld_precedence BlDenotation . BlDenotation_bld_precedence
+# endif
+
+        int BlDenotation_bld_flags;
+# ifndef bld_flags
+#   define bld_flags BlDenotation . BlDenotation_bld_flags
+# endif
+
+/* There is a sourrounding loop with no */
+#   define INSIDE_LOOP       1
+/* intervening blocks or function       */
+/* abstractions.                        */
+/* Also set if there is a possibility   */
+/* that the block may be reexecuted     */
+/* without leaving the surrounding      */
+/* function due to Call/cc calls.       */
+/* A closure value is built inside the  */
+#   define CONTAINS_CLOSURE  2
+/* block.                               */
+/* There may be an embedded Call/cc     */
+#   define CALLCC_CALL       4
+/* call.                                */
+/* We need an a.r. if this is inside a  */
+#   define REQUIRES_AR       8
+/* loop, and it either the block builds */
+/* a closure, or there is a Call/cc     */
+/* call embedded in the block.          */
+/* These imply that it is not safe to   */
+/* promote bindings to surrounding      */
+/* function activation record.          */
+/* It is known that there is no         */
+#   define NO_SURR_LOOP     16
+/* explicit loop between this block     */
+/* and the surrounding function         */
+/* construction.  Implies not           */
+/* INSIDE_LOOP, but can be computed     */
+/* much earlier.                        */
+} BlDenotation;
+    struct {
+#   define USELIST 12
+                int UseList_kind;
+# ifndef kind
+#   define kind UseList . UseList_kind
+# endif
+
+           unsigned UseList_vlineno;
+# ifndef vlineno
+#   define vlineno UseList . UseList_vlineno
+# endif
+
+          int UseList_pre_num;
+# ifndef pre_num
+#   define pre_num UseList . UseList_pre_num
+# endif
+
+          int UseList_post_num;
+# ifndef post_num
+#   define post_num UseList . UseList_post_num
+# endif
+
+        union Node * UseList_signature;
+# ifndef signature
+#   define signature UseList . UseList_signature
+# endif
+
+        int UseList_sig_done;
+# ifndef sig_done
+#   define sig_done UseList . UseList_sig_done  /* signature checking done flag */
+# endif
+
+         union Node * UseList_usl_type_list;
+# ifndef usl_type_list
+#   define usl_type_list UseList . UseList_usl_type_list
+# endif
+
+         union Node * UseList_usl_den_seq;
+# ifndef usl_den_seq
+#   define usl_den_seq UseList . UseList_usl_den_seq
+# endif
+
+         union Node * UseList_usl_previous_list;
+# ifndef usl_previous_list
+#   define usl_previous_list UseList . UseList_usl_previous_list
+# endif
+
+        int UseList_usl_precedence;
+# ifndef usl_precedence
+#   define usl_precedence UseList . UseList_usl_precedence
+# endif
+
+} UseList;
+    struct {
+#   define APPLICATION 13
+                int Application_kind;
+# ifndef kind
+#   define kind Application . Application_kind
+# endif
+
+           unsigned Application_vlineno;
+# ifndef vlineno
+#   define vlineno Application . Application_vlineno
+# endif
+
+          int Application_pre_num;
+# ifndef pre_num
+#   define pre_num Application . Application_pre_num
+# endif
+
+          int Application_post_num;
+# ifndef post_num
+#   define post_num Application . Application_post_num
+# endif
+
+        union Node * Application_signature;
+# ifndef signature
+#   define signature Application . Application_signature
+# endif
+
+        int Application_sig_done;
+# ifndef sig_done
+#   define sig_done Application . Application_sig_done
+# endif
+
+        union Node * Application_ap_operator;
+# ifndef ap_operator
+#   define ap_operator Application . Application_ap_operator
+# endif
+
+         union Node * Application_ap_args;
+# ifndef ap_args
+#   define ap_args Application . Application_ap_args
+# endif
+
+         union Node * Application_ap_void_decl;
+# ifndef ap_void_decl
+#   define ap_void_decl Application . Application_ap_void_decl  /* enclosing var Void parameter */
+# endif
+
+} Application;
+    struct {
+#   define ENUMERATION 14
+                int Enumeration_kind;
+# ifndef kind
+#   define kind Enumeration . Enumeration_kind
+# endif
+
+           unsigned Enumeration_vlineno;
+# ifndef vlineno
+#   define vlineno Enumeration . Enumeration_vlineno
+# endif
+
+          int Enumeration_pre_num;
+# ifndef pre_num
+#   define pre_num Enumeration . Enumeration_pre_num
+# endif
+
+          int Enumeration_post_num;
+# ifndef post_num
+#   define post_num Enumeration . Enumeration_post_num
+# endif
+
+        union Node * Enumeration_signature;
+# ifndef signature
+#   define signature Enumeration . Enumeration_signature
+# endif
+
+        int Enumeration_sig_done;
+# ifndef sig_done
+#   define sig_done Enumeration . Enumeration_sig_done
+# endif
+
+         union Node * Enumeration_enum_id_list;
+# ifndef enum_id_list
+#   define enum_id_list Enumeration . Enumeration_enum_id_list
+# endif
+
+} Enumeration;
+    struct {
+#   define EXTENSION 15
+                int Extension_kind;
+# ifndef kind
+#   define kind Extension . Extension_kind
+# endif
+
+           unsigned Extension_vlineno;
+# ifndef vlineno
+#   define vlineno Extension . Extension_vlineno
+# endif
+
+          int Extension_pre_num;
+# ifndef pre_num
+#   define pre_num Extension . Extension_pre_num
+# endif
+
+          int Extension_post_num;
+# ifndef post_num
+#   define post_num Extension . Extension_post_num
+# endif
+
+        union Node * Extension_signature;
+# ifndef signature
+#   define signature Extension . Extension_signature
+# endif
+
+        int Extension_sig_done;
+# ifndef sig_done
+#   define sig_done Extension . Extension_sig_done
+# endif
+
+        union Node * Extension_ext_denotation;
+# ifndef ext_denotation
+#   define ext_denotation Extension . Extension_ext_denotation
+# endif
+
+        int Extension_In_index;
+# ifndef In_index
+#   define In_index Extension . Extension_In_index  /* Position of In operation in type sign. */
+# endif
+
+        int Extension_Out_index;
+# ifndef Out_index
+#   define Out_index Extension . Extension_Out_index
+# endif
+
+} Extension;
+    struct {
+#   define PRODCONSTRUCTION 16
+                int Product_kind;
+# ifndef kind
+#   define kind Product . Product_kind
+# endif
+
+           unsigned Product_vlineno;
+# ifndef vlineno
+#   define vlineno Product . Product_vlineno
+# endif
+
+          int Product_pre_num;
+# ifndef pre_num
+#   define pre_num Product . Product_pre_num
+# endif
+
+          int Product_post_num;
+# ifndef post_num
+#   define post_num Product . Product_post_num
+# endif
+
+        union Node * Product_signature;
+# ifndef signature
+#   define signature Product . Product_signature
+# endif
+
+        int Product_sig_done;
+# ifndef sig_done
+#   define sig_done Product . Product_sig_done
+# endif
+
+        union Node * Product_prod_local_type_id;
+# ifndef prod_local_type_id
+#   define prod_local_type_id Product . Product_prod_local_type_id
+# endif
+
+         union Node * Product_prod_components;
+# ifndef prod_components
+#   define prod_components Product . Product_prod_components  /* a list of parameter nodes */
+# endif
+
+         union Node * Product_prod_previous_definition;
+# ifndef prod_previous_definition
+#   define prod_previous_definition Product . Product_prod_previous_definition
+# endif
+
+} Product;
+    struct {
+#   define RECORDCONSTRUCTION 17
+                int Record_kind;
+# ifndef kind
+#   define kind Record . Record_kind
+# endif
+
+           unsigned Record_vlineno;
+# ifndef vlineno
+#   define vlineno Record . Record_vlineno
+# endif
+
+          int Record_pre_num;
+# ifndef pre_num
+#   define pre_num Record . Record_pre_num
+# endif
+
+          int Record_post_num;
+# ifndef post_num
+#   define post_num Record . Record_post_num
+# endif
+
+        union Node * Record_signature;
+# ifndef signature
+#   define signature Record . Record_signature
+# endif
+
+        int Record_sig_done;
+# ifndef sig_done
+#   define sig_done Record . Record_sig_done
+# endif
+
+         union Node * Record_rec_component_list;
+# ifndef rec_component_list
+#   define rec_component_list Record . Record_rec_component_list
+# endif
+
+         union Node * Record_rec_previous_definition;
+# ifndef rec_previous_definition
+#   define rec_previous_definition Record . Record_rec_previous_definition
+# endif
+
+} Record;
+    struct {
+#   define UNIONCONSTRUCTION 18
+                int Union_kind;
+# ifndef kind
+#   define kind Union . Union_kind
+# endif
+
+           unsigned Union_vlineno;
+# ifndef vlineno
+#   define vlineno Union . Union_vlineno
+# endif
+
+          int Union_pre_num;
+# ifndef pre_num
+#   define pre_num Union . Union_pre_num
+# endif
+
+          int Union_post_num;
+# ifndef post_num
+#   define post_num Union . Union_post_num
+# endif
+
+        union Node * Union_signature;
+# ifndef signature
+#   define signature Union . Union_signature
+# endif
+
+        int Union_sig_done;
+# ifndef sig_done
+#   define sig_done Union . Union_sig_done
+# endif
+
+        union Node * Union_prod_local_type_id;
+# ifndef prod_local_type_id
+#   define prod_local_type_id Union . Union_prod_local_type_id
+# endif
+
+         union Node * Union_prod_components;
+# ifndef prod_components
+#   define prod_components Union . Union_prod_components  /* list of parameter nodes */
+# endif
+
+         union Node * Union_prod_previous_definition;
+# ifndef prod_previous_definition
+#   define prod_previous_definition Union . Union_prod_previous_definition
+# endif
+
+} Union;
+    struct {
+#   define WITHLIST 19
+                int WithList_kind;
+# ifndef kind
+#   define kind WithList . WithList_kind
+# endif
+
+           unsigned WithList_vlineno;
+# ifndef vlineno
+#   define vlineno WithList . WithList_vlineno
+# endif
+
+          int WithList_pre_num;
+# ifndef pre_num
+#   define pre_num WithList . WithList_pre_num
+# endif
+
+          int WithList_post_num;
+# ifndef post_num
+#   define post_num WithList . WithList_post_num
+# endif
+
+        union Node * WithList_wl_local_type_id;
+# ifndef wl_local_type_id
+#   define wl_local_type_id WithList . WithList_wl_local_type_id
+# endif
+
+         union Node * WithList_wl_component_list;
+# ifndef wl_component_list
+#   define wl_component_list WithList . WithList_wl_component_list
+# endif
+
+         union Node * WithList_wl_previous_definition;
+# ifndef wl_previous_definition
+#   define wl_previous_definition WithList . WithList_wl_previous_definition
+# endif
+
+} WithList;
+    struct {
+#   define MODPRIMARY 20
+                int MPrimary_kind;
+# ifndef kind
+#   define kind MPrimary . MPrimary_kind
+# endif
+
+           unsigned MPrimary_vlineno;
+# ifndef vlineno
+#   define vlineno MPrimary . MPrimary_vlineno
+# endif
+
+          int MPrimary_pre_num;
+# ifndef pre_num
+#   define pre_num MPrimary . MPrimary_pre_num
+# endif
+
+          int MPrimary_post_num;
+# ifndef post_num
+#   define post_num MPrimary . MPrimary_post_num
+# endif
+
+        union Node * MPrimary_signature;
+# ifndef signature
+#   define signature MPrimary . MPrimary_signature
+# endif
+
+        int MPrimary_sig_done;
+# ifndef sig_done
+#   define sig_done MPrimary . MPrimary_sig_done
+# endif
+
+        int MPrimary_displacement;
+# ifndef displacement
+#   define displacement MPrimary . MPrimary_displacement
+# endif
+
+        int MPrimary_level;
+# ifndef level
+#   define level MPrimary . MPrimary_level
+# endif
+
+        union Node * MPrimary_mp_primary;
+# ifndef mp_primary
+#   define mp_primary MPrimary . MPrimary_mp_primary
+# endif
+
+        union Node * MPrimary_mp_type_modifier;
+# ifndef mp_type_modifier
+#   define mp_type_modifier MPrimary . MPrimary_mp_type_modifier  /* NIL if this represents a coercion */
+# endif
+
+        char * MPrimary_mp_delete_v;
+# ifndef mp_delete_v
+#   define mp_delete_v MPrimary . MPrimary_mp_delete_v  /* bit vector specifying components  */
+# endif
+
+/* to be deleted.                    */
+        int MPrimary_mp_orig_length;
+# ifndef mp_orig_length
+#   define mp_orig_length MPrimary . MPrimary_mp_orig_length  /* number of type components before  */
+# endif
+
+/* deletions.                        */
+        int MPrimary_mp_needed;
+# ifndef mp_needed
+#   define mp_needed MPrimary . MPrimary_mp_needed  /* Need to actually construct value  */
+# endif
+
+        int MPrimary_mp_no_surr_loop;
+# ifndef mp_no_surr_loop
+#   define mp_no_surr_loop MPrimary . MPrimary_mp_no_surr_loop
+# endif
+
+} MPrimary;
+    struct {
+#   define EXPORTLIST 21
+                int Elist_kind;
+# ifndef kind
+#   define kind Elist . Elist_kind
+# endif
+
+           unsigned Elist_vlineno;
+# ifndef vlineno
+#   define vlineno Elist . Elist_vlineno
+# endif
+
+          int Elist_pre_num;
+# ifndef pre_num
+#   define pre_num Elist . Elist_pre_num
+# endif
+
+          int Elist_post_num;
+# ifndef post_num
+#   define post_num Elist . Elist_post_num
+# endif
+
+        union Node * Elist_el_local_type_id;
+# ifndef el_local_type_id
+#   define el_local_type_id Elist . Elist_el_local_type_id
+# endif
+
+         union Node * Elist_el_export_element_list;
+# ifndef el_export_element_list
+#   define el_export_element_list Elist . Elist_el_export_element_list
+# endif
+
+         union Node * Elist_el_previous_definition;
+# ifndef el_previous_definition
+#   define el_previous_definition Elist . Elist_el_previous_definition
+# endif
+
+} Elist;
+    struct {
+#   define HIDELIST 22
+                int Hlist_kind;
+# ifndef kind
+#   define kind Hlist . Hlist_kind
+# endif
+
+           unsigned Hlist_vlineno;
+# ifndef vlineno
+#   define vlineno Hlist . Hlist_vlineno
+# endif
+
+          int Hlist_pre_num;
+# ifndef pre_num
+#   define pre_num Hlist . Hlist_pre_num
+# endif
+
+          int Hlist_post_num;
+# ifndef post_num
+#   define post_num Hlist . Hlist_post_num
+# endif
+
+        union Node * Hlist_el_local_type_id;
+# ifndef el_local_type_id
+#   define el_local_type_id Hlist . Hlist_el_local_type_id
+# endif
+
+         union Node * Hlist_el_export_element_list;
+# ifndef el_export_element_list
+#   define el_export_element_list Hlist . Hlist_el_export_element_list
+# endif
+
+         union Node * Hlist_el_previous_definition;
+# ifndef el_previous_definition
+#   define el_previous_definition Hlist . Hlist_el_previous_definition
+# endif
+
+} Hlist;
+    struct {
+#   define EXPORTELEMENT 23
+                int EElement_kind;
+# ifndef kind
+#   define kind EElement . EElement_kind
+# endif
+
+           unsigned EElement_vlineno;
+# ifndef vlineno
+#   define vlineno EElement . EElement_vlineno
+# endif
+
+          int EElement_pre_num;
+# ifndef pre_num
+#   define pre_num EElement . EElement_pre_num
+# endif
+
+          int EElement_post_num;
+# ifndef post_num
+#   define post_num EElement . EElement_post_num
+# endif
+
+        union Node * EElement_ee_id;
+# ifndef ee_id
+#   define ee_id EElement . EElement_ee_id
+# endif
+
+        union Node * EElement_ee_signature;
+# ifndef ee_signature
+#   define ee_signature EElement . EElement_ee_signature
+# endif
+
+        union Node * EElement_ee_export_list;
+# ifndef ee_export_list
+#   define ee_export_list EElement . EElement_ee_export_list
+# endif
+
+} EElement;
+    struct {
+#   define ALLCONSTANTS 24
+                int ConstsKeyWord_kind;
+# ifndef kind
+#   define kind ConstsKeyWord . ConstsKeyWord_kind
+# endif
+
+           unsigned ConstsKeyWord_vlineno;
+# ifndef vlineno
+#   define vlineno ConstsKeyWord . ConstsKeyWord_vlineno
+# endif
+
+          int ConstsKeyWord_pre_num;
+# ifndef pre_num
+#   define pre_num ConstsKeyWord . ConstsKeyWord_pre_num
+# endif
+
+          int ConstsKeyWord_post_num;
+# ifndef post_num
+#   define post_num ConstsKeyWord . ConstsKeyWord_post_num
+# endif
+
+} ConstsKeyWord;
+    struct {
+#   define WORDELSE 25
+                int ElseKeyWord_kind;
+# ifndef kind
+#   define kind ElseKeyWord . ElseKeyWord_kind
+# endif
+
+           unsigned ElseKeyWord_vlineno;
+# ifndef vlineno
+#   define vlineno ElseKeyWord . ElseKeyWord_vlineno
+# endif
+
+          int ElseKeyWord_pre_num;
+# ifndef pre_num
+#   define pre_num ElseKeyWord . ElseKeyWord_pre_num
+# endif
+
+          int ElseKeyWord_post_num;
+# ifndef post_num
+#   define post_num ElseKeyWord . ElseKeyWord_post_num
+# endif
+
+        union Node * ElseKeyWord_signature;
+# ifndef signature
+#   define signature ElseKeyWord . ElseKeyWord_signature
+# endif
+
+        int ElseKeyWord_sig_done;
+# ifndef sig_done
+#   define sig_done ElseKeyWord . ElseKeyWord_sig_done
+# endif
+
+} ElseKeyWord;
+    struct {
+#   define WORDCAND 26
+                int CandKeyWord_kind;
+# ifndef kind
+#   define kind CandKeyWord . CandKeyWord_kind
+# endif
+
+           unsigned CandKeyWord_vlineno;
+# ifndef vlineno
+#   define vlineno CandKeyWord . CandKeyWord_vlineno
+# endif
+
+          int CandKeyWord_pre_num;
+# ifndef pre_num
+#   define pre_num CandKeyWord . CandKeyWord_pre_num
+# endif
+
+          int CandKeyWord_post_num;
+# ifndef post_num
+#   define post_num CandKeyWord . CandKeyWord_post_num
+# endif
+
+} CandKeyWord;
+    struct {
+#   define WORDCOR 27
+                int CorKeyWord_kind;
+# ifndef kind
+#   define kind CorKeyWord . CorKeyWord_kind
+# endif
+
+           unsigned CorKeyWord_vlineno;
+# ifndef vlineno
+#   define vlineno CorKeyWord . CorKeyWord_vlineno
+# endif
+
+          int CorKeyWord_pre_num;
+# ifndef pre_num
+#   define pre_num CorKeyWord . CorKeyWord_pre_num
+# endif
+
+          int CorKeyWord_post_num;
+# ifndef post_num
+#   define post_num CorKeyWord . CorKeyWord_post_num
+# endif
+
+} CorKeyWord;
+    struct {
+#   define GUARDEDLIST 28
+                int GList_kind;
+# ifndef kind
+#   define kind GList . GList_kind
+# endif
+
+           unsigned GList_vlineno;
+# ifndef vlineno
+#   define vlineno GList . GList_vlineno
+# endif
+
+          int GList_pre_num;
+# ifndef pre_num
+#   define pre_num GList . GList_pre_num
+# endif
+
+          int GList_post_num;
+# ifndef post_num
+#   define post_num GList . GList_post_num
+# endif
+
+        union Node * GList_signature;
+# ifndef signature
+#   define signature GList . GList_signature
+# endif
+
+        int GList_sig_done;
+# ifndef sig_done
+#   define sig_done GList . GList_sig_done
+# endif
+
+         union Node * GList_gl_list;
+# ifndef gl_list
+#   define gl_list GList . GList_gl_list
+# endif
+
+} GList;
+    struct {
+#   define LOOPDENOTATION 29
+                int LDenotation_kind;
+# ifndef kind
+#   define kind LDenotation . LDenotation_kind
+# endif
+
+           unsigned LDenotation_vlineno;
+# ifndef vlineno
+#   define vlineno LDenotation . LDenotation_vlineno
+# endif
+
+          int LDenotation_pre_num;
+# ifndef pre_num
+#   define pre_num LDenotation . LDenotation_pre_num
+# endif
+
+          int LDenotation_post_num;
+# ifndef post_num
+#   define post_num LDenotation . LDenotation_post_num
+# endif
+
+        union Node * LDenotation_signature;
+# ifndef signature
+#   define signature LDenotation . LDenotation_signature
+# endif
+
+        int LDenotation_sig_done;
+# ifndef sig_done
+#   define sig_done LDenotation . LDenotation_sig_done
+# endif
+
+         union Node * LDenotation_gl_list;
+# ifndef gl_list
+#   define gl_list LDenotation . LDenotation_gl_list
+# endif
+
+} LDenotation;
+    struct {
+#   define GUARDEDELEMENT 30
+                int GElement_kind;
+# ifndef kind
+#   define kind GElement . GElement_kind
+# endif
+
+           unsigned GElement_vlineno;
+# ifndef vlineno
+#   define vlineno GElement . GElement_vlineno
+# endif
+
+          int GElement_pre_num;
+# ifndef pre_num
+#   define pre_num GElement . GElement_pre_num
+# endif
+
+          int GElement_post_num;
+# ifndef post_num
+#   define post_num GElement . GElement_post_num
+# endif
+
+        union Node * GElement_ge_guard;
+# ifndef ge_guard
+#   define ge_guard GElement . GElement_ge_guard
+# endif
+
+        union Node * GElement_ge_element;
+# ifndef ge_element
+#   define ge_element GElement . GElement_ge_element
+# endif
+
+} GElement;
+    struct {
+#   define OPRID 31
+                int OpId_kind;
+# ifndef kind
+#   define kind OpId . OpId_kind
+# endif
+
+           unsigned OpId_vlineno;
+# ifndef vlineno
+#   define vlineno OpId . OpId_vlineno
+# endif
+
+          int OpId_pre_num;
+# ifndef pre_num
+#   define pre_num OpId . OpId_pre_num
+# endif
+
+          int OpId_post_num;
+# ifndef post_num
+#   define post_num OpId . OpId_post_num
+# endif
+
+        union Node * OpId_signature;
+# ifndef signature
+#   define signature OpId . OpId_signature
+# endif
+
+        int OpId_sig_done;
+# ifndef sig_done
+#   define sig_done OpId . OpId_sig_done
+# endif
+
+        union Node * OpId_sel_type;
+# ifndef sel_type
+#   define sel_type OpId . OpId_sel_type  /* optional type denotation from which    */
+# endif
+
+/* identifier is to be selected.          */
+         unsigned OpId_id_str_table_index;
+# ifndef id_str_table_index
+#   define id_str_table_index OpId . OpId_id_str_table_index  /* -1 ==> imm. surrounding local type id	*/
+# endif
+
+/* Note that the local type id is in fact */
+/* always defined by a TYPESIGNATURE node */
+/* since this convention is used only for */
+/* id's with a default signature.         */
+         union Node * OpId_id_use_list;
+# ifndef id_use_list
+#   define id_use_list OpId . OpId_id_use_list
+# endif
+
+         union Node * OpId_id_last_definition;
+# ifndef id_last_definition
+#   define id_last_definition OpId . OpId_id_last_definition  /* innermost definition of identifier     */
+# endif
+
+        int OpId_id_def_found;
+# ifndef id_def_found
+#   define id_def_found OpId . OpId_id_def_found  /* TRUE ==> last_definition points to     */
+# endif
+
+/* actual definition rather than last     */
+/* overloading of the identifier and the  */
+/* sel_type field has its final value.    */
+        int OpId_sel_index;
+# ifndef sel_index
+#   define sel_index OpId . OpId_sel_index
+# endif
+
+         union Node * OpId_id_appl;
+# ifndef id_appl
+#   define id_appl OpId . OpId_id_appl  /* An application of the identifier       */
+# endif
+
+        int OpId_id_forward_ref;
+# ifndef id_forward_ref
+#   define id_forward_ref OpId . OpId_id_forward_ref  /* Need to check for erroneous forward ref */
+# endif
+
+} OpId;
+    struct {
+#   define LETTERID 32
+                int LetterId_kind;
+# ifndef kind
+#   define kind LetterId . LetterId_kind
+# endif
+
+           unsigned LetterId_vlineno;
+# ifndef vlineno
+#   define vlineno LetterId . LetterId_vlineno
+# endif
+
+          int LetterId_pre_num;
+# ifndef pre_num
+#   define pre_num LetterId . LetterId_pre_num
+# endif
+
+          int LetterId_post_num;
+# ifndef post_num
+#   define post_num LetterId . LetterId_post_num
+# endif
+
+        union Node * LetterId_signature;
+# ifndef signature
+#   define signature LetterId . LetterId_signature
+# endif
+
+        int LetterId_sig_done;
+# ifndef sig_done
+#   define sig_done LetterId . LetterId_sig_done
+# endif
+
+        union Node * LetterId_sel_type;
+# ifndef sel_type
+#   define sel_type LetterId . LetterId_sel_type
+# endif
+
+         unsigned LetterId_id_str_table_index;
+# ifndef id_str_table_index
+#   define id_str_table_index LetterId . LetterId_id_str_table_index
+# endif
+
+         union Node * LetterId_id_use_list;
+# ifndef id_use_list
+#   define id_use_list LetterId . LetterId_id_use_list
+# endif
+
+         union Node * LetterId_id_last_definition;
+# ifndef id_last_definition
+#   define id_last_definition LetterId . LetterId_id_last_definition
+# endif
+
+        int LetterId_id_def_found;
+# ifndef id_def_found
+#   define id_def_found LetterId . LetterId_id_def_found
+# endif
+
+        int LetterId_sel_index;
+# ifndef sel_index
+#   define sel_index LetterId . LetterId_sel_index
+# endif
+
+        union Node * LetterId_id_appl;
+# ifndef id_appl
+#   define id_appl LetterId . LetterId_id_appl  /* An application of the identifier         */
+# endif
+
+/* Useful for overload resolution           */
+        int LetterId_id_forward_ref;
+# ifndef id_forward_ref
+#   define id_forward_ref LetterId . LetterId_id_forward_ref  /* Need to check for erroneous forward ref */
+# endif
+
+} LetterId;
+    struct {
+#   define QSTR 33
+/* quoted string */
+                int QStr_kind;
+# ifndef kind
+#   define kind QStr . QStr_kind
+# endif
+
+           unsigned QStr_vlineno;
+# ifndef vlineno
+#   define vlineno QStr . QStr_vlineno
+# endif
+
+          int QStr_pre_num;
+# ifndef pre_num
+#   define pre_num QStr . QStr_pre_num
+# endif
+
+          int QStr_post_num;
+# ifndef post_num
+#   define post_num QStr . QStr_post_num
+# endif
+
+        union Node * QStr_signature;
+# ifndef signature
+#   define signature QStr . QStr_signature
+# endif
+
+        int QStr_sig_done;
+# ifndef sig_done
+#   define sig_done QStr . QStr_sig_done
+# endif
+
+        union Node * QStr_sel_type;
+# ifndef sel_type
+#   define sel_type QStr . QStr_sel_type
+# endif
+
+        char * QStr_str_string;
+# ifndef str_string
+#   define str_string QStr . QStr_str_string
+# endif
+
+         union Node * QStr_str_use_list;
+# ifndef str_use_list
+#   define str_use_list QStr . QStr_str_use_list
+# endif
+
+        union Node * QStr_str_expansion;
+# ifndef str_expansion
+#   define str_expansion QStr . QStr_str_expansion
+# endif
+
+} QStr;
+    struct {
+#   define UQSTR 34
+/* unquoted string */
+                int UQStr_kind;
+# ifndef kind
+#   define kind UQStr . UQStr_kind
+# endif
+
+           unsigned UQStr_vlineno;
+# ifndef vlineno
+#   define vlineno UQStr . UQStr_vlineno
+# endif
+
+          int UQStr_pre_num;
+# ifndef pre_num
+#   define pre_num UQStr . UQStr_pre_num
+# endif
+
+          int UQStr_post_num;
+# ifndef post_num
+#   define post_num UQStr . UQStr_post_num
+# endif
+
+        union Node * UQStr_signature;
+# ifndef signature
+#   define signature UQStr . UQStr_signature
+# endif
+
+        int UQStr_sig_done;
+# ifndef sig_done
+#   define sig_done UQStr . UQStr_sig_done
+# endif
+
+        union Node * UQStr_sel_type;
+# ifndef sel_type
+#   define sel_type UQStr . UQStr_sel_type
+# endif
+
+        char * UQStr_str_string;
+# ifndef str_string
+#   define str_string UQStr . UQStr_str_string
+# endif
+
+         union Node * UQStr_str_use_list;
+# ifndef str_use_list
+#   define str_use_list UQStr . UQStr_str_use_list
+# endif
+
+        union Node * UQStr_str_expansion;
+# ifndef str_expansion
+#   define str_expansion UQStr . UQStr_str_expansion
+# endif
+
+} UQStr;
+    struct {
+#   define FUNCCONSTR 35
+                int FConstruction_kind;
+# ifndef kind
+#   define kind FConstruction . FConstruction_kind
+# endif
+
+           unsigned FConstruction_vlineno;
+# ifndef vlineno
+#   define vlineno FConstruction . FConstruction_vlineno
+# endif
+
+          int FConstruction_pre_num;
+# ifndef pre_num
+#   define pre_num FConstruction . FConstruction_pre_num
+# endif
+
+          int FConstruction_post_num;
+# ifndef post_num
+#   define post_num FConstruction . FConstruction_post_num
+# endif
+
+        union Node * FConstruction_signature;
+# ifndef signature
+#   define signature FConstruction . FConstruction_signature  /* completed by signature deduction pass if */
+# endif
+
+/* necessary.  */
+        int FConstruction_sig_done;
+# ifndef sig_done
+#   define sig_done FConstruction . FConstruction_sig_done
+# endif
+
+/* Activation record info */
+          int FConstruction_ar_size;
+# ifndef ar_size
+#   define ar_size FConstruction . FConstruction_ar_size
+# endif
+
+           union Node * FConstruction_ar_static_link;
+# ifndef ar_static_link
+#   define ar_static_link FConstruction . FConstruction_ar_static_link
+# endif
+
+          int FConstruction_ar_static_level;
+# ifndef ar_static_level
+#   define ar_static_level FConstruction . FConstruction_ar_static_level
+# endif
+
+        union Node * FConstruction_fc_body;
+# ifndef fc_body
+#   define fc_body FConstruction . FConstruction_fc_body
+# endif
+
+        int FConstruction_fc_complexity;
+# ifndef fc_complexity
+#   define fc_complexity FConstruction . FConstruction_fc_complexity  /* used to hold the following bits of dataflow */
+# endif
+
+/* information:                                */
+# ifndef STREEDEFS
+/* No special properties */
+#   define COMPLICATED  0
+/* Static link not needed,       */
+#   define NO_SL        1
+/* no "complicated" constructs,  */
+/* no accesses through AR.       */
+/* No calls to an output routine */
+#   define NO_PUT       2
+/* Environment can't be saved by   */
+#   define NO_CALLCC    4
+/* call/cc call.  This implies     */
+/* that it's safe to allocate      */
+/* variables directly on the stack */
+/* There are no nested fn constrs.  */
+#   define NO_CONSTR    8
+/* that could conceivably be        */
+/* exported.                        */
+/* Thus it is safe to copy id       */
+/* bindings into the closure itself */
+/* Closure must be explicitly represented */
+#   define NEED_CL     16
+/* Nonlocal bindings WILL BE copied to */
+#   define CP_GLOBALS  32
+/* closure. Requires that NO_CONSTR    */
+/* holds, that there aren't too many   */
+/* non-locals, that the closure needs  */
+/* to be explicitly built, that        */
+/* none of the non-locals constitute   */
+/* forward references, and that there  */
+/* are no calls to the procedure that  */
+/* could otherwise bypass evaluation   */
+/* of the operator.                    */
+/* All nested fn constructions that require  */
+#   define NO_AR_REFS  64
+/* a closure copy identifier bindings into   */
+/* the closure itself.  Thus it is           */
+/* automatically safe to allocate            */
+/* activation record on the stack.           */
+/* Known to call itself directly and */
+#   define DIR_REC    128
+/* tail-recursively.                 */
+/* There is a direct call to this  */
+#   define DIR_CALL   256
+/* procedure that does not require */
+/* an explicit closure.            */
+/* Procedure may indirect through   */
+#   define SL_ACC     512
+/* static link.  Thus it better be  */
+/* there.  (Accesses through AR are */
+/* possible even if SL_ACC is false)*/
+#   define NESTED_AR_BLOCK 1024
+/* Procedure contains a nested block that */
+/* requires its own activation record.    */
+# endif
+        char * FConstruction_fc_code_label;
+# ifndef fc_code_label
+#   define fc_code_label FConstruction . FConstruction_fc_code_label
+# endif
+
+         union Node * FConstruction_fc_free_vars;
+# ifndef fc_free_vars
+#   define fc_free_vars FConstruction . FConstruction_fc_free_vars  /* List of occurrences of distinct   */
+# endif
+
+/* non-local identifiers inside the  */
+/* function.  Meaningful only in the */
+/* presence of CP_GLOBALS.  Ordering */
+/* in list determines ordering in    */
+/* closure.                          */
+/* References to identifiers that    */
+/* are global to the entire program  */
+/* are excluded.                     */
+        int FConstruction_fc_body_needed;
+# ifndef fc_body_needed
+#   define fc_body_needed FConstruction . FConstruction_fc_body_needed  /* need to generate code for body */
+# endif
+
+} FConstruction;
+    struct {
+#   define FREEVARNODE 36
+/* A list of these is pointed to	*/
+                int FreeVarNode_kind;
+# ifndef kind
+#   define kind FreeVarNode . FreeVarNode_kind
+# endif
+
+           unsigned FreeVarNode_vlineno;
+# ifndef vlineno
+#   define vlineno FreeVarNode . FreeVarNode_vlineno
+# endif
+
+          int FreeVarNode_pre_num;
+# ifndef pre_num
+#   define pre_num FreeVarNode . FreeVarNode_pre_num
+# endif
+
+          int FreeVarNode_post_num;
+# ifndef post_num
+#   define post_num FreeVarNode . FreeVarNode_post_num  /* by each funcconstructor (i.e.	*/
+# endif
+
+/* lambda abstraction)		  	*/
+         union Node * FreeVarNode_fv_last_definition;
+# ifndef fv_last_definition
+#   define fv_last_definition FreeVarNode . FreeVarNode_fv_last_definition  /* Pointer to declaration		*/
+# endif
+
+        int FreeVarNode_fv_surr_class;
+# ifndef fv_surr_class
+#   define fv_surr_class FreeVarNode . FreeVarNode_fv_surr_class  /* Local/Global in surrounding scope	*/
+# endif
+
+        int FreeVarNode_fv_surr_index;
+# ifndef fv_surr_index
+#   define fv_surr_index FreeVarNode . FreeVarNode_fv_surr_index  /* Variable Index in surrounding scope	*/
+# endif
+
+        int FreeVarNode_fv_index;
+# ifndef fv_index
+#   define fv_index FreeVarNode . FreeVarNode_fv_index  /* Free Variable Index (in closure)	*/
+# endif
+
+} FreeVarNode;
+    struct {
+#   define EXTERNDEF 37
+/* used as body of externally defined  */
+/* functions.                          */
+                int ExternDef_kind;
+# ifndef kind
+#   define kind ExternDef . ExternDef_kind
+# endif
+
+           unsigned ExternDef_vlineno;
+# ifndef vlineno
+#   define vlineno ExternDef . ExternDef_vlineno
+# endif
+
+          int ExternDef_pre_num;
+# ifndef pre_num
+#   define pre_num ExternDef . ExternDef_pre_num
+# endif
+
+          int ExternDef_post_num;
+# ifndef post_num
+#   define post_num ExternDef . ExternDef_post_num
+# endif
+
+        char * ExternDef_ext_name;
+# ifndef ext_name
+#   define ext_name ExternDef . ExternDef_ext_name
+# endif
+
+} ExternDef;
+    struct {
+#   define REXTERNDEF 38
+/* used as body of separately compiled  */
+/* Russell functions.                   */
+                int RExternDef_kind;
+# ifndef kind
+#   define kind RExternDef . RExternDef_kind
+# endif
+
+           unsigned RExternDef_vlineno;
+# ifndef vlineno
+#   define vlineno RExternDef . RExternDef_vlineno
+# endif
+
+          int RExternDef_pre_num;
+# ifndef pre_num
+#   define pre_num RExternDef . RExternDef_pre_num
+# endif
+
+          int RExternDef_post_num;
+# ifndef post_num
+#   define post_num RExternDef . RExternDef_post_num
+# endif
+
+        union Node * RExternDef_signature;
+# ifndef signature
+#   define signature RExternDef . RExternDef_signature
+# endif
+
+        int RExternDef_sig_done;
+# ifndef sig_done
+#   define sig_done RExternDef . RExternDef_sig_done
+# endif
+
+        char * RExternDef_r_ext_name;
+# ifndef r_ext_name
+#   define r_ext_name RExternDef . RExternDef_r_ext_name
+# endif
+
+} RExternDef;
+    struct {
+#   define DCSEXCEPTION 39
+/* Single character type component with */
+/* in-line code or special field.       */
+                int DCSException_kind;
+# ifndef kind
+#   define kind DCSException . DCSException_kind
+# endif
+
+           unsigned DCSException_vlineno;
+# ifndef vlineno
+#   define vlineno DCSException . DCSException_vlineno
+# endif
+
+          int DCSException_pre_num;
+# ifndef pre_num
+#   define pre_num DCSException . DCSException_pre_num
+# endif
+
+          int DCSException_post_num;
+# ifndef post_num
+#   define post_num DCSException . DCSException_post_num
+# endif
+
+        int DCSException_dcse_char;
+# ifndef dcse_char
+#   define dcse_char DCSException . DCSException_dcse_char
+# endif
+
+        char * DCSException_dcse_inline;
+# ifndef dcse_inline
+#   define dcse_inline DCSException . DCSException_dcse_inline
+# endif
+
+        int DCSException_dcse_special;
+# ifndef dcse_special
+#   define dcse_special DCSException . DCSException_dcse_special  /* Same conventions as fsig_special  */
+# endif
+
+         union Node * DCSException_dcse_construction;
+# ifndef dcse_construction
+#   define dcse_construction DCSException . DCSException_dcse_construction  /* Must be BACKREF so that subst etc.*/
+# endif
+
+/* don't try to follow it.           */
+} DCSException;
+      char Node_dummy[10000000];	   				   } NODE;
+# define LASTKINDVALUE 39
+#define STREEDEFS
+/* definitions for sig_done field (used by pass 4) */
+#   define SIG_UNKNOWN 0
+#   define SIG_IN_PROGRESS 1
+#   define SIG_DONE 2
+/* definitions for fsig_special field (used for code generation) */
+#   define NOT_SPECIAL 0
+#   define PROD_NEW 1
+#   define PROD_ASSIGN 2
+#   define PROD_VALUEOF 3
+#   define PROD_MK 4
+#   define PROD_PROJ 5
+#   define UNION_NEW 6
+#   define UNION_ASSIGN 7
+#   define UNION_VALUEOF 8
+#   define UNION_INJ 9
+#   define UNION_PROJ 10
+#   define UNION_INQ 11
+#   define RECORD_NEW 12
+#   define RECORD_ASSIGN 13
+#   define RECORD_VALUEOF 14
+#   define RECORD_MK 15
+#   define RECORD_VAL_FIELD 16
+#   define RECORD_VAR_FIELD 17
+#   define ENUM_NEW 18
+#   define ENUM_ASSIGN 19
+#   define ENUM_VALUEOF 20
+#   define ENUM_EQ 21
+#   define ENUM_NE 22
+/* Also used for First, Last */
+#   define ENUM_ELEMENT 23
+#   define ENUM_CARD 24
+#   define ENUM_PRED 25
+#   define ENUM_SUCC 26
+/* Used for extension, Ord and OrdInv */
+#   define IDENTITY 27
+/* Value is  of longwords to copy */
+#   define STD_ASSIGN 28
+/* Value is  of longwords to allocate */
+#   define STD_NEW 29
+/* Value is  of longwords to allocate */
+#   define STD_VALUEOF 30
+/* Not impure, put writes */
+#   define STD_PUT 31
+/* Callcc, all bets are off */
+#   define STD_CALLCC 32
+/* Behaves like builtin array function */
+#   define STD_ARRAY 33
+/* Array New function, initialized to 0's   */
+#   define ARRAY_STD_NEW 34
+/* Value is size of Array, 0 if unknown     */
+/* Array New function, initialized to undef */
+#   define ARRAY_PTR_NEW 35
+/* Array Valueof, components var's are ptrs */
+#   define ARRAY_VALUEOF 36
+/* to size 1 objects.                       */
+#   define ARRAY_SIZE 37
+#   define ARRAY_VAL_SUB 38
+#   define ARRAY_VAR_SUB 39
+/* Works like PROD_NEW, etc */
+#   define PTR_NEW 40
+/* New with an argument for initialization */
+#   define INIT_NEW 41
+/* Known to be builtin, not PUT ot CALLCC */
+#   define OTHER_BUILTIN 42
+/* Behaves like Short$+= */
+#   define STD_PASSIGN 43
+/* Behaves like Short$-= */
+#   define STD_MASSIGN 44
+/* Behaves like Short$*= */
+#   define STD_TASSIGN 45
+/* Returns the value UNINIT */
+#   define UNDEF_CONST 46
+/* Union inject without argument */
+#   define UNION_INJ0  47
+#   define special_tp(x)  (((unsigned long)(x)) >> 26)
+#   define special_val(x)  ((x) & 0x3ffffff)
+#   define MAX_SP_VAL 0x3ffffff
+# ifdef DEBUG
+#   define special(tp,val)  ((val) > 0x3ffffff? \
+			     printf("Compiler error - prod too big\n") : \
+			     ((tp) << 26) | (val) )
+# else
+#   define special(tp,val)  (((tp) << 26) | (val))
+# endif
+#define is_good(l) ((l) == NIL || \
+/* is l possibly meaningful ? */     ((unsigned) ((l)->kind)) <= LASTKINDVALUE)
+#define is_list(l) ((l) != NIL && \
+/* is l a list? */                    (l)->kind == LISTHEADER)
+/* is l an empty list? */
+#define is_empty(l) ((l)->lh_first == NIL)
+/* is v only referenced once? */
+#define is_singleref(v) ((v) -> refcount == 1)
+/* is v referenced at all? */
+#define is_refd(v) ((v) -> refcount)
+/* return first element of l */
+#define first(l) ((NODE *)cn_head((l)->lh_first))
+#define second(l) ((NODE *)cn_head(cn_tail((l)->lh_first)))
+/* return second element of l */
+/* return last element of l */
+#define last(l) ((NODE *)cn_head((l)->lh_last))
+/* make an empty list */
+#define emptylist() mknode(LISTHEADER,NIL,NIL)
+#define chgfld(pp, v) (*(pp) = (v))
+#define initfld(pp, v) (*(pp) = (v))
+/* defined in mknode.c */void maprlist();
+/* defined in mknode.c */NODE * mknode();
+NODE * copynode();
+LIST mklist();
+LIST copylist();
+LIST addright();
+LIST addleft();
+LIST split();
+LIST conc();
+/* general list traversal */
+/* macros - use only when */
+/* nothing else will work */
+/* Assumes the list l is  */
+/* nonempty.              */
+#define DECLARE_ITER ConsNode * mL__0O
+#define INIT_ITER(v,l) mL__0O = (l) -> lh_first; v = (NODE *)cn_head(mL__0O)
+#define NEXT_ITER(v)   \
+    mL__0O = cn_tail(mL__0O); \
+    v = (mL__0O == NIL? NIL: (NODE *) cn_head(mL__0O))
+/* Run v through l executing */
+/* stmt for every value of l */
+#define maplist(v,l,stmt) \
+{   register NODE * v; \
+/* an unreproducible identifier */    register ConsNode * mL__0O;    \
+    for(mL__0O = ((l) -> lh_first); mL__0O != NIL; mL__0O = cn_tail(mL__0O) ) {\
+        v = (NODE *) cn_head(mL__0O); \
+        stmt; \
+    } \
+}
+/* identical to maplist, except that v is a pointer to the pointer */
+/* to the current node.  Allows easy replacement of list elements. */
+#define maplistp(v,l,stmt) \
+{   register NODE ** v; \
+/* an unreproducible identifier */    register ConsNode * mL__0O;    \
+    for(mL__0O = ((l) -> lh_first); mL__0O != NIL; mL__0O = cn_tail(mL__0O) ) {\
+	v = (NODE **)(& cn_head(mL__0O)); \
+        stmt; \
+    } \
+}
+/* Can be used inside the preceding macro to determine whether this is */
+/* the last iteration                                                  */
+#define LAST_ITER (cn_tail(mL__0O) == NIL)
+/* A two part version. Needed */
+/* since cpp chokes on long   */
+/* arguments.                 */
+#define begin_maplist(v,l) \
+{   register NODE * v; \
+/* an unreproducible identifier */    register ConsNode * mL__0O;    \
+    for(mL__0O = ((l) -> lh_first); mL__0O != NIL; mL__0O = cn_tail(mL__0O) ) {\
+	v = (NODE *) cn_head(mL__0O);
+#define end_maplist \
+    } \
+}
+/* insert a new element into */
+/* the list being traversed  */
+/* by maplist.               */
+/* The element is inserted   */
+/* before the current element*/
+/* must be used with         */
+/* mapinslist                */
+#define INSERT(v) \
+lock(v); \
+if (mL__0OP == NIL) { \
+    mL__0OL -> lh_first = mL__0OP = cn_cons(v, mL__0OL -> lh_first); \
+} else { \
+    cn_settail(mL__0OP, cn_cons(v, mL__0O)); \
+    mL__0OP = cn_tail(mL__0OP); \
+} \
+if (mL__0O == NIL) mL__0OL -> lh_last = mL__0OP;
+/* Replace the current list  */
+/* element by v              */
+#define REPLACE(v) \
+lock(v);  \
+vfree(unlock((NODE *) cn_head(mL__0O))); \
+cn_sethead(mL__0O, v);
+/* delete current element    */
+/* use with mapinslist       */
+/* No attempt is made to free*/
+/* cons nodes                */
+#ifdef DEBUG
+# define DELETE \
+    if (mL__0O == NIL) { \
+	dbgmsg("Attempt to delete NIL\n"); \
+	abort(); \
+    } \
+    vfree(unlock((NODE *) cn_head(mL__0O))); \
+    if (mL__0OP == NIL) { \
+	mL__0OL -> lh_first = cn_tail(mL__0O); \
+    } else { \
+	cn_settail(mL__0OP, cn_tail(mL__0O)); \
+    } \
+    if (mL__0OL -> lh_last == mL__0O) { \
+	mL__0OL -> lh_last = mL__0OP; \
+    } \
+    mL__0Odeld = TRUE
+#else
+#  define DELETE \
+    vfree(unlock((NODE *) cn_head(mL__0O))); \
+    if (mL__0OP == NIL) { \
+	mL__0OL -> lh_first = cn_tail(mL__0O); \
+    } else { \
+	cn_settail(mL__0OP, cn_tail(mL__0O)); \
+    } \
+    if (mL__0OL -> lh_last == mL__0O) { \
+	mL__0OL -> lh_last = mL__0OP; \
+    } \
+    mL__0Odeld = TRUE
+#endif
+/* Note that the following   */
+/* loop construct is intended*/
+/* only for insertions and   */
+/* deletions. It             */
+/* includes a final iteration*/
+/* with a NIL loop variable  */
+/* to allow insertions at the*/
+/* end.                      */
+#define mapinslist(v,l,stmt) \
+{   register NODE * v; \
+/* an unreproducible identifier */    register ConsNode * mL__0O;    \
+    NODE * mL__0OL = (l); \
+    ConsNode * mL__0OP = NIL; \
+    boolean mL__0Odeld = FALSE; \
+    mL__0O = ((l) -> lh_first); \
+    do { \
+	if (mL__0O != NIL) v = (NODE *) cn_head(mL__0O); else v = NIL; \
+        stmt; \
+	if(!mL__0Odeld) {mL__0OP = mL__0O;} else {mL__0Odeld = FALSE;} \
+	if (mL__0O != NIL) mL__0O = cn_tail(mL__0O); \
+    } while (mL__0OP != NIL); \
+}
+#define map2lists(v1,l1,v2,l2,stmt) \
+{   register NODE * v1, * v2; \
+/* unreproducible identifiers */	register ConsNode * mL__1O, * mL__2O;    \
+	for(mL__1O = ((l1) -> lh_first), mL__2O = ((l2) -> lh_first);\
+		mL__1O != NIL && mL__2O != NIL;\
+		mL__1O = cn_tail(mL__1O), mL__2O = cn_tail(mL__2O) ) {\
+		v1 = (NODE *) cn_head(mL__1O); v2 = (NODE *) cn_head(mL__2O); \
+        stmt; \
+    } \
+}
+#define begin_map2lists(v1,l1,v2,l2) \
+{   register NODE * v1, * v2; \
+/* unreproducible identifiers */	register ConsNode * mL__1O, * mL__2O;    \
+	for(mL__1O = ((l1) -> lh_first), mL__2O = ((l2) -> lh_first);\
+		mL__1O != NIL && mL__2O != NIL;\
+		mL__1O = cn_tail(mL__1O), mL__2O = cn_tail(mL__2O) ) {\
+		v1 = (NODE *) cn_head(mL__1O); v2 = (NODE *) cn_head(mL__2O);
+#define end_map2lists \
+    } \
+}
+/* check whether an identifier is declared by a given declaration node */
+#define is_declared_by(id_node, def_node)   \
+    ((id_node) -> id_last_definition -> pre_num == (def_node) -> pre_num)

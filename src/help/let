@@ -1,0 +1,76 @@
+  The principal means for declaring identifiers in Russell is the let-block.
+It is an expression and can appear wherever any other expression is allowed.
+Its syntax is:
+
+        let
+            x1: sig1 == e1;
+            x2: sig2 == e2;
+             ...
+	    xn: sign == en      (or, xn: sign === en)
+        in
+            E1; E2; ...; En
+        ni
+
+  Here x1, ..., xn denote identifiers; e1, ..., en and E1, ..., En denote
+expressions; sig1, ..., sign denote signatures.  The signatures are
+optional.  The block is evaluated by evaluating e1 through en in sequence,
+and binding each identifier to the corresponding value immediately after it
+is found.  The expressions E1 through En are then evaluated, and the value
+of En becomes the value of the block.  The signature of En is the signature
+of the block.
+  The newly introduced identifiers are known in both E1, ..., En and
+e1, ..., en. Russell does not require that identifiers be declared
+before they are mentioned.  It is however required that the right side of
+a declaration have been evaluated before the value of the corresponding
+identifier is needed.  (Note that function constructions, products, and
+unions can be evaluated without evaluating the expressions they, or the
+signatures they mention, may contain. Thus the values of identifiers they
+mention are not immediately needed.) The expression
+
+              let x == y; y == 1 in ... ni
+
+is illegal, but
+
+              let x == func[]{y}; y == 1 in ... ni
+
+is allowed.
+  The "==" sign in a normal declaration may be replaced by "===".  Such
+declarations are known as "signature transparent".  In this case the signature
+checker will consider the left and right sides of the declaration to be
+equivalent.  All identifiers appearing in the right side of a "===" declaration
+must be declared prior to the declaration in which they are mentioned.
+Signature inference in the right side of a "===" declaration is restricted
+to that normally performed inside signatures.
+
+Signature checking rules:
+1. All expressions in the block must be signature correct, assuming the newly
+   introduced identifiers have the specified signature.  (If no signature is
+   specified, it must be possible to obtain the signature from the
+   corresponding expression.)
+
+2. Whenever an explicit signature is specified for an identifier, it must
+   match the signature of the expression on the right side.  (Currently
+   no forgetting of type components is allowed.  An explicit export list
+   should be given.)
+
+3. (The export rule.)  The signature of the block may not mention the
+   newly declared identifiers x1, ..., xn.  This restriction does not apply
+   to "===" declared identifiers.  However, the right side of a "==="
+   declaration is considered to be part of any signature that mentions it.
+   Thus occurrences of local identifiers in the right side of such declarations
+   are implicitly restricted.
+
+Note: This definition differs from previous versions of the language in
+several respects.  The signature checking rules no longer require
+"argument-parameter" substitution.  (This would lead to anomolous behaviour
+in the presence of recursive declarations.)  The order of evaluation for
+recursive declarations is fixed.  (This marginally improves execution
+efficiency and dodges some subtle semantic issues.)  Redeclaration is allowed.
+An identifier always refers to the innermost declaration with appropriate
+signature.  Identifiers associated with distinct declarations are treated
+are treated as distinct by signature matching.
+
+Implementation Note:  Duplicate declarations are not currently detected.
+(The first one is used.)  References to an identifier whose value is not
+yet known (as in the first example above) are detected, unless the optimizer
+is invoked.

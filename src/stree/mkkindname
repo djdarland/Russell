@@ -1,0 +1,3 @@
+../../CDCC -DMAIN -o $HOME/bin/kindname kindname.c
+echo kindname installed in $HOME/bin.
+

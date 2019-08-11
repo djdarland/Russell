@@ -1,0 +1,26 @@
+No Russell expression with type signature may mention a variable
+(identifier with var signature) which is not local to that expression.
+The same restriction applies to function constructions, since these could
+conceivably be invoked from inside a type expression.
+This applies both to explicit, programmer-written expressions, and
+to expressions in signatures computed by the compiler.  For example, if
+f has signature
+
+        func [x: val Short] val Array[x, Float]
+
+and if n is an integer variable then f[V[n]] would have signature
+
+        val Array[V[n], Float]
+
+and is therefore an import rule violation.  (This could be avoided by
+first binding an identifier to V[n] and the using it as the argument
+of f.)
+
+The -L flag to the compiler implies that the rule is not checked for
+function constructions whose last parameter has var Void signature.  (More
+precisely, it is not checked if the innermost expression that is either
+type valued or is a function construction in which the identifier occurs is
+a function construction whose last parameter has var Void signature.)
+This makes it possible to simulate lazy evaluation etc., and still maintain
+type safety.  (It does make it harder to reason about the behaviour of
+functions with var Void parameters.)

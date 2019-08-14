@@ -571,7 +571,9 @@ void GC_init_inner()
   	ABORT("stack direction 2\n");
 #     endif
 #     ifdef STACK_GROWS_DOWN
-        if ((word)(&dummy) > (word)GC_stackbottom) {
+
+	// DJD        if ((word)(&dummy) > (word)GC_stackbottom) {
+        if ((long)(&dummy) > (long)GC_stackbottom) {
           GC_err_printf0(
           	"STACK_GROWS_DOWN is defd, but stack appears to grow up\n");
           GC_err_printf2("sp = 0x%lx, GC_stackbottom = 0x%lx\n",

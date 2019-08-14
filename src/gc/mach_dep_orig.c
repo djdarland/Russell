@@ -20,12 +20,12 @@ GC_mark_regs()
 	/* VAX - generic code below does not work under 4.2 */
 	  /* r1 through r5 are caller save, and therefore     */
 	  /* on the stack or dead.                            */
-	  asm("pushl r11");     asm("calls $1,GC_tl_mark");
-	  asm("pushl r10"); 	asm("calls $1,GC_tl_mark");
-	  asm("pushl r9");	asm("calls $1,GC_tl_mark");
-	  asm("pushl r8");	asm("calls $1,GC_tl_mark");
-	  asm("pushl r7");	asm("calls $1,GC_tl_mark");
-	  asm("pushl r6");	asm("calls $1,GC_tl_mark");
+	  asm("pushl r11");     asm("calls $1,_GC_tl_mark");
+	  asm("pushl r10"); 	asm("calls $1,_GC_tl_mark");
+	  asm("pushl r9");	asm("calls $1,_GC_tl_mark");
+	  asm("pushl r8");	asm("calls $1,_GC_tl_mark");
+	  asm("pushl r7");	asm("calls $1,_GC_tl_mark");
+	  asm("pushl r6");	asm("calls $1,_GC_tl_mark");
 #       endif
 #       if defined(M68K) && defined(SUNOS)
 	/*  M68K SUNOS - could be replaced by generic code */
@@ -34,18 +34,18 @@ GC_mark_regs()
 	
 	  asm("subqw #0x4,sp");		/* allocate word on top of stack */
 
-	  asm("movl a2,sp@");	asm("jbsr GC_tl_mark");
-	  asm("movl a3,sp@");	asm("jbsr GC_tl_mark");
-	  asm("movl a4,sp@");	asm("jbsr GC_tl_mark");
-	  asm("movl a5,sp@");	asm("jbsr GC_tl_mark");
+	  asm("movl a2,sp@");	asm("jbsr _GC_tl_mark");
+	  asm("movl a3,sp@");	asm("jbsr _GC_tl_mark");
+	  asm("movl a4,sp@");	asm("jbsr _GC_tl_mark");
+	  asm("movl a5,sp@");	asm("jbsr _GC_tl_mark");
 	  /* Skip frame pointer and stack pointer */
-	  asm("movl d1,sp@");	asm("jbsr GC_tl_mark");
-	  asm("movl d2,sp@");	asm("jbsr GC_tl_mark");
-	  asm("movl d3,sp@");	asm("jbsr GC_tl_mark");
-	  asm("movl d4,sp@");	asm("jbsr GC_tl_mark");
-	  asm("movl d5,sp@");	asm("jbsr GC_tl_mark");
-	  asm("movl d6,sp@");	asm("jbsr GC_tl_mark");
-	  asm("movl d7,sp@");	asm("jbsr GC_tl_mark");
+	  asm("movl d1,sp@");	asm("jbsr _GC_tl_mark");
+	  asm("movl d2,sp@");	asm("jbsr _GC_tl_mark");
+	  asm("movl d3,sp@");	asm("jbsr _GC_tl_mark");
+	  asm("movl d4,sp@");	asm("jbsr _GC_tl_mark");
+	  asm("movl d5,sp@");	asm("jbsr _GC_tl_mark");
+	  asm("movl d6,sp@");	asm("jbsr _GC_tl_mark");
+	  asm("movl d7,sp@");	asm("jbsr _GC_tl_mark");
 
 	  asm("addqw #0x4,sp");		/* put stack back where it was	*/
 #       endif
@@ -56,18 +56,18 @@ GC_mark_regs()
 	
 	  asm("subq.w &0x4,%sp");	/* allocate word on top of stack */
 
-	  asm("mov.l %a2,(%sp)"); asm("jsr GC_tl_mark");
-	  asm("mov.l %a3,(%sp)"); asm("jsr GC_tl_mark");
-	  asm("mov.l %a4,(%sp)"); asm("jsr GC_tl_mark");
-	  asm("mov.l %a5,(%sp)"); asm("jsr GC_tl_mark");
+	  asm("mov.l %a2,(%sp)"); asm("jsr _GC_tl_mark");
+	  asm("mov.l %a3,(%sp)"); asm("jsr _GC_tl_mark");
+	  asm("mov.l %a4,(%sp)"); asm("jsr _GC_tl_mark");
+	  asm("mov.l %a5,(%sp)"); asm("jsr _GC_tl_mark");
 	  /* Skip frame pointer and stack pointer */
-	  asm("mov.l %d1,(%sp)"); asm("jsr GC_tl_mark");
-	  asm("mov.l %d2,(%sp)"); asm("jsr GC_tl_mark");
-	  asm("mov.l %d3,(%sp)"); asm("jsr GC_tl_mark");
-	  asm("mov.l %d4,(%sp)"); asm("jsr GC_tl_mark");
-	  asm("mov.l %d5,(%sp)"); asm("jsr GC_tl_mark");
-	  asm("mov.l %d6,(%sp)"); asm("jsr GC_tl_mark");
-	  asm("mov.l %d7,(%sp)"); asm("jsr GC_tl_mark");
+	  asm("mov.l %d1,(%sp)"); asm("jsr _GC_tl_mark");
+	  asm("mov.l %d2,(%sp)"); asm("jsr _GC_tl_mark");
+	  asm("mov.l %d3,(%sp)"); asm("jsr _GC_tl_mark");
+	  asm("mov.l %d4,(%sp)"); asm("jsr _GC_tl_mark");
+	  asm("mov.l %d5,(%sp)"); asm("jsr _GC_tl_mark");
+	  asm("mov.l %d6,(%sp)"); asm("jsr _GC_tl_mark");
+	  asm("mov.l %d7,(%sp)"); asm("jsr _GC_tl_mark");
 
 	  asm("addq.w &0x4,%sp");	/* put stack back where it was	*/
 #       endif /* M68K HP */
@@ -75,12 +75,12 @@ GC_mark_regs()
 #       if defined(I386) && !defined(OS2) && !defined(SUNOS5)
 	/* I386 code, generic code does not appear to work */
 	/* It does appear to work under OS2, and asms dont */
-	  asm("pushl %eax");  asm("call GC_tl_mark"); asm("addl $4,%esp");
-	  asm("pushl %ecx");  asm("call GC_tl_mark"); asm("addl $4,%esp");
-	  asm("pushl %edx");  asm("call GC_tl_mark"); asm("addl $4,%esp");
-	  asm("pushl %esi");  asm("call GC_tl_mark"); asm("addl $4,%esp");
-	  asm("pushl %edi");  asm("call GC_tl_mark"); asm("addl $4,%esp");
-	  asm("pushl %ebx");  asm("call GC_tl_mark"); asm("addl $4,%esp");
+	  asm("pushl %eax");  asm("call _GC_tl_mark"); asm("addl $4,%esp");
+	  asm("pushl %ecx");  asm("call _GC_tl_mark"); asm("addl $4,%esp");
+	  asm("pushl %edx");  asm("call _GC_tl_mark"); asm("addl $4,%esp");
+	  asm("pushl %esi");  asm("call _GC_tl_mark"); asm("addl $4,%esp");
+	  asm("pushl %edi");  asm("call _GC_tl_mark"); asm("addl $4,%esp");
+	  asm("pushl %ebx");  asm("call _GC_tl_mark"); asm("addl $4,%esp");
 #       endif
 
 #       if defined(I386) && defined(SUNOS5)
@@ -95,11 +95,11 @@ GC_mark_regs()
 #       endif
 
 #       ifdef NS32K
-	  asm ("movd r3, tos"); asm ("bsr ?GC_tl_mark"); asm ("adjspb $-4");
-	  asm ("movd r4, tos"); asm ("bsr ?GC_tl_mark"); asm ("adjspb $-4");
-	  asm ("movd r5, tos"); asm ("bsr ?GC_tl_mark"); asm ("adjspb $-4");
-	  asm ("movd r6, tos"); asm ("bsr ?GC_tl_mark"); asm ("adjspb $-4");
-	  asm ("movd r7, tos"); asm ("bsr ?GC_tl_mark"); asm ("adjspb $-4");
+	  asm ("movd r3, tos"); asm ("bsr ?_GC_tl_mark"); asm ("adjspb $-4");
+	  asm ("movd r4, tos"); asm ("bsr ?_GC_tl_mark"); asm ("adjspb $-4");
+	  asm ("movd r5, tos"); asm ("bsr ?_GC_tl_mark"); asm ("adjspb $-4");
+	  asm ("movd r6, tos"); asm ("bsr ?_GC_tl_mark"); asm ("adjspb $-4");
+	  asm ("movd r7, tos"); asm ("bsr ?_GC_tl_mark"); asm ("adjspb $-4");
 #       endif
 
 #       ifdef SPARC

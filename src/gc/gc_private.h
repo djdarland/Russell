@@ -9,7 +9,10 @@
  * Permission is hereby granted to copy this garbage collector for any purpose,
  * provided the above notices are retained on all copies.
  */
- 
+
+// DJD
+# include <stdio.h>
+# include <stdlib.h> 
 
 # ifndef GC_PRIVATE_H
 # define GC_PRIVATE_H
@@ -319,7 +322,8 @@ typedef char * ptr_t;	/* A generic pointer to which we can add	*/
     void PCR_Base_Panic(const char *fmt, ...);
 #   define ABORT(s) PCR_Base_Panic(s)
 # else
-#   define ABORT(s) abort(s)
+// DJD
+#   define ABORT(s) {printf(s); fflush(stdout); abort();}
 # endif
 
 /* Exit abnormally, but without making a mess (e.g. out of memory) */

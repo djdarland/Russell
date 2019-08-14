@@ -9,18 +9,19 @@ SRCS= $(CSRCS) mips_mach_dep.s rs6000_mach_dep.s interface.c gc.h gc_headers.h g
 # the SHELL environment variable.
 SHELL= /bin/sh
 
-CC= cc
-CFLAGS= -O
+CC= gcc 
+CFLAGS= -m32 -O -Wno-deprecated-declarations
 # Setjmp_test may yield overly optimistic results when compiled
 # without optimization.
 
-SPECIALCFLAGS = 
+# next added DJD according to www info
+SPECIALCFLAGS = -Wno-deprecated-declarations -m32 -Wa,--32  
 # Alternative flags to the C compiler for mach_dep.c.
 # Mach_dep.c often doesn't like optimization, and it's
 # not time-critical anyway.
 # Set SPECIALCFLAGS to -q nodirect_code on Encore.
 
-all: gc.a gctest
+all: alloc.o reclaim.o allochblk.o misc.o mach_dep.o os_dep.o mark_roots.o headers.o mark.o obj_map.o black_list.o finalize.o new_hblk.o real_malloc.o dynamic_load.o debug_malloc.o gctest
 
 pcr: PCR-Makefile gc_private.h gc_headers.h gc.h config.h mach_dep.o $(SRCS)
 	make -f PCR-Makefile depend
@@ -28,9 +29,9 @@ pcr: PCR-Makefile gc_private.h gc_headers.h gc.h config.h mach_dep.o $(SRCS)
 
 $(OBJS) test.o: gc_private.h gc_headers.h gc.h config.h Makefile
 
-gc.a: $(OBJS)
-	ar ru gc.a $(OBJS)
-	ranlib gc.a || cat /dev/null
+# gc.a: $(OBJS)
+#	ar ru gc.a $(OBJS)
+#	ranlib gc.a || cat /dev/null
 #	ignore ranlib failure; that usually means it doesn't exist, and isn't needed
 
 mach_dep.o: mach_dep.c mips_mach_dep.s rs6000_mach_dep.s if_mach if_not_there
@@ -41,12 +42,12 @@ mach_dep.o: mach_dep.c mips_mach_dep.s rs6000_mach_dep.s if_mach if_not_there
 
 if_mach: if_mach.c config.h
 	$(CC) $(CFLAGS) -o if_mach if_mach.c
-	
+
 if_not_there: if_not_there.c
 	$(CC) $(CFLAGS) -o if_not_there if_not_there.c
 
 clean: 
-	rm -f gc.a test.o gctest output-local output-diff $(OBJS) \
+	rm -f alloc.o reclaim.o allochblk.o misc.o mach_dep.o os_dep.o mark_roots.o headers.o mark.o obj_map.o black_list.o finalize.o new_hblk.o real_malloc.o dynamic_load.o debug_malloc.o test.o gctest output-local output-diff $(OBJS) \
 	      setjmp_test  mon.out gmon.out a.out core
 	-rm -f *~
 
@@ -57,8 +58,8 @@ clean:
 # been due to my failure to find the right version of stdio.h or some
 # such thing.
 # On a Solaris 2.X system, also make sure you're using BSD libraries.
-gctest: test.o gc.a
-	$(CC) $(CFLAGS) -o gctest test.o gc.a
+gctest: test.o alloc.o reclaim.o allochblk.o misc.o mach_dep.o os_dep.o mark_roots.o headers.o mark.o obj_map.o black_list.o finalize.o new_hblk.o real_malloc.o dynamic_load.o debug_malloc.o
+	$(CC) $(CFLAGS) -o gctest test.o alloc.o reclaim.o allochblk.o misc.o mach_dep.o os_dep.o mark_roots.o headers.o mark.o obj_map.o black_list.o finalize.o new_hblk.o real_malloc.o dynamic_load.o debug_malloc.o
 
 # If an optimized setjmp_test generates a segmentation fault,
 # odds are your compiler is broken.  Gctest may still work.

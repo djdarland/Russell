@@ -171,45 +171,66 @@ ptr_t GC_get_stack_base()
       		/* See above for static declaration.			*/
 #   endif
 #   define STACKBOTTOM_ALIGNMENT_M1 0xffffff
-
+      // DJD printf("DJD in GC_get_stack_base\n");
 #   ifdef STACKBOTTOM
+      // DJD printf("DJD in GC_get_stack_base 0001\n");
 	return(STACKBOTTOM);
 #   else
 #	ifdef HEURISTIC1
+      // DJD printf("DJD in GC_get_stack_base 0002\n");
 #	   ifdef STACK_GROWS_DOWN
+      // DJD printf("DJD in GC_get_stack_base 0003\n");
 	     result = (ptr_t)((((word)(&dummy))
 	     		       + STACKBOTTOM_ALIGNMENT_M1)
 			      & ~STACKBOTTOM_ALIGNMENT_M1);
 #	   else
 	     result = (ptr_t)(((word)(&dummy))
+      // DJD printf("DJD in GC_get_stack_base 0004\n");
 			      & ~STACKBOTTOM_ALIGNMENT_M1);
 #	   endif
 #	endif /* HEURISTIC1 */
 #	ifdef HEURISTIC2
+      // DJD printf("DJD in GC_get_stack_base 0005\n");
 	   old_segv_handler = signal(SIGSEGV, GC_fault_handler);
 #	   ifdef SIGBUS
+      // DJD printf("DJD in GC_get_stack_base 0006\n");
+
 	     old_bus_handler = signal(SIGBUS, GC_fault_handler);
 #	   endif
+      // DJD printf("DJD in GC_get_stack_base 0007\n");
+
 	   if (setjmp(GC_jmp_buf) == 0) {
 	     result = (ptr_t)(((word)(&dummy))
 			      & ~(MIN_PAGE_SIZE-1));
 	     for (;;) {
 #	         ifdef STACK_GROWS_DOWN
+      // DJD printf("DJD in GC_get_stack_base 0008\n");
+
 		   result += MIN_PAGE_SIZE;
 #	         else
+      // DJD printf("DJD in GC_get_stack_base 0009\n");
+
 		   result -= MIN_PAGE_SIZE;
 #	         endif
+      // DJD printf("DJD in GC_get_stack_base 0010\n");
+
 		 GC_noop(*result);
 	     }
 	   }
 	   (void) signal(SIGSEGV, old_segv_handler);
 #	   ifdef SIGBUS
+      // DJD printf("DJD in GC_get_stack_base 0011\n");
+
 	       (void) signal(SIGBUS, old_bus_handler);
 #	   endif
 #	   ifdef STACK_GROWS_UP
+      // DJD printf("DJD in GC_get_stack_base 0012\n");
+
 	      result += MIN_PAGE_SIZE;
 #	   endif
 #	endif /* HEURISTIC2 */
+	      // DJD printf("DJD in GC_get_stack_base result = %ld\n",result);
+
     	return(result);
 #   endif /* STACKBOTTOM */
 }

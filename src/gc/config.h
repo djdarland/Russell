@@ -2,6 +2,11 @@
 
 # define CONFIG_H
 
+// next 3 DJD
+# define linux 1
+# define i386 1
+// # define STACK_GROWS_UP
+
 /* Machine dependent parameters.  Some tuning parameters can be found	*/
 /* near the top of gc_private.h.					*/
 
@@ -301,7 +306,8 @@
 #	define OS_TYPE "LINUX"
 	extern int etext;
 #       define DATASTART ((ptr_t)((((word) (&etext)) + 0xfff) & ~0xfff))
-#	define STACKBOTTOM ((ptr_t)0xc0000000)
+// DJD #	define STACKBOTTOM ((ptr_t)0xc0000000)
+#   define HEURISTIC2
 #   endif
 #   ifdef OS2
 #	define OS_TYPE "OS2"

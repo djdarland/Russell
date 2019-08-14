@@ -1,0 +1,48 @@
+echo "Russell Edit Utility"
+echo "RICfilter + RIC_to_C + root + sigio .c"
+echo "enter 0 to proceed 999 to quit"
+read select
+while [ $select -ne 999 ]
+do 
+echo "-----------"
+echo "RICfilter + RIC_to_C + root + sigio .c files for Russell"
+echo "-----------"
+echo "Version 3.3 Vs. current"
+echo "1 RICfilter/filter.c"
+echo "2 RIC_to_C/args.c"
+echo "3 RIC_to_C/loc_tab.c"
+echo "4 RIC_to_C/main.c"
+echo "5 RIC_to_C/Omain.c"
+echo "6 RIC_to_C/strings.c"
+echo "7 RIC_to_C/tmp_tab.c"
+echo "8 root/rc.c"
+echo "9 sigio/sa_sig_in.c"
+echo "10 sigio/sig_in.c"
+echo "11 sigio/sig_out.c"
+echo "-----------"
+echo "111 def_glob.h"
+echo "222 def_proto.h"
+echo "777 NOTES_DJD.txt"
+echo "999 quit"
+echo "select"
+read select
+case $select in
+1) $EDITOR ~/RUSSELL-3.3/src/RICfilter/filter.c def_proto.h;;
+2) $EDITOR ~/RUSSELL-3.3/src/RIC_to_C/args.c def_proto.h;;
+3) $EDITOR ~/RUSSELL-3.3/src/RIC_to_C/loc_tab.c def_proto.h;;
+4) $EDITOR ~/RUSSELL-3.3/src/RIC_to_C/main.c def_proto.h;;
+5) $EDITOR ~/RUSSELL-3.3/src/RIC_to_C/Omain.c def_proto.h;;
+6) $EDITOR ~/RUSSELL-3.3/src/RIC_to_C/strings.c def_proto.h;;
+7) $EDITOR ~/RUSSELL-3.3/src/RIC_to_C/tmp_tab.c def_proto.h;;
+8) $EDITOR ~/RUSSELL-3.3/src/root/rc.c def_proto.h;;
+9) $EDITOR ~/RUSSELL-3.3/src/sigio/sa_sig_in.c def_proto.h;;
+10) $EDITOR ~/RUSSELL-3.3/src/sigio/sig_in.c def_proto.h;;
+11) $EDITOR ~/RUSSELL-3.3/src/sigio/sig_out.c def_proto.h;;
+
+111) $EDITOR def_glob.h ;;
+222) $EDITOR def_proto.h ;;
+777) $EDITOR NOTES_DJD.txt;;
+
+esac
+done
+

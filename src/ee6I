@@ -1,0 +1,58 @@
+echo "Russell Edit Utility"
+echo "pass5d .c"
+echo "enter 0 to proceed 999 to quit"
+read select
+while [ $select -ne 999 ]
+do 
+echo "-----------"
+echo "pass5d .c files for Russell"
+echo "-----------"
+echo "Version 3.3 Vs. current"
+echo "1 pass5d/appl.c"
+echo "2 pass5d/cl_analyze.c"
+echo "3 pass5d/codegen.c"
+echo "4 pass5d/compile_decl.c"
+echo "5 pass5d/compile_stubs.c"
+echo "6 pass5d/display.c"
+echo "7 pass5d/find_inline.c"
+echo "8 pass5d/ident.c"
+echo "9 pass5d/is_int_const.c"
+echo "10 pass5d/op_codes.c"
+echo "11 pass5d/RIC.c"
+echo "12 pass5d/sl_analyze.c"
+echo "13 pass5d/trace.c"
+echo "14 pass5d/traverse.c"
+echo "15 pass5d/type_constr.c"
+echo "16 pass5d/var_in_reg.c"
+echo "-----------"
+echo "111 def_glob.h"
+echo "222 def_proto.h"
+echo "777 NOTES_DJD.txt"
+echo "999 quit"
+echo "select"
+read select
+case $select in
+1) $EDITOR ~/RUSSELL-3.3/src/pass5d/appl.c def_proto.h;;
+2) $EDITOR ~/RUSSELL-3.3/src/pass5d/cl_analyze.c def_proto.h;;
+3) $EDITOR ~/RUSSELL-3.3/src/pass5d/codegen.c def_proto.h;;
+4) $EDITOR ~/RUSSELL-3.3/src/pass5d/compile_decl.c def_proto.h;;
+5) $EDITOR ~/RUSSELL-3.3/src/pass5d/compile_stubs.c def_proto.h;;
+6) $EDITOR ~/RUSSELL-3.3/src/pass5d/display.c def_proto.h;;
+7) $EDITOR ~/RUSSELL-3.3/src/pass5d/find_inline.c def_proto.h;;
+8) $EDITOR ~/RUSSELL-3.3/src/pass5d/ident.c def_proto.h;;
+9) $EDITOR ~/RUSSELL-3.3/src/pass5d/is_int_const.c def_proto.h;;
+10) $EDITOR ~/RUSSELL-3.3/src/pass5d/op_codes.c def_proto.h;;
+11) $EDITOR ~/RUSSELL-3.3/src/pass5d/RIC.c def_proto.h;;
+12) $EDITOR ~/RUSSELL-3.3/src/pass5d/sl_analyze.c def_proto.h;;
+13) $EDITOR ~/RUSSELL-3.3/src/pass5d/trace.c def_proto.h;;
+14) $EDITOR ~/RUSSELL-3.3/src/pass5d/traverse.c def_proto.h;;
+15) $EDITOR ~/RUSSELL-3.3/src/pass5d/type_constr.c def_proto.h;;
+16) $EDITOR ~/RUSSELL-3.3/src/pass5d/var_in_reg.c def_proto.h;;
+
+111) $EDITOR def_glob.h ;;
+222) $EDITOR def_proto.h ;;
+777) $EDITOR NOTES_DJD.txt;;
+
+esac
+done
+

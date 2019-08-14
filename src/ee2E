@@ -1,0 +1,57 @@
+echo "Russell Edit Utility"
+echo "pass1 .c"
+echo "enter 0 to proceed 999 to quit"
+read select
+while [ $select -ne 999 ]
+do 
+echo "-----------"
+echo "pass1 .c files for Russell"
+echo "-----------"
+echo "Version 3.3 Vs. current"
+echo "1 pass1/applinfer/cand_cond.c"
+echo "2 pass1/applinfer/cor_cond.c"
+echo "3 pass1/applinfer/mkappl2.c"
+echo "4 pass1/applinfer/mkappl.c"
+echo "5 pass1/applinfer/outermost.c"
+echo "6 pass1/applinfer/precedence.c"
+echo "7 pass1/applinfer/single_arg.c"
+echo "8 pass1/parser/initids.c"
+echo "9 pass1/parser/yyerr.c"
+echo "10 pass1/scanner/cctab.c"
+echo "11 pass1/scanner/getchr.c"
+echo "12 pass1/scanner/restab.c"
+echo "13 pass1/scanner/scan.c"
+echo "14 pass1/scanner/test.c"
+echo "15 pass1/stt/stt.c"
+echo "16 pass1/stt/test.c"
+echo "-----------"
+echo "111 def_glob.h"
+echo "222 def_proto.h"
+echo "777 NOTES_DJD.txt"
+echo "999 quit"
+echo "select"
+read select
+case $select in
+1) $EDITOR ~/RUSSELL-3.3/src/pass1/applinfer/cand_cond.c pass1/applinfer/cand_cond.c ;;
+2) $EDITOR ~/RUSSELL-3.3/src/pass1/applinfer/cor_cond.h pass1/applinfer/cor_cond.c ;;
+3) $EDITOR ~/RUSSELL-3.3/src/pass1/applinfer/mkappl2.c pass1/applinfer/mkappl_2.c ;;
+4) $EDITOR ~/RUSSELL-3.3/src/pass1/applinfer/mkappl.c pass1/applinfer/mkappl.c ;;
+5) $EDITOR ~/RUSSELL-3.3/src/pass1/applinfer/outermost.c pass1/applinfer/outermost.h ;;
+6) $EDITOR ~/RUSSELL-3.3/src/pass1/applinfer/precedence.c pass1/applinfer/precedence.c ;;
+7) $EDITOR ~/RUSSELL-3.3/src/pass1/applinfer/single_arg.c pass1/applinfer/single_arg.c ;;
+8) $EDITOR ~/RUSSELL-3.3/src/pass1/parser/initids.c pass1/parser/initids.c ;;
+9) $EDITOR ~/RUSSELL-3.3/src/pass1/parser/yyerr.c pass1/parser/yyerr.c ;;
+10) $EDITOR ~/RUSSELL-3.3/src/pass1/scanner/cctab.c pass1/scanner/cctab.c ;;
+11) $EDITOR ~/RUSSELL-3.3/src/pass1/scanner/getchr.c pass1/scanner/getchr.c ;;
+12) $EDITOR ~/RUSSELL-3.3/src/pass1/scanner/restab.c pass1/scanner/restab.c ;;
+13) $EDITOR ~/RUSSELL-3.3/src/pass1/scanner/scan.c pass1/scanner/scan.c ;;
+14) $EDITOR ~/RUSSELL-3.3/src/pass1/scanner/test.c pass1/scanner/test.c ;;
+15) $EDITOR ~/RUSSELL-3.3/src/pass1/stt/stt.c pass1/stt/stt.c ;;
+16) $EDITOR ~/RUSSELL-3.3/src/pass1/stt/test.c pass1/stt/test.c ;;
+111) $EDITOR def_glob.h ;;
+222) $EDITOR def_proto.h ;;
+777) $EDITOR NOTES_DJD.txt;;
+
+esac
+done
+

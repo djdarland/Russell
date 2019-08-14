@@ -1,0 +1,2 @@
+ALL:
+	make all -f Makefile.main.dennis RROOT=`cd ..; pwd`

@@ -1,0 +1,35 @@
+echo "Russell Edit Utility"
+echo "gc .h"
+echo "enter 0 to proceed 999 to quit"
+read select
+while [ $select -ne 999 ]
+do 
+echo "-----------"
+echo "gc .h files for Russell"
+echo "-----------"
+echo "Version 3.3 Vs. current"
+echo "1 config.h"
+echo "2 gc.h"
+echo "3 gc_headers.h"
+echo "4 gc_inline.h"
+echo "5 gc_private"
+echo "-----------"
+echo "111 def_glob.h"
+echo "222 def_proto.h"
+echo "777 NOTES_DJD.txt"
+echo "999 quit"
+echo "select"
+read select
+case $select in
+1) $EDITOR ~/RUSSELL-3.3/src/gc/config.h gc/config.h ;;
+2) $EDITOR ~/RUSSELL-3.3/src/gc/gc.h gc/gc.h ;;
+3) $EDITOR ~/RUSSELL-3.3/src/gc/gc_headers.h gc/gc_headers.h ;;
+4) $EDITOR ~/RUSSELL-3.3/src/gc/gc_inline.h gc/gc_inline.h ;;
+5) $EDITOR ~/RUSSELL-3.3/src/gc/gc_private.h gc/gc_private.h ;;
+111) $EDITOR def_glob.h ;;
+222) $EDITOR def_proto.h ;;
+777) $EDITOR NOTES_DJD.txt;;
+
+esac
+done
+

@@ -1,0 +1,47 @@
+echo "Russell Edit Utility"
+echo "pass4 .c"
+echo "enter 0 to proceed 999 to quit"
+read select
+while [ $select -ne 999 ]
+do 
+echo "-----------"
+echo "pass4 .c files for Russell"
+echo "-----------"
+echo "Version 3.3 Vs. current"
+echo "1 pass4/checksigs.c"
+echo "2 pass4/coerce.c"
+echo "3 pass4/findapplsig.c"
+echo "4 pass4/finddecl.c"
+echo "5 pass4/findidsig.c"
+echo "6 pass4/fixhints.c"
+echo "7 pass4/getcomp.c"
+echo "8 pass4/import.c"
+echo "9 pass4/infer_args.c"
+echo "10 pass4/match.c"
+echo "11 pass4/subst.c"
+echo "-----------"
+echo "111 def_glob.h"
+echo "222 def_proto.h"
+echo "777 NOTES_DJD.txt"
+echo "999 quit"
+echo "select"
+read select
+case $select in
+1) $EDITOR ~/RUSSELL-3.3/src/pass4/checksigs.c pass4/checksigs.c ;;
+2) $EDITOR ~/RUSSELL-3.3/src/pass4/coerce.c pass4/coerce.c ;;
+3) $EDITOR ~/RUSSELL-3.3/src/pass4/findapplsig.c pass4/findapplsig.c ;;
+4) $EDITOR ~/RUSSELL-3.3/src/pass4/finddecl.c pass4/finddecl.c ;;
+5) $EDITOR ~/RUSSELL-3.3/src/pass4/findidsig.c pass4/findidsig.c ;;
+6) $EDITOR ~/RUSSELL-3.3/src/pass4/fixhints.c pass4/fixhints.c ;;
+7) $EDITOR ~/RUSSELL-3.3/src/pass4/getcomp.c pass4/getcomp.c ;;
+8) $EDITOR ~/RUSSELL-3.3/src/pass4/import.c pass4/import.c ;;
+9) $EDITOR ~/RUSSELL-3.3/src/pass4/infer_args.c pass4/infer_args.c ;;
+10) $EDITOR ~/RUSSELL-3.3/src/pass4/match.c pass4/match.c ;;
+11) $EDITOR ~/RUSSELL-3.3/src/pass4/subst.c pass4/subst.c ;;
+111) $EDITOR def_glob.h ;;
+222) $EDITOR def_proto.h ;;
+777) $EDITOR NOTES_DJD.txt;;
+
+esac
+done
+

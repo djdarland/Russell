@@ -1,0 +1,64 @@
+echo "-----------"
+echo "files russell"
+echo "-----------"
+echo "1 ee1 - view any .h file (current) next to (below) 3.3 version"
+echo "2 ee2 - edit any .c file (current) next to (below) 3.3 version"
+echo "---------------------------------------------"
+echo "3 ee3 - diff any (current) .h file - with 3.3 version"
+echo "4 ee4 - diff any (current) .c file - with 3.3 version"
+echo "----------------------------------------------"
+echo "5 ee5 - edit any (current) .c file next to def_glob.h"
+echo "6 ee6 - edit any (current).c file next to def_proto.h"
+echo "7 ee7 - edit any (3.3).c file next to def_proto.h"
+echo "----------------------------------------------"
+echo "111 make "
+
+echo "116 test and edit"
+echo "117 test NO edit"
+
+echo "777 NOTES_DJD.txt"
+echo "999 quit"
+echo "select"
+read select
+while [ $select -ne 999 ]
+do 
+case $select in
+1) ./ee1 ;;
+2) ./ee2 ;;
+3) ./ee3 ;;
+4) ./ee4 ;;
+5) ./ee5 ;;
+6) ./ee6 ;;
+7) ./ee7 ;;
+
+111) ./mk ;;
+
+116) ./re ;;
+117) ./rt ;;
+
+777) $EDITOR NOTES_DJD.txt;;
+
+esac
+echo "-----------"
+echo "files russell"
+echo "-----------"
+echo "1 ee1 - view any .h file (current) next to (below) 3.3 version"
+echo "2 ee2 - edit any .c file (current) next to (below) 3.3 version"
+echo "---------------------------------------------"
+echo "3 ee3 - diff any (current) .h file - with 3.3 version"
+echo "4 ee4 - diff any (current) .c file - with 3.3 version"
+echo "----------------------------------------------"
+echo "5 ee5 - edit any (current) .c file next to def_glob.h"
+echo "6 ee6 - edit any (current).c file next to def_proto.h"
+echo "7 ee7 - edit any (3.3).c file next to def_proto.h"
+echo "----------------------------------------------"
+echo "111 make "
+
+echo "116 test and edit"
+echo "117 test NO edit"
+
+echo "777 NOTES_DJD.txt"
+echo "999 quit"
+echo "select"
+read select
+done

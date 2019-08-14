@@ -1,0 +1,61 @@
+echo "Russell Edit Utility"
+echo "pass2 + pass3 .c"
+echo "enter 0 to proceed 999 to quit"
+read select
+while [ $select -ne 999 ]
+do 
+echo "-----------"
+echo "pass2 + pass3 .c files for Russell"
+echo "-----------"
+echo "Version 3.3 Vs. current"
+echo "1 pass2/add_id.c"
+echo "2 pass2/build_symtab.c"
+echo "3 pass2/process_id.c"
+echo "4 pass2/restore.c"
+echo "5 pass2/retrieve.c"
+echo "6 pass2/rettest.c"
+echo "7 pass2/symtabtest.c"
+echo "8 pass3/comp_st.c"
+echo "9 pass3/decl_pairs.c"
+echo "10 pass3/expand_str.c"
+echo "11 pass3/fixup.c"
+echo "12 pass3/gden_order.c"
+echo "13 pass3/hascomp.c"
+echo "14 pass3/hasstring.c"
+echo "15 pass3/number.c "
+echo "16 pass3/reorder.c"
+echo "17 pass3/sigids.c"
+echo "18 pass3/tsig_order.c"
+echo "-----------"
+echo "111 def_glob.h"
+echo "222 def_proto.h"
+echo "777 NOTES_DJD.txt"
+echo "999 quit"
+echo "select"
+read select
+case $select in
+1) $EDITOR ~/RUSSELL-3.3/src/pass2/add_id.c def_proto.h ;;
+2) $EDITOR ~/RUSSELL-3.3/src/pass2/build_symtab.c def_proto.h ;;
+3) $EDITOR ~/RUSSELL-3.3/src/pass2/process_id.c def_proto.h ;;
+4) $EDITOR ~/RUSSELL-3.3/src/pass2/restore.c def_proto.h ;;
+5) $EDITOR ~/RUSSELL-3.3/src/pass2/retrieve.c def_proto.h ;;
+6) $EDITOR ~/RUSSELL-3.3/src/pass2/rettest.c def_proto.h ;;
+7) $EDITOR ~/RUSSELL-3.3/src/pass2/symtabtest.c def_proto.h ;;
+8) $EDITOR ~/RUSSELL-3.3/src/pass3/comp_st.c def_proto.h ;;
+9) $EDITOR ~/RUSSELL-3.3/src/pass3/decl_pairs.c def_proto.h ;;
+10) $EDITOR ~/RUSSELL-3.3/src/pass3/expand_str.c def_proto.h ;;
+11) $EDITOR ~/RUSSELL-3.3/src/pass3/fixup.c def_proto.h ;;
+12) $EDITOR ~/RUSSELL-3.3/src/pass3/gden_order.c def_proto.h ;;
+13) $EDITOR ~/RUSSELL-3.3/src/pass3/hascomp.c def_proto.h ;;
+14) $EDITOR ~/RUSSELL-3.3/src/pass3/hasstring.c def_proto.h ;;
+15) $EDITOR ~/RUSSELL-3.3/src/pass3/number.c def_proto.h ;;
+16) $EDITOR ~/RUSSELL-3.3/src/pass3/reorder.c def_proto.h ;;
+17) $EDITOR ~/RUSSELL-3.3/src/pass3/sigids.c def_proto.h ;;
+18) $EDITOR ~/RUSSELL-3.3/src/pass3/tsig_order.c def_proto.h ;;
+111) $EDITOR def_glob.h ;;
+222) $EDITOR def_proto.h ;;
+777) $EDITOR NOTES_DJD.txt;;
+
+esac
+done
+

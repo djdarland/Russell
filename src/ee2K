@@ -1,0 +1,54 @@
+echo "Russell Edit Utility"
+echo "stree .c"
+echo "enter 0 to proceed 999 to quit"
+read select
+while [ $select -ne 999 ]
+do 
+echo "-----------"
+echo "stree .c files for Russell"
+echo "-----------"
+echo "Version 3.3 Vs. current"
+echo "1 stree/bitcnt.c"
+echo "2 stree/drefops.c"
+echo "3 stree/fixmacros.c"
+echo "4 stree/kindname.c"
+echo "5 stree/listops.c"
+echo "6 stree/mknode.c"
+echo "7 stree/prstree.c"
+echo "8 stree/testbitcnt.c"
+echo "9 stree/testvertex.c"
+echo "10 stree/unparse.c"
+echo "11 utilities/exec_cmd.c"
+echo "12 utilities/fixstrings.c"
+echo "13 utilities/insnl.c"
+echo "14 utilities/parencount.c"
+echo "-----------"
+echo "111 def_glob.h"
+echo "222 def_proto.h"
+echo "777 NOTES_DJD.txt"
+echo "999 quit"
+echo "select"
+read select
+case $select in
+1) $EDITOR ~/RUSSELL-3.3/src/stree/bitcnt.c stree/bitcnt.c;;
+2) $EDITOR ~/RUSSELL-3.3/src/stree/drefops.c stree/drefops.c;;
+3) $EDITOR ~/RUSSELL-3.3/src/stree/fixmacros.c stree/fixmacros.c;;
+4) $EDITOR ~/RUSSELL-3.3/src/stree/kindname.c stree/kindname.c;;
+5) $EDITOR ~/RUSSELL-3.3/src/stree/listops.c stree/listops.c;;
+6) $EDITOR ~/RUSSELL-3.3/src/stree/mknode.c stree/mknode.c;;
+7) $EDITOR ~/RUSSELL-3.3/src/stree/prstree.c stree/prstree.c;;
+8) $EDITOR ~/RUSSELL-3.3/src/stree/testbitcnt.c stree/testbitcnt.c;;
+9) $EDITOR ~/RUSSELL-3.3/src/stree/testvertex.c stree/testvertex.c;;
+10) $EDITOR ~/RUSSELL-3.3/src/stree/unparse.c stree/unparse.c;;
+11) $EDITOR ~/RUSSELL-3.3/src/utilities/exec_cmd.c utilities/exec_cmd.c;;
+12) $EDITOR ~/RUSSELL-3.3/src/utilities/fixstrings.c utilities/fixstrings.c;;
+13) $EDITOR ~/RUSSELL-3.3/src/utilities/insnl.c utilities/insnl.c;;
+14) $EDITOR ~/RUSSELL-3.3/src/utilities/parencount.c utilities/parencount.c;;
+
+111) $EDITOR def_glob.h ;;
+222) $EDITOR def_proto.h ;;
+777) $EDITOR NOTES_DJD.txt;;
+
+esac
+done
+

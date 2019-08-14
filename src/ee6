@@ -1,0 +1,56 @@
+echo "Russell Edit Utility"
+echo ".c"
+echo "enter 0 to proceed 999 to quit"
+read select
+while [ $select -ne 999 ]
+do 
+echo "-----------"
+echo " .c files for Russell"
+echo "-----------"
+echo "Version 3.3 Vs. current"
+echo "1 datatypes"
+echo "2 delab"
+echo "3 gc"
+echo "4 lh_opt + lib"
+echo "5 pass1"
+echo "6 pass2 + pass3"
+echo "7 pass4"
+echo "8 pass5c "
+echo "9 pass5d "
+echo "10 RICfilter + RIC_to_C + root + sigio"
+echo "11 stree + utilities"
+
+echo "12 extract_sig.c"
+echo "13 inenv.c"
+echo "14 main.c"
+echo "15 vr.c"
+echo "-----------"
+echo "111 def_glob.h"
+echo "222 def_proto.h"
+echo "777 NOTES_DJD.txt"
+echo "999 quit"
+echo "select"
+read select
+case $select in
+1) ./ee6A;;
+2) ./ee6B;;
+3) ./ee6C;;
+4) ./ee6D;;
+5) ./ee6E;;
+6) ./ee6F;;
+7) ./ee6G;;
+8) ./ee6H;;
+9) ./ee6I;;
+10) ./ee6J;;
+11) ./ee6K;;
+12) $EDITOR ~/RUSSELL-3.3/src/extract_sig.c def_proto.h;;
+13) $EDITOR ~/RUSSELL-3.3/src/inenv.c def_proto.h;;
+14) $EDITOR ~/RUSSELL-3.3/src/main.c def_proto.h;;
+15) $EDITOR ~/RUSSELL-3.3/src/vr.c def_proto.h;;
+111) $EDITOR def_glob.h ;;
+222) $EDITOR def_proto.h ;;
+777) $EDITOR NOTES_DJD.txt;;
+
+esac
+done
+

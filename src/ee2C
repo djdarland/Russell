@@ -1,0 +1,69 @@
+echo "Russell Edit Utility"
+echo "gc .h"
+echo "enter 0 to proceed 999 to quit"
+read select
+while [ $select -ne 999 ]
+do 
+echo "-----------"
+echo "gc .h files for Russell"
+echo "-----------"
+echo "Version 3.3 Vs. current"
+echo "1 alloc.c"
+echo "2 allochblk.c"
+echo "3 black_list.c"
+echo "4 debug_malloc.c"
+echo "5 dynamic_load.c"
+echo "6 finalize.c"
+echo "7 headers.c"
+echo "8 if_mach.c"
+echo "9 if_not_there.c"
+echo "10 interface.c"
+echo "11 mach_dep.c"
+echo "12 mark.c"
+echo "13 mark_roots.c"
+echo "14 misc.c"
+echo "15 new_hblk.c"
+echo "16 obj_map.c"
+echo "17 os_dep.c"
+echo "18 pcr_interface.c"
+echo "19 real_malloc.c"
+echo "20 reclaim.c"
+echo "21 setjmp_test.c"
+echo "22 test.c"
+echo "-----------"
+echo "111 def_glob.h"
+echo "222 def_proto.h"
+echo "777 NOTES_DJD.txt"
+echo "999 quit"
+echo "select"
+read select
+case $select in
+1) $EDITOR ~/RUSSELL-3.3/src/gc/alloc.c gc/alloc.c;;
+2) $EDITOR ~/RUSSELL-3.3/src/gc/allochblk.c gc/allochblk.c;;
+3) $EDITOR ~/RUSSELL-3.3/src/gc/black_list.c gc/black_list.c;;
+4) $EDITOR ~/RUSSELL-3.3/src/gc/debug_malloc.c gc/debug_malloc.c;;
+5) $EDITOR ~/RUSSELL-3.3/src/gc/dynamic_load.c gc/dynamic_load.c;;
+6) $EDITOR ~/RUSSELL-3.3/src/gc/finalize.c gc/finalize.c;;
+7) $EDITOR ~/RUSSELL-3.3/src/gc/headers.c gc/headers.c;;
+8) $EDITOR ~/RUSSELL-3.3/src/gc/if_mach.c gc/if_mach.c;;
+9) $EDITOR ~/RUSSELL-3.3/src/gc/if_not_there.c gc/if_not_there.c;;
+10) $EDITOR ~/RUSSELL-3.3/src/gc/interface.c gc/interface.c;;
+11) $EDITOR ~/RUSSELL-3.3/src/gc/mach_dep.c gc/mach_dep.c;;
+12) $EDITOR ~/RUSSELL-3.3/src/gc/mark.c gc/mark.c;;
+13) $EDITOR ~/RUSSELL-3.3/src/gc/mark_roots.c gc/mark_roots.c;;
+14) $EDITOR ~/RUSSELL-3.3/src/gc/misc.c gc/misc.c;;
+15) $EDITOR ~/RUSSELL-3.3/src/gc/new_hblk.c gc/new_hblk.c;;
+16) $EDITOR ~/RUSSELL-3.3/src/gc/obj_map.c gc/obj_map.c;;
+17) $EDITOR ~/RUSSELL-3.3/src/gc/os_dep.c gc/os_dep.c;;
+18) $EDITOR ~/RUSSELL-3.3/src/gc/pcr_interface.c gc/pcr_interface.c;;
+19) $EDITOR ~/RUSSELL-3.3/src/gc/real_malloc.c gc/real_malloc.c;;
+20) $EDITOR ~/RUSSELL-3.3/src/gc/reclaim.c gc/reclaim.c;;
+21) $EDITOR ~/RUSSELL-3.3/src/gc/setjmp_test.c gc/setjmp_test.c;;
+22) $EDITOR ~/RUSSELL-3.3/src/gc/test.c gc/test.c;;
+111) $EDITOR def_glob.h ;;
+222) $EDITOR def_proto.h ;;
+777) $EDITOR NOTES_DJD.txt;;
+
+esac
+done
+

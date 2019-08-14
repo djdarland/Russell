@@ -1,0 +1,16 @@
+./mk
+#cat Ginitenv.r sep.r $1 >work.r
+cat Ginit.r $1 >work.r
+cp work.r awork.r
+./Rc -BDfGSf awork.r work.r work.out >djd1.tmp 2>djd2.tmp
+$EDITOR djd1.tmp djd2.tmp
+$EDITOR djd_ccinfo.txt pass1/scanner/scan.c
+$EDITOR djd_lexinfo.txt pass1/scanner/scan.c
+
+
+#char *lppflags = "";        /* Legal preprocessor flags. */
+#char *lpmnflags  = "BDidaMpLPTVNfFRhx"; /* Legal Rc flags.            */
+#				        /* G,c are handled separately */
+#char *lprtflags  = "IUOGcSArlCXOu";  /* legal flags, used only by   */
+# 				     /* the root process.   	    */
+# $(RROOT)/rc -d Ginitenv.r

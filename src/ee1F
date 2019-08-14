@@ -1,0 +1,42 @@
+echo "Russell Edit Utility"
+echo "pass5c + pass5d + RICfilter + RIC_to_C + root .h"
+echo "enter 0 to proceed 999 to quit"
+read select
+while [ $select -ne 999 ]
+do 
+echo "-----------"
+echo "pass1 + pass2 + pass3 .h files for Russell"
+echo "-----------"
+echo "Version 3.3 Vs. current"
+echo "1 pass5c/codeutil.h"
+echo "2 pass5d/codegen.h"
+echo "3 pass5d/op_codes.h"
+echo "4 RICfilter/RIC.h"
+echo "5 RIC_to_C/op_codes.h"
+echo "6 RIC_to_C/strings.h"
+echo "7 RIC_to_C/tables.h"
+echo "8 root/mesg.h"
+echo "-----------"
+echo "111 def_glob.h"
+echo "222 def_proto.h"
+echo "777 NOTES_DJD.txt"
+echo "999 quit"
+echo "select"
+read select
+case $select in
+1) $EDITOR ~/RUSSELL-3.3/src/pass5c/codeutil.h pass5c/codeutil.h;;
+2) $EDITOR ~/RUSSELL-3.3/src/pass5d/codegen.h pass5d/codegen.h;;
+3) $EDITOR ~/RUSSELL-3.3/src/pass5d/op_codes.h pass5d/op_codes.h;;
+4) $EDITOR ~/RUSSELL-3.3/src/RICfilter/RIC.h RICfilter/RIC.h;;
+5) $EDITOR ~/RUSSELL-3.3/src/RIC_to_C/op_codes.h RIC_to_C/op_codes.h;;
+6) $EDITOR ~/RUSSELL-3.3/src/RIC_to_C/strings.h RIC_to_C/strings.h;;
+7) $EDITOR ~/RUSSELL-3.3/src/RIC_to_C/tables.h RIC_to_C/tables.h;;
+8) $EDITOR ~/RUSSELL-3.3/src/root/mesg.h root/mesg.h;;
+
+111) $EDITOR def_glob.h ;;
+222) $EDITOR def_proto.h ;;
+777) $EDITOR NOTES_DJD.txt;;
+
+esac
+done
+

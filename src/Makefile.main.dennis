@@ -1,0 +1,178 @@
+CC = gcc
+
+
+# RROOT = <path to parent directory, normally defined by top level Makefile>
+RR_TEMPLATE= \"$(RROOT)\"
+CFLAGS=  -m32 -O -DRROOT=$(RR_TEMPLATE) -I$(RROOT)/src
+LIBC=
+# May need -Bstatic in some versions of SunOS:
+LFLAGS=
+stinclfiles= stree/ststructs.mh stree/stsizes.mh stree/stptrs.mh stree/stmkfields.mh stree/Array.h datatypes/consnodes.h
+
+# - the order of the following probably matters, even though it shouldn't:
+#all: $(RROOT)/fixmacros $(RROOT)/fixstrings $(RROOT)/rc rc.x Grc.x \
+#RICfilter/filter delab/delab RIC_to_C/to_C $(RROOT)/runtime/rrt0.o $(RROOT)/rhelp  $(RROOT)/extract_sig RICopt
+
+all: $(RROOT)/fixmacros $(RROOT)/fixstrings $(RROOT)/rc Rc \
+RICfilter/filter delab/delab RIC_to_C/to_C
+
+root_path.h:
+	echo -n "#define ROOT_PATH \"" > root_path.h
+	echo -n $(RROOT) >> root_path.h
+	echo "\"" >> root_path.h
+	
+$(RROOT)/fixstrings: utilities/fixstrings.c
+	$(CC) -m32 -o $(RROOT)/fixstrings utilities/fixstrings.c
+
+$(RROOT)/fixmacros: stree/fixmacros.c
+	$(CC) -m32 -o $(RROOT)/fixmacros stree/fixmacros.c
+
+# -- The "root" (driver) process
+$(RROOT)/rc: root/rc.o 
+	$(CC) -m32 -o $(RROOT)/rc root/rc.o $(LIBC)
+
+root/rc.o: root/rc.c root/mesg.h parm.h
+	cd root; $(CC) -m32 -c $(CFLAGS) rc.c
+
+# Tool to display signature info from .o file
+#$(RROOT)/extract_sig: extract_sig.c Grc.x
+#	make_extract_sig
+	
+# Tool to convert intermediate code (.G) files to human readable form
+$(RROOT)/display: pass5d/display.c pass5d/op_codes.c pass5d/op_codes.h
+	$(CC) -m32 -o $(RROOT)/display pass5d/display.c pass5d/op_codes.c
+
+# -- Various intermediate code passes
+# Basic intermediate code peephole optimizations; invoked with -O 
+RICfilter/filter: 
+	cd RICfilter; make
+
+# Intermediate code to C converter
+RIC_to_C/to_C:
+	cd RIC_to_C; make RROOT=$(RROOT)
+
+# Static garbage collector
+RICopt: $(RROOT)/rhelp
+	echo "install ../rc somewhere along your path; then do a make in lh_opt"
+
+# Local label removal & similar processing
+delab/delab:
+	cd delab; make
+
+# -- runtime system
+$(RROOT)/runtime/rrt0.o: gc/alloc.o gc/reclaim.o gc/allochblk.o gc/misc.o  gc/mach_dep.o gc/os_dep.o gc/mark_roots.o gc/headers.o gc/mark.o gc/obj_map.o  gc/black_list.o gc/finalize.o gc/new_hblk.o gc/real_malloc.o  gc/dynamic_load.o gc/debug_malloc.o 
+	cd $(RROOT)/runtime; make
+	
+# -- garbage collector supporting lots of the above
+
+	cd gc; make gc.a
+	
+# -- help utility
+$(RROOT)/rhelp: rc.x $(RROOT)/rc rhelp.r inenv.o root_path.h RICfilter/filter \
+RIC_to_C/to_C $(RROOT)/runtime/rrt0.o
+	$(RROOT)/rc -pN rhelp.r inenv.o; mv a.out $(RROOT)/rhelp
+	echo "move $(RROOT)/rhelp to somewhere on your path"
+
+inenv.o: inenv.c
+	$(CC) -m32 -O -c $<
+
+# -- The compiler itself
+# --   VAX version first:
+# rc.x: Rc initenv.r
+#	$(RROOT)/rc -dA initenv.r
+# --   Now the intermediate code version:
+# Grc.x: Rc Ginitenv.r
+#	$(RROOT)/rc -d Ginitenv.r
+
+Grc.x: Rc Ginitenv.r	
+	$(RROOT)/rc -i Ginitenv.r
+
+
+Rc:    main.o stree/mknode.o stree/listops.o stree/prstree.o stree/drefops.o stree/kindname.o stree/bitcnt.o stree/unparse.o 	pass1/scanner/scan.o pass1/scanner/cctab.o pass1/scanner/restab.o 	pass1/scanner/getchr.o pass1/parser/y.tab.o pass1/parser/yyerr.o pass1/parser/initids.o pass1/stt/stt.o 	pass1/applinfer/precedence.o pass1/applinfer/mkappl.o pass1/applinfer/mkappl2.o pass1/applinfer/single_arg.o pass1/applinfer/cand_cond.o pass1/applinfer/cor_cond.o pass1/applinfer/outermost_op.o 	pass2/add_id.o pass2/build_symtab.o pass2/process_id.o pass2/restore.o pass2/retrieve.o pass3/hasstring.o pass3/expand_str.o pass3/hascomp.o pass3/fixup.o pass3/number.o pass3/sigids.o pass3/reorder.o pass3/gden_order.o pass3/tsig_order.o pass3/comp_st.o pass3/decl_pairs.o pass4/checksigs.o pass4/import.o pass4/finddecl.o pass4/findsig.o pass4/getcomp.o pass4/match.o pass4/subst.o pass4/coerce.o pass4/fixhints.o pass4/infer_args.o pass4/findidsig.o pass4/findapplsig.o pass4/findmpsig.o pass5c/codegen.o pass5c/allocate.o pass5c/codeutil.o pass5c/decl_sort.o pass5c/find_inline.o pass5c/Fcodegen.o pass5c/accessible.o pass5c/analyze.o pass5c/appl.o pass5c/bld_analyze.o 	pass5d/codegen.o pass5d/find_inline.o pass5d/RIC.o pass5d/appl.o 	pass5d/op_codes.o pass5d/trace.o pass5d/type_constr.o 	pass5d/traverse.o pass5d/sl_analyze.o pass5d/cl_analyze.o 	pass5d/ident.o pass5d/is_int_const.o pass5d/compile_decl.o 	pass5d/compile_stubs.o pass5d/var_in_reg.o datatypes/consnodes.o gc/alloc.o gc/reclaim.o gc/allochblk.o gc/misc.o gc/mach_dep.o gc/os_dep.o gc/mark_roots.o gc/headers.o gc/mark.o gc/obj_map.o gc/black_list.o gc/finalize.o gc/new_hblk.o gc/real_malloc.o gc/dynamic_load.o gc/debug_malloc.o lib/catch.o vr.o sigio/sig_in.o sigio/sig_out.o parmhflag
+		cd gc ; make
+	$(CC) -m32 -o Rc $(LFLAGS) main.o stree/mknode.o stree/listops.o 		stree/prstree.o stree/drefops.o stree/kindname.o 		stree/bitcnt.o 	stree/unparse.o  pass1/scanner/scan.o 		pass1/scanner/cctab.o pass1/scanner/restab.o 		pass1/scanner/getchr.o pass1/parser/y.tab.o 		pass1/parser/yyerr.o pass1/parser/initids.o pass1/stt/stt.o 		pass1/applinfer/precedence.o pass1/applinfer/mkappl.o 		pass1/applinfer/mkappl2.o pass1/applinfer/single_arg.o 		pass1/applinfer/cand_cond.o pass1/applinfer/cor_cond.o 		pass1/applinfer/outermost_op.o 	pass2/add_id.o 		pass2/build_symtab.o  	pass2/process_id.o pass2/restore.o 		pass2/retrieve.o pass3/hasstring.o 	pass3/expand_str.o 		pass3/hascomp.o pass3/fixup.o pass3/number.o 	pass3/sigids.o 		pass3/reorder.o pass3/gden_order.o pass3/tsig_order.o 	pass3/comp_st.o pass3/decl_pairs.o pass4/checksigs.o 		pass4/import.o 	pass4/finddecl.o pass4/findsig.o 		pass4/getcomp.o pass4/match.o 	pass4/subst.o pass4/coerce.o 		pass4/fixhints.o pass4/infer_args.o 	pass4/findidsig.o 		pass4/findapplsig.o pass4/findmpsig.o 	pass5c/codegen.o 		pass5c/allocate.o pass5c/codeutil.o 	pass5c/decl_sort.o 		pass5c/find_inline.o pass5c/Fcodegen.o pass5c/accessible.o 		pass5c/analyze.o pass5c/appl.o pass5c/bld_analyze.o 		pass5d/codegen.o pass5d/find_inline.o pass5d/RIC.o 		pass5d/appl.o 	pass5d/op_codes.o pass5d/trace.o 		pass5d/type_constr.o 	pass5d/traverse.o pass5d/sl_analyze.o 		pass5d/cl_analyze.o 	pass5d/ident.o pass5d/is_int_const.o 		pass5d/compile_decl.o 	pass5d/compile_stubs.o 		pass5d/var_in_reg.o 	datatypes/consnodes.o gc/alloc.o 		gc/reclaim.o gc/allochblk.o gc/misc.o gc/mach_dep.o 		gc/os_dep.o gc/mark_roots.o gc/headers.o gc/mark.o 		gc/obj_map.o gc/black_list.o gc/finalize.o gc/new_hblk.o 		gc/real_malloc.o gc/dynamic_load.o gc/debug_malloc.o 		lib/catch.o vr.o sigio/sig_in.o sigio/sig_out.o 
+
+main.o: $(stinclfiles) main.c
+	$(CC) -m32 -c -o main.o main.c
+
+parmhflag: parm.h
+	echo > parmhflag
+	: Warning: parm.h was updated since last make
+	: Files dependent on it were nevertheless not recompiled
+
+lib/catch.o: lib/catch.c
+	cd lib; $(CC) -m32 -c catch.c
+
+# -- sigio stuff
+sigio/sig_in.o: $(stinclfiles) pass3/is_local.h
+
+sigio/sig_out.o: $(stinclfiles) pass3/is_local.h
+
+# -- stree stuff
+
+stree/mknode.o: $(stinclfiles)
+
+stree/unparse.o: stree/ststructs.mh pass4/sigs.h datatypes/consnodes.h
+
+stree/listops.o: $(stinclfiles)
+
+stree/prstree.o: $(stinclfiles) stree/stformats.h
+
+stree/kindname.o: stree/stformats.h
+
+stree/drefops.o: stree/ststructs.mh stree/is_ptr.h
+
+# -- datatypes stuff
+
+datatypes/datatypes.o: datatypes/consnodes.o
+	 $(CC) -m32 -r -o datatypes/datatypes.o $(LFLAGS) datatypes/consnodes.o
+
+datatypes/consnodes.o: datatypes/consnodes.h
+
+stackinclfiles= datatypes/consnodes.h datatypes/stack.h
+
+
+# -- pass1 (parser) stuff
+
+# a= pass1/applinfer
+
+pass1/applinfer/precedence.o: pass1/applinfer/precedence.c pass1/applinfer/precedence.h
+			$(CC) -m32 -c -o pass1/applinfer/precedence.o pass1/applinfer/precedence.c
+
+#p= pass1/parser
+
+pass1/parser/y.tab.o:   pass1/parser/y.tab.c pass1/parser/rcs.h $(stinclfiles)
+			$(CC) -m32 -c -o pass1/parser/y.tab.o pass1/parser/y.tab.c
+
+pass1/parser/y.tab.c:   pass1/parser/grammar.y
+	cd pass1/parser; \
+	byacc -d grammar.y
+#	: Warning - this makefile assumes y.tab.h is not modified
+#	: in spite of the fact that it has just been replaced
+
+#s= pass1/scanner
+
+# -- pass2 (symbol table) stuff
+
+#st = pass2
+
+# -- pass3 (fix up) stuff
+
+#fxp = pass3
+
+# -- pass4 (signature) stuff
+
+#sig = pass4
+
+# -- pass5c (VAX code generation) stuff
+
+#cg= pass5c
+
+# -- pass5d (Intermediate code generation) stuff
+
+# -- a slight change to the default rules
+
+.s.o:
+	-$(AS) -o $@ $<
+.c.o:
+	$(CC) -m32 -c $(CFLAGS) -o $@ $<

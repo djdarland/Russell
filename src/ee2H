@@ -1,0 +1,48 @@
+echo "Russell Edit Utility"
+echo "pass5c + pass5d .c"
+echo "enter 0 to proceed 999 to quit"
+read select
+while [ $select -ne 999 ]
+do 
+echo "-----------"
+echo "pass5c + pass5d .c files for Russell"
+echo "-----------"
+echo "Version 3.3 Vs. current"
+echo "1 pass5c/accessible.c"
+echo "2 pass5c/allocate.c"
+echo "3 pass5c/analyze.c"
+echo "4 pass5c/appl.c"
+echo "5 pass5c/bld_analyze.c"
+echo "6 pass5c/codegen.c"
+echo "7 pass5c/codeutil.c"
+echo "8 pass5c/decl_sort.c"
+echo "9 pass5c/Fcodegen.c"
+echo "10 pass5c/fgenf.c"
+echo "11 pass5c/find_inline"
+echo "-----------"
+echo "111 def_glob.h"
+echo "222 def_proto.h"
+echo "777 NOTES_DJD.txt"
+echo "999 quit"
+echo "select"
+read select
+case $select in
+1) $EDITOR ~/RUSSELL-3.3/src/pass5c/accessible.c pass5c/accessible.c;;
+2) $EDITOR ~/RUSSELL-3.3/src/pass5c/allocate.c pass5c/allocate.c;;
+3) $EDITOR ~/RUSSELL-3.3/src/pass5c/analyze.c pass5c/analyze.c;;
+4) $EDITOR ~/RUSSELL-3.3/src/pass5c/appl.c pass5c/appl.c;;
+5) $EDITOR ~/RUSSELL-3.3/src/pass5c/bld_analyze.c pass5c/bld_analyze.c;;
+6) $EDITOR ~/RUSSELL-3.3/src/pass5c/codegen.c pass5c/codegen.c;;
+7) $EDITOR ~/RUSSELL-3.3/src/pass5c/codeutil.c pass5c/codeutil.c;;
+8) $EDITOR ~/RUSSELL-3.3/src/pass5c/decl_sort.c pass5c/decl_sort.c;;
+9) $EDITOR ~/RUSSELL-3.3/src/pass5c/Fcodegen.c pass5c/Fcodegen.c;;
+10) $EDITOR ~/RUSSELL-3.3/src/pass5c/fgenf.c pass5c/fgenf.c;;
+11) $EDITOR ~/RUSSELL-3.3/src/pass5c/find_inline.c pass5c/find_inline.c;;
+
+111) $EDITOR def_glob.h ;;
+222) $EDITOR def_proto.h ;;
+777) $EDITOR NOTES_DJD.txt;;
+
+esac
+done
+

@@ -1,0 +1,43 @@
+echo "Russell Edit Utility"
+echo "pass1 + pass2 + pass3 + pass4 .h"
+echo "enter 0 to proceed 999 to quit"
+read select
+while [ $select -ne 999 ]
+do 
+echo "-----------"
+echo "pass1 + pass2 + pass3 .h files for Russell"
+echo "-----------"
+echo "Version 3.3 Vs. current"
+echo "1 pass1/applinfer/precedence.h"
+echo "2 pass1/parser/rcs.h"
+echo "3 pass1/parser/y.tab.h"
+echo "4 pass1/scanner/scan.h"
+echo "5 pass1/stt/sttdefs.h"
+echo "6 pass2/Idtable.h"
+echo "7 pass3/decl_pairs.h"
+echo "8 pass3/is_local.h"
+echo "9 pass4/sigs.h"
+echo "-----------"
+echo "111 def_glob.h"
+echo "222 def_proto.h"
+echo "777 NOTES_DJD.txt"
+echo "999 quit"
+echo "select"
+read select
+case $select in
+1) $EDITOR ~/RUSSELL-3.3/src/pass1/applinfer/precedence.h pass1/applinfer/precedence.h ;;
+2) $EDITOR ~/RUSSELL-3.3/src/pass1/parser/rcs.h pass1/parser/rcs.h ;;
+3) $EDITOR ~/RUSSELL-3.3/src/pass1/parser/y.tab.h pass1/parser/y.tab.h ;;
+4) $EDITOR ~/RUSSELL-3.3/src/pass1/scanner/scan.h pass1/scanner/scan.h ;;
+5) $EDITOR ~/RUSSELL-3.3/src/pass1/stt/sttdefs.h pass1/stt/sttdefs.h ;;
+6) $EDITOR ~/RUSSELL-3.3/src/pass2/Idtable.h pass2/Idtable.h ;;
+7) $EDITOR ~/RUSSELL-3.3/src/pass3/decl_pairs.h pass3/decl_pairs.h ;;
+8) $EDITOR ~/RUSSELL-3.3/src/pass3/is_local.h pass3/is_local.h ;;
+9) $EDITOR ~/RUSSELL-3.3/src/pass4/sigs.h pass4/sigs.h ;;
+111) $EDITOR def_glob.h ;;
+222) $EDITOR def_proto.h ;;
+777) $EDITOR NOTES_DJD.txt;;
+
+esac
+done
+

@@ -1,0 +1,69 @@
+echo "Russell Edit Utility"
+echo "gc .h"
+echo "enter 0 to proceed 999 to quit"
+read select
+while [ $select -ne 999 ]
+do 
+echo "-----------"
+echo "gc .h files for Russell"
+echo "-----------"
+echo "Version 3.3 Vs. current"
+echo "1 alloc.c"
+echo "2 allochblk.c"
+echo "3 black_list.c"
+echo "4 debug_malloc.c"
+echo "5 dynamic_load.c"
+echo "6 finalize.c"
+echo "7 headers.c"
+echo "8 if_mach.c"
+echo "9 if_not_there.c"
+echo "10 interface.c"
+echo "11 mach_dep.c"
+echo "12 mark.c"
+echo "13 mark_roots.c"
+echo "14 misc.c"
+echo "15 new_hblk.c"
+echo "16 obj_map.c"
+echo "17 os_dep.c"
+echo "18 pcr_interface.c"
+echo "19 real_malloc.c"
+echo "20 reclaim.c"
+echo "21 setjmp_test.c"
+echo "22 test.c"
+echo "-----------"
+echo "111 def_glob.h"
+echo "222 def_proto.h"
+echo "777 NOTES_DJD.txt"
+echo "999 quit"
+echo "select"
+read select
+case $select in
+1) $EDITOR ~/RUSSELL-3.3/src/gc/alloc.c def_proto.h;;
+2) $EDITOR ~/RUSSELL-3.3/src/gc/allochblk.c def_proto.h;;
+3) $EDITOR ~/RUSSELL-3.3/src/gc/black_list.c def_proto.h;;
+4) $EDITOR ~/RUSSELL-3.3/src/gc/debug_malloc.c def_proto.h;;
+5) $EDITOR ~/RUSSELL-3.3/src/gc/dynamic_load.c def_proto.h;;
+6) $EDITOR ~/RUSSELL-3.3/src/gc/finalize.c def_proto.h;;
+7) $EDITOR ~/RUSSELL-3.3/src/gc/headers.c def_proto.h;;
+8) $EDITOR ~/RUSSELL-3.3/src/gc/if_mach.c def_proto.h;;
+9) $EDITOR ~/RUSSELL-3.3/src/gc/if_not_there.c def_proto.h;;
+10) $EDITOR ~/RUSSELL-3.3/src/gc/interface.c def_proto.h;;
+11) $EDITOR ~/RUSSELL-3.3/src/gc/mach_dep.c def_proto.h;;
+12) $EDITOR ~/RUSSELL-3.3/src/gc/mark.c def_proto.h;;
+13) $EDITOR ~/RUSSELL-3.3/src/gc/mark_roots.c def_proto.h;;
+14) $EDITOR ~/RUSSELL-3.3/src/gc/misc.c def_proto.h;;
+15) $EDITOR ~/RUSSELL-3.3/src/gc/new_hblk.c def_proto.h;;
+16) $EDITOR ~/RUSSELL-3.3/src/gc/obj_map.c def_proto.h;;
+17) $EDITOR ~/RUSSELL-3.3/src/gc/os_dep.c def_proto.h;;
+18) $EDITOR ~/RUSSELL-3.3/src/gc/pcr_interface.c def_proto.h;;
+19) $EDITOR ~/RUSSELL-3.3/src/gc/real_malloc.c def_proto.h;;
+20) $EDITOR ~/RUSSELL-3.3/src/gc/reclaim.c def_proto.h;;
+21) $EDITOR ~/RUSSELL-3.3/src/gc/setjmp_test.c def_proto.h;;
+22) $EDITOR ~/RUSSELL-3.3/src/gc/test.c def_proto.h;;
+111) $EDITOR def_glob.h ;;
+222) $EDITOR def_proto.h ;;
+777) $EDITOR NOTES_DJD.txt;;
+
+esac
+done
+

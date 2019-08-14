@@ -1,0 +1,6 @@
+./clean.sh
+make -f Makefile.dennis >djd1.tmp 2>djd2.tmp
+$EDITOR djd1.tmp djd2.tmp
+# $EDITOR djd2.tmp pass3/sigids.c
+
+

@@ -1,0 +1,58 @@
+echo "Russell Edit Utility"
+echo "pass5d .c"
+echo "enter 0 to proceed 999 to quit"
+read select
+while [ $select -ne 999 ]
+do 
+echo "-----------"
+echo "pass5d .c files for Russell"
+echo "-----------"
+echo "Version 3.3 Vs. current"
+echo "1 pass5d/appl.c"
+echo "2 pass5d/cl_analyze.c"
+echo "3 pass5d/codegen.c"
+echo "4 pass5d/compile_decl.c"
+echo "5 pass5d/compile_stubs.c"
+echo "6 pass5d/display.c"
+echo "7 pass5d/find_inline.c"
+echo "8 pass5d/ident.c"
+echo "9 pass5d/is_int_const.c"
+echo "10 pass5d/op_codes.c"
+echo "11 pass5d/RIC.c"
+echo "12 pass5d/sl_analyze.c"
+echo "13 pass5d/trace.c"
+echo "14 pass5d/traverse.c"
+echo "15 pass5d/type_constr.c"
+echo "16 pass5d/var_in_reg.c"
+echo "-----------"
+echo "111 def_glob.h"
+echo "222 def_proto.h"
+echo "777 NOTES_DJD.txt"
+echo "999 quit"
+echo "select"
+read select
+case $select in
+1) $EDITOR ~/RUSSELL-3.3/src/pass5d/appl.c pass5d/appl.c;;
+2) $EDITOR ~/RUSSELL-3.3/src/pass5d/cl_analyze.c pass5d/cl_analyze.c;;
+3) $EDITOR ~/RUSSELL-3.3/src/pass5d/codegen.c pass5d/codegen.c;;
+4) $EDITOR ~/RUSSELL-3.3/src/pass5d/compile_decl.c pass5d/compile_decl.c;;
+5) $EDITOR ~/RUSSELL-3.3/src/pass5d/compile_stubs.c pass5d/compile_stubs.c;;
+6) $EDITOR ~/RUSSELL-3.3/src/pass5d/display.c pass5d/display.c;;
+7) $EDITOR ~/RUSSELL-3.3/src/pass5d/find_inline.c pass5d/find_inline.c;;
+8) $EDITOR ~/RUSSELL-3.3/src/pass5d/ident.c pass5d/ident.c;;
+9) $EDITOR ~/RUSSELL-3.3/src/pass5d/is_int_const.c pass5d/is_int_const.c;;
+10) $EDITOR ~/RUSSELL-3.3/src/pass5d/op_codes.c pass5d/op_codes.c;;
+11) $EDITOR ~/RUSSELL-3.3/src/pass5d/RIC.c pass5d/RIC.c;;
+12) $EDITOR ~/RUSSELL-3.3/src/pass5d/sl_analyze.c pass5d/sl_analyze.c;;
+13) $EDITOR ~/RUSSELL-3.3/src/pass5d/trace.c pass5d/trace.c;;
+14) $EDITOR ~/RUSSELL-3.3/src/pass5d/traverse.c pass5d/traverse.c;;
+15) $EDITOR ~/RUSSELL-3.3/src/pass5d/type_constr.c pass5d/type_constr.c;;
+16) $EDITOR ~/RUSSELL-3.3/src/pass5d/var_in_reg.c pass5d/var_in_reg.c;;
+
+111) $EDITOR def_glob.h ;;
+222) $EDITOR def_proto.h ;;
+777) $EDITOR NOTES_DJD.txt;;
+
+esac
+done
+

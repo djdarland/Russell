@@ -2,3 +2,5 @@
 *.o
 *.tmp
 djd?
+*.tar
+*.tar.gz

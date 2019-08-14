@@ -1,0 +1,46 @@
+echo "Russell Edit Utility"
+echo "stree .h"
+echo "enter 0 to proceed 999 to quit"
+read select
+while [ $select -ne 999 ]
+do 
+echo "-----------"
+echo "stree .h files for Russell"
+echo "-----------"
+echo "Version 3.3 Vs. current"
+echo "1 stree/Array.h"
+echo "2 stree/is_ptr.h"
+echo "3 stree/stformats.h"
+echo "4 stree/stmkfields.mh"
+echo "5 stree/stplinks.mh"
+echo "6 stree/stptrs.mh"
+echo "7 stree/streedefs.h"
+echo "8 stree/stsigs.mh"
+echo "9 stree/stsizes.mh"
+echo "10 stree/ststructs.mh"
+echo "-----------"
+echo "111 def_glob.h"
+echo "222 def_proto.h"
+echo "777 NOTES_DJD.txt"
+echo "999 quit"
+echo "select"
+read select
+case $select in
+1) $EDITOR ~/RUSSELL-3.3/src/stree/Array.h stree/Array.h;;
+2) $EDITOR ~/RUSSELL-3.3/src/stree/is_ptr.h stree/is_ptr.h;;
+3) $EDITOR ~/RUSSELL-3.3/src/stree/stformats.h stree/stformats.h;;
+4) $EDITOR ~/RUSSELL-3.3/src/stree/stmkfields.mh stree/stmkfields.mh;;
+5) $EDITOR ~/RUSSELL-3.3/src/stree/stplinks.mh stree/stplinks.mh;;
+6) $EDITOR ~/RUSSELL-3.3/src/stree/stptrs.mh stree/stptrs.mh;;
+7) $EDITOR ~/RUSSELL-3.3/src/stree/streedefs.h stree/streedefs.h;;
+8) $EDITOR ~/RUSSELL-3.3/src/stree/stsigs.mh stree/stsigs.mh;;
+9) $EDITOR ~/RUSSELL-3.3/src/stree/stsizes.mh stree/stsizes.mh;;
+10) $EDITOR ~/RUSSELL-3.3/src/stree/ststructs.mh stree/ststructs.mh;;
+
+111) $EDITOR def_glob.h ;;
+222) $EDITOR def_proto.h ;;
+777) $EDITOR NOTES_DJD.txt;;
+
+esac
+done
+
